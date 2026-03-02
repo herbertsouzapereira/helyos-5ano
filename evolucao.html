@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Quiz da Evolução Humana</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(to right, #56ab2f, #a8e063);
+    color: #222;
+}
+
+.quiz-container {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    background-color: #4CAF50;
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#resultado {
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+#reiniciar {
+    background-color: #333;
+}
+</style>
+</head>
+<body>
+
+<h1>🦴 Quiz da Evolução Humana 🧠</h1>
+
+<div class="quiz-container">
+    <h3 id="pergunta"></h3>
+    <div id="opcoes"></div>
+    <div id="resultado"></div>
+</div>
+
+<button id="reiniciar" onclick="reiniciar()">🔄 Reiniciar</button>
+
+<script>
+
+const perguntas = [
+{
+    pergunta: "Qual espécie já andava em dois pés e viveu há milhões de anos?",
+    opcoes: ["Homo sapiens", "Australopithecus", "Homo neanderthalensis"],
+    resposta: "Australopithecus"
+},
+{
+    pergunta: "Qual foi a primeira espécie a fabricar ferramentas de pedra?",
+    opcoes: ["Homo habilis", "Homo erectus", "Homo sapiens"],
+    resposta: "Homo habilis"
+},
+{
+    pergunta: "Qual espécie foi a primeira a dominar o fogo?",
+    opcoes: ["Homo erectus", "Australopithecus", "Homo sapiens"],
+    resposta: "Homo erectus"
+},
+{
+    pergunta: "Qual espécie era forte, viveu na Europa e conviveu com Homo sapiens?",
+    opcoes: ["Homo habilis", "Homo neanderthalensis", "Australopithecus"],
+    resposta: "Homo neanderthalensis"
+},
+{
+    pergunta: "Qual espécie é a nossa, que desenvolveu linguagem complexa e arte?",
+    opcoes: ["Homo sapiens", "Homo erectus", "Homo habilis"],
+    resposta: "Homo sapiens"
+}
+];
+
+let indice = 0;
+let pontos = 0;
+
+function carregarPergunta() {
+    const perguntaAtual = perguntas[indice];
+    document.getElementById("pergunta").innerText = perguntaAtual.pergunta;
+    const opcoesDiv = document.getElementById("opcoes");
+    opcoesDiv.innerHTML = "";
+
+    perguntaAtual.opcoes.forEach(opcao => {
+        const btn = document.createElement("button");
+        btn.innerText = opcao;
+        btn.onclick = () => verificarResposta(opcao);
+        opcoesDiv.appendChild(btn);
+    });
+}
+
+function verificarResposta(opcaoSelecionada) {
+    const respostaCorreta = perguntas[indice].resposta;
+    const resultado = document.getElementById("resultado");
+
+    if (opcaoSelecionada === respostaCorreta) {
+        pontos++;
+        resultado.innerHTML = "✅ Correto!";
+    } else {
+        resultado.innerHTML = "❌ Errado! A resposta correta era: " + respostaCorreta;
+    }
+
+    indice++;
+
+    setTimeout(() => {
+        resultado.innerHTML = "";
+        if (indice < perguntas.length) {
+            carregarPergunta();
+        } else {
+            mostrarResultadoFinal();
+        }
+    }, 1500);
+}
+
+function mostrarResultadoFinal() {
+    let mensagem = "";
+    
+    if (pontos === 5) {
+        mensagem = "🏆 Cientista Mirim Nível Ouro!";
+    } else if (pontos >= 3) {
+        mensagem = "🥈 Muito bem! Você sabe bastante!";
+    } else {
+        mensagem = "📚 Continue estudando! Você vai conseguir!";
+    }
+
+    document.getElementById("pergunta").innerHTML = 
+        `Fim do jogo! Você fez ${pontos} de 5 pontos.<br><br>${mensagem}`;
+    
+    document.getElementById("opcoes").innerHTML = "";
+}
+
+function reiniciar() {
+    indice = 0;
+    pontos = 0;
+    document.getElementById("resultado").innerHTML = "";
+    carregarPergunta();
+}
+
+carregarPergunta();
+
+</script>
+
+</body>
+</html>
