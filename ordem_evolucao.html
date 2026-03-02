@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Jogo da Evolução Humana</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: linear-gradient(to right, #f9d423, #ff4e50);
+        color: white;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    .container {
+        margin-top: 30px;
+    }
+
+    button {
+        display: block;
+        margin: 10px auto;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: white;
+        color: #333;
+        width: 250px;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background-color: #ddd;
+    }
+
+    #resultado {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    #reiniciar {
+        margin-top: 15px;
+        background-color: #222;
+        color: white;
+    }
+</style>
+</head>
+<body>
+
+<h1>🦴 Missão: Ordem da Evolução Humana 🦴</h1>
+<p>Clique na ordem correta da evolução:</p>
+
+<div class="container" id="botoes"></div>
+
+<div id="resultado"></div>
+<button id="reiniciar" onclick="iniciarJogo()">🔄 Reiniciar</button>
+
+<script>
+const ordemCorreta = [
+    "Australopithecus",
+    "Homo habilis",
+    "Homo erectus",
+    "Homo neanderthalensis",
+    "Homo sapiens"
+];
+
+let ordemSelecionada = [];
+
+function embaralhar(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function iniciarJogo() {
+    ordemSelecionada = [];
+    document.getElementById("resultado").innerHTML = "";
+    const container = document.getElementById("botoes");
+    container.innerHTML = "";
+
+    const embaralhado = embaralhar([...ordemCorreta]);
+
+    embaralhado.forEach(nome => {
+        const btn = document.createElement("button");
+        btn.innerText = nome;
+        btn.onclick = () => selecionar(nome, btn);
+        container.appendChild(btn);
+    });
+}
+
+function selecionar(nome, botao) {
+    ordemSelecionada.push(nome);
+    botao.disabled = true;
+    botao.style.backgroundColor = "#90ee90";
+
+    if (ordemSelecionada.length === ordemCorreta.length) {
+        verificar();
+    }
+}
+
+function verificar() {
+    const resultado = document.getElementById("resultado");
+    if (JSON.stringify(ordemSelecionada) === JSON.stringify(ordemCorreta)) {
+        resultado.innerHTML = "🎉 Parabéns! Você acertou a ordem da evolução!";
+    } else {
+        resultado.innerHTML = "❌ Ops! A ordem não está correta. Tente novamente!";
+    }
+}
+
+iniciarJogo();
+</script>
+
+</body>
+</html>
