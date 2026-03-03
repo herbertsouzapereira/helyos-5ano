@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Ciências 🚀</title>
+<style>
+body{margin:0;font-family:Arial, sans-serif;background:linear-gradient(to bottom,#0b1d3a,#1b263b);color:white;display:flex;justify-content:center}
+.container{width:95%;max-width:900px;margin:20px 0;background:rgba(0,0,0,0.85);padding:20px;border-radius:15px}
+h1{text-align:center}
+.progress-bar{width:100%;height:12px;background:#444;border-radius:10px;overflow:hidden;margin:15px 0}
+.progress{height:100%;width:0;background:#2ecc71;transition:0.3s}
+.question{font-size:16px;margin:15px 0}
+button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.neutral{background:#3498db}
+.correct{background:#2ecc71}
+.wrong{background:#e74c3c}
+.next{background:#f1c40f;color:black}
+.retry{background:#9b59b6}
+.feedback,.summary,.ranking,.history{margin-top:10px;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;font-size:13px}
+@media(min-width:768px){.question{font-size:18px}button{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🚀 Partiu Revisão: Ciências</h1>
+<div class="progress-bar"><div class="progress" id="progress"></div></div>
+<div class="question" id="question"></div>
+<div id="answers"></div>
+<div class="feedback" id="feedback"></div>
+<div id="nextContainer"></div>
+<div id="result"></div>
+<div class="summary" id="summary"></div>
+<div id="retryContainer"></div>
+<div class="history" id="history"></div>
+<div class="ranking" id="ranking"></div>
+</div>
+
+<script>
+
+// 🔀 Função para embaralhar (Fisher-Yates)
+function shuffleArray(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
+const bancoQuestoes=[
+// (Mantidas as mesmas 30 questões anteriores)
+{tema:"Rotação",q:"O Sol nasce em qual direção?",a:["Oeste","Leste","Sul"],c:1,e:"Nasce no Leste devido à rotação da Terra."},
+{tema:"Rotação",q:"O pôr do sol ocorre no:",a:["Leste","Oeste","Norte"],c:1,e:"O Sol se põe no Oeste."},
+{tema:"Rotação",q:"A rotação da Terra dura aproximadamente:",a:["24h","365 dias","7 dias"],c:0,e:"A Terra leva 24 horas para girar."},
+{tema:"Translação",q:"A translação dura cerca de:",a:["24h","30 dias","365 dias"],c:2,e:"A Terra leva cerca de 365 dias."},
+{tema:"Estações",q:"As estações existem por causa da:",a:["Inclinação do eixo","Lua cheia","Equador"],c:0,e:"O eixo inclinado altera a incidência solar."},
+{tema:"Linha do Equador",q:"A Linha do Equador divide a Terra em:",a:["Leste/Oeste","Norte/Sul","Dia/Noite"],c:1,e:"Divide hemisfério Norte e Sul."},
+{tema:"Linha do Equador",q:"O Brasil é cortado pela:",a:["Linha do Equador","Linha Internacional de Data","Órbita"],c:0,e:"A Linha do Equador passa pelo Norte do Brasil."},
+{tema:"Lua",q:"A Lua gira ao redor da:",a:["Terra","Marte","Vênus"],c:0,e:"A Lua orbita a Terra."},
+{tema:"Fases da Lua",q:"Quantas fases principais existem?",a:["2","4","8"],c:1,e:"São quatro fases principais."},
+{tema:"Fases da Lua",q:"A sequência correta é:",a:["Nova-Crescente-Cheia-Minguante","Cheia-Nova-Crescente","Minguante-Cheia-Nova"],c:0,e:"Essa é a ordem do ciclo lunar."},
+{tema:"Fases da Lua",q:"Na Lua Nova vemos:",a:["Nada iluminado","Metade","Toda iluminada"],c:0,e:"A parte iluminada não está voltada para a Terra."},
+{tema:"Fases da Lua",q:"Na Lua Cheia vemos:",a:["Metade","Nada","Toda iluminada"],c:2,e:"A face iluminada está totalmente visível."},
+{tema:"Fases da Lua",q:"Após a Cheia vem:",a:["Crescente","Minguante","Nova"],c:1,e:"Depois da cheia começa a fase minguante."},
+{tema:"Fases da Lua",q:"O ciclo lunar dura cerca de:",a:["28 dias","7 dias","365 dias"],c:0,e:"O ciclo dura aproximadamente 28 dias."},
+{tema:"Fases da Lua",q:"Quarto Crescente significa:",a:["Metade iluminada crescente","Totalmente escura","Totalmente iluminada"],c:0,e:"Metade visível e aumentando."},
+{tema:"Aristóteles",q:"Aristóteles defendia modelo:",a:["Geocêntrico","Heliocêntrico","Espacial"],c:0,e:"Defendia a Terra no centro."},
+{tema:"Ptolomeu",q:"Ptolomeu aperfeiçoou o modelo:",a:["Heliocêntrico","Geocêntrico","Lunar"],c:1,e:"Aperfeiçoou o geocentrismo."},
+{tema:"Copérnico",q:"Copérnico defendia que o centro era:",a:["Terra","Sol","Lua"],c:1,e:"Modelo heliocêntrico."},
+{tema:"Galileu",q:"Galileu usou o:",a:["Microscópio","Telescópio","Satélite"],c:1,e:"Ele utilizou telescópio."},
+{tema:"Galileu",q:"Galileu observou luas de:",a:["Marte","Júpiter","Terra"],c:1,e:"Descobriu satélites de Júpiter."},
+{tema:"Exploração",q:"Primeira ida à Lua foi em:",a:["1969","1985","2000"],c:0,e:"Apollo 11 ocorreu em 1969."},
+{tema:"Exploração",q:"Astronautas caminharam na Lua por cerca de:",a:["2 horas","2 dias","1 mês"],c:0,e:"Permaneceram cerca de duas horas."},
+{tema:"Satélites",q:"Satélites artificiais ajudam na:",a:["Previsão do tempo","Apagar Sol","Mover Lua"],c:0,e:"São usados em comunicação e meteorologia."},
+{tema:"Satélites",q:"Satélites orbitam a:",a:["Lua","Terra","Marte"],c:1,e:"Eles giram ao redor da Terra."},
+{tema:"Sondas",q:"Sondas espaciais são:",a:["Não tripuladas","Tripuladas","Turísticas"],c:0,e:"São missões sem astronautas."},
+{tema:"Sistema Solar",q:"O Sol é o centro do:",a:["Universo","Sistema Solar","Lua"],c:1,e:"É o centro do Sistema Solar."},
+{tema:"Sistema Solar",q:"A Terra é um:",a:["Planeta","Estrela","Satélite"],c:0,e:"A Terra é um planeta."},
+{tema:"Sistema Solar",q:"A Lua é um:",a:["Planeta","Satélite natural","Asteroide"],c:1,e:"A Lua é satélite natural da Terra."},
+{tema:"Sistema Solar",q:"O movimento da Terra ao redor do Sol chama-se:",a:["Rotação","Translação","Inclinação"],c:1,e:"É chamado de translação."},
+{tema:"Sistema Solar",q:"Quando é dia no Brasil, do outro lado do planeta é:",a:["Verão","Noite","Inverno"],c:1,e:"Devido à rotação, ocorre dia e noite em lados opostos."}
+];
+
+let questoesAtuais=[];
+let current=0;
+let score=0;
+let errosPorTema={};
+let questoesErradas=[];
+let tentativa=1;
+let historicoTentativas=[];
+
+function iniciarTentativa(lista){
+  questoesAtuais=shuffleArray([...lista]); // 🔀 embaralha a cada tentativa
+  current=0;
+  score=0;
+  errosPorTema={};
+  questoesErradas=[];
+  document.getElementById("result").innerHTML="";
+  document.getElementById("summary").innerHTML="";
+  document.getElementById("retryContainer").innerHTML="";
+  loadQuestion();
+}
+
+const qEl=document.getElementById("question");
+const aEl=document.getElementById("answers");
+const fEl=document.getElementById("feedback");
+const progress=document.getElementById("progress");
+const nextContainer=document.getElementById("nextContainer");
+const result=document.getElementById("result");
+const ranking=document.getElementById("ranking");
+const summary=document.getElementById("summary");
+const retryContainer=document.getElementById("retryContainer");
+const historyEl=document.getElementById("history");
+
+function loadQuestion(){
+  const q=questoesAtuais[current];
+  qEl.textContent=`Tentativa ${tentativa} — (${current+1}/${questoesAtuais.length}) ${q.q}`;
+  aEl.innerHTML="";
+  fEl.innerHTML="";
+  nextContainer.innerHTML="";
+  progress.style.width=(current/questoesAtuais.length*100)+"%";
+  q.a.forEach((opt,i)=>{
+    const btn=document.createElement("button");
+    btn.textContent=opt;
+    btn.className="neutral";
+    btn.onclick=()=>checkAnswer(i);
+    aEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(i){
+  const buttons=document.querySelectorAll("#answers button");
+  buttons.forEach(b=>b.disabled=true);
+  const q=questoesAtuais[current];
+  if(i===q.c){
+    buttons[i].className="correct";
+    score++;
+    fEl.innerHTML="✅ Resposta correta!";
+  }else{
+    buttons[i].className="wrong";
+    buttons[q.c].className="correct";
+    fEl.innerHTML=`❌ Resposta incorreta.<br><strong>Resposta:</strong> ${q.a[q.c]}<br><strong>Justificativa:</strong> ${q.e}`;
+    errosPorTema[q.tema]=(errosPorTema[q.tema]||0)+1;
+    questoesErradas.push(q);
+  }
+  const nextBtn=document.createElement("button");
+  nextBtn.textContent="Próxima pergunta";
+  nextBtn.className="next";
+  nextBtn.onclick=nextQuestion;
+  nextContainer.appendChild(nextBtn);
+}
+
+function nextQuestion(){
+  current++;
+  if(current<questoesAtuais.length){loadQuestion()}else{finalizarTentativa()}
+}
+
+function finalizarTentativa(){
+  progress.style.width="100%";
+  qEl.textContent="🎯 Tentativa Finalizada";
+  aEl.innerHTML="";
+  fEl.innerHTML="";
+  nextContainer.innerHTML="";
+  historicoTentativas.push({tentativa,score,total:questoesAtuais.length});
+  result.innerHTML=`<h3>Pontuação: ${score}/${questoesAtuais.length}</h3>`;
+  gerarResumo();
+  mostrarHistorico();
+  saveRanking(score);
+  showRanking();
+  if(questoesErradas.length>0){criarBotaoRetry();}
+}
+
+function gerarResumo(){
+  if(Object.keys(errosPorTema).length===0){summary.innerHTML="👏 Excelente! Nenhum erro!";return}
+  summary.innerHTML="<strong>📚 Temas para revisar:</strong><br>";
+  for(let tema in errosPorTema){summary.innerHTML+=`- ${tema} (erros: ${errosPorTema[tema]})<br>`}
+}
+
+function criarBotaoRetry(){
+  const retryBtn=document.createElement("button");
+  retryBtn.textContent="🔁 Refazer apenas questões erradas";
+  retryBtn.className="retry";
+  retryBtn.onclick=()=>{tentativa++; iniciarTentativa(questoesErradas)};
+  retryContainer.innerHTML="";
+  retryContainer.appendChild(retryBtn);
+}
+
+function mostrarHistorico(){
+  historyEl.innerHTML="<strong>📊 Histórico de Tentativas:</strong><br>";
+  historicoTentativas.forEach(h=>{historyEl.innerHTML+=`Tentativa ${h.tentativa}: ${h.score}/${h.total}<br>`});
+}
+
+function saveRanking(s){
+  let r=JSON.parse(localStorage.getItem("rankingCiencias"))||[];
+  r.push(s);
+  r.sort((a,b)=>b-a);
+  r=r.slice(0,5);
+  localStorage.setItem("rankingCiencias",JSON.stringify(r));
+}
+
+function showRanking(){
+  let r=JSON.parse(localStorage.getItem("rankingCiencias"))||[];
+  ranking.innerHTML="<strong>🏆 Ranking Top 5:</strong><br>";
+  r.forEach((s,i)=>ranking.innerHTML+=`${i+1}º - ${s} pontos<br>`);
+}
+
+// Inicia primeira tentativa já embaralhada
+iniciarTentativa(bancoQuestoes);
+
+</script>
+</body>
+</html>
