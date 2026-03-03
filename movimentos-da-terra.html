@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Ciências 🚀</title>
+<style>
+body{margin:0;font-family:Arial, sans-serif;background:linear-gradient(to bottom,#0b1d3a,#1b263b);color:white;display:flex;justify-content:center}
+.container{width:95%;max-width:900px;margin:20px 0;background:rgba(0,0,0,0.85);padding:20px;border-radius:15px}
+h1{text-align:center}
+.progress-bar{width:100%;height:12px;background:#444;border-radius:10px;overflow:hidden;margin:15px 0}
+.progress{height:100%;width:0;background:#2ecc71;transition:0.3s}
+.question{font-size:16px;margin:15px 0}
+button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.neutral{background:#3498db}
+.correct{background:#2ecc71}
+.wrong{background:#e74c3c}
+.next{background:#f1c40f;color:black}
+.feedback,.summary,.ranking{margin-top:10px;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;font-size:13px}
+@media(min-width:768px){.question{font-size:18px}button{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🚀 Partiu Revisão: Ciências</h1>
+<div class="progress-bar"><div class="progress" id="progress"></div></div>
+<div class="question" id="question"></div>
+<div id="answers"></div>
+<div class="feedback" id="feedback"></div>
+<div id="nextContainer"></div>
+<div id="result"></div>
+<div class="summary" id="summary"></div>
+<div class="ranking" id="ranking"></div>
+</div>
+
+<script>
+
+const questions=[
+{tema:"Rotação",q:"O Sol nasce geralmente em qual direção?",a:["Oeste","Leste","Norte"],c:1,e:"O Sol nasce no Leste por causa da rotação da Terra."},
+{tema:"Rotação",q:"O pôr do sol acontece no:",a:["Leste","Oeste","Sul"],c:1,e:"O Sol se põe no Oeste devido à rotação terrestre."},
+{tema:"Linha do Equador",q:"A Linha do Equador divide a Terra em:",a:["Leste e Oeste","Norte e Sul","Dia e noite"],c:1,e:"Ela divide o planeta em hemisfério Norte e Sul."},
+{tema:"Rotação",q:"Qual movimento causa dia e noite?",a:["Translação","Rotação","Fase lunar"],c:1,e:"A rotação é o giro da Terra em torno de si mesma."},
+{tema:"Translação",q:"Qual movimento dura cerca de 365 dias?",a:["Rotação","Translação","Inclinação"],c:1,e:"A translação é o movimento da Terra ao redor do Sol."},
+{tema:"Estações",q:"As estações do ano acontecem por causa da:",a:["Inclinação do eixo","Lua cheia","Linha do Equador"],c:0,e:"O eixo inclinado altera a incidência solar."},
+{tema:"Lua",q:"A Lua gira ao redor de quem?",a:["Sol","Terra","Marte"],c:1,e:"A Lua orbita a Terra."},
+{tema:"Fases da Lua",q:"Quantas são as principais fases da Lua?",a:["2","4","8"],c:1,e:"São quatro: nova, crescente, cheia e minguante."},
+{tema:"Fases da Lua",q:"Qual é a sequência correta das fases?",a:["Nova, Crescente, Cheia, Minguante","Cheia, Nova, Crescente","Minguante, Cheia, Nova"],c:0,e:"Essa é a ordem do ciclo lunar."},
+{tema:"Fases da Lua",q:"Na Lua Nova vemos:",a:["Toda iluminada","Metade iluminada","Nenhuma parte iluminada"],c:2,e:"Na Lua Nova a parte iluminada não está voltada para a Terra."},
+{tema:"Fases da Lua",q:"O ciclo completo da Lua dura cerca de:",a:["7 dias","28 dias","365 dias"],c:1,e:"O ciclo lunar dura aproximadamente 28 dias."},
+{tema:"Fases da Lua",q:"Na Lua Cheia vemos:",a:["Metade","Toda iluminada","Nada"],c:1,e:"A face iluminada está totalmente visível."},
+{tema:"Fases da Lua",q:"Após a Lua Cheia vem:",a:["Crescente","Minguante","Nova"],c:1,e:"Depois da cheia começa a fase minguante."},
+{tema:"Aristóteles",q:"Aristóteles defendia qual modelo?",a:["Heliocêntrico","Geocêntrico","Espacial"],c:1,e:"Ele defendia a Terra no centro do Universo."},
+{tema:"Ptolomeu",q:"Ptolomeu aperfeiçoou qual modelo?",a:["Heliocêntrico","Geocêntrico","Lunar"],c:1,e:"Ele aperfeiçoou o modelo geocêntrico."},
+{tema:"Copérnico",q:"Copérnico defendia que o centro era:",a:["A Terra","O Sol","A Lua"],c:1,e:"Copérnico propôs o modelo heliocêntrico."},
+{tema:"Galileu",q:"Galileu comprovou suas ideias usando:",a:["Microscópio","Telescópio","Satélite"],c:1,e:"Ele usou uma luneta (telescópio)."},
+{tema:"Galileu",q:"Galileu observou satélites ao redor de:",a:["Marte","Júpiter","Terra"],c:1,e:"Ele descobriu luas orbitando Júpiter."},
+{tema:"Satélites",q:"Satélites artificiais ajudam na:",a:["Previsão do tempo","Apagar o Sol","Mover planetas"],c:0,e:"São usados em comunicação e meteorologia."},
+{tema:"Sondas",q:"Sondas espaciais são missões:",a:["Tripuladas","Não tripuladas","Turísticas"],c:1,e:"São controladas da Terra sem astronautas."},
+{tema:"Exploração",q:"A primeira viagem à Lua ocorreu em:",a:["1969","1980","2005"],c:0,e:"A missão Apollo 11 foi em 1969."},
+{tema:"Sistema Solar",q:"O Sol é o centro do:",a:["Universo","Sistema Solar","Lua"],c:1,e:"Ele é o centro do Sistema Solar."}
+];
+
+let current=0,score=0;
+let errosPorTema={};
+
+const qEl=document.getElementById("question");
+const aEl=document.getElementById("answers");
+const fEl=document.getElementById("feedback");
+const progress=document.getElementById("progress");
+const nextContainer=document.getElementById("nextContainer");
+const result=document.getElementById("result");
+const ranking=document.getElementById("ranking");
+const summary=document.getElementById("summary");
+
+function loadQuestion(){
+  const q=questions[current];
+  qEl.textContent=`(${current+1}/${questions.length}) ${q.q}`;
+  aEl.innerHTML="";
+  fEl.innerHTML="";
+  nextContainer.innerHTML="";
+  progress.style.width=(current/questions.length*100)+"%";
+  q.a.forEach((opt,i)=>{
+    const btn=document.createElement("button");
+    btn.textContent=opt;
+    btn.className="neutral";
+    btn.onclick=()=>checkAnswer(i);
+    aEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(i){
+  const buttons=document.querySelectorAll("#answers button");
+  buttons.forEach(b=>b.disabled=true);
+  const q=questions[current];
+  if(i===q.c){
+    buttons[i].className="correct";
+    score++;
+    fEl.innerHTML="✅ Resposta correta!";
+  }else{
+    buttons[i].className="wrong";
+    buttons[q.c].className="correct";
+    fEl.innerHTML=`❌ Resposta incorreta.<br><strong>Resposta:</strong> ${q.a[q.c]}<br><strong>Justificativa:</strong> ${q.e}`;
+    errosPorTema[q.tema]=(errosPorTema[q.tema]||0)+1;
+  }
+  const nextBtn=document.createElement("button");
+  nextBtn.textContent="Próxima pergunta";
+  nextBtn.className="next";
+  nextBtn.onclick=nextQuestion;
+  nextContainer.appendChild(nextBtn);
+}
+
+function nextQuestion(){
+  current++;
+  if(current<questions.length){loadQuestion()}else{showResult()}
+}
+
+function showResult(){
+  progress.style.width="100%";
+  qEl.textContent="🎉 Revisão Concluída!";
+  aEl.innerHTML="";
+  fEl.innerHTML="";
+  nextContainer.innerHTML="";
+  result.innerHTML=`<h3>Pontuação: ${score}/${questions.length}</h3>`;
+  gerarResumo();
+  saveRanking(score);
+  showRanking();
+}
+
+function gerarResumo(){
+  if(Object.keys(errosPorTema).length===0){summary.innerHTML="👏 Excelente! Nenhum erro!";return}
+  summary.innerHTML="<strong>📚 Temas para revisar:</strong><br>";
+  for(let tema in errosPorTema){summary.innerHTML+=`- ${tema} (erros: ${errosPorTema[tema]})<br>`}
+}
+
+function saveRanking(s){
+  let r=JSON.parse(localStorage.getItem("rankingCiencias"))||[];
+  r.push(s);
+  r.sort((a,b)=>b-a);
+  r=r.slice(0,5);
+  localStorage.setItem("rankingCiencias",JSON.stringify(r));
+}
+
+function showRanking(){
+  let r=JSON.parse(localStorage.getItem("rankingCiencias"))||[];
+  ranking.innerHTML="<strong>🏆 Ranking Top 5:</strong><br>";
+  r.forEach((s,i)=>{ranking.innerHTML+=`${i+1}º - ${s} pontos<br>`});
+}
+
+loadQuestion();
+
+</script>
+</body>
+</html>
