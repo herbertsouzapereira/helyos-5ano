@@ -23,6 +23,9 @@ button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;font-s
 </head>
 <body>
 <div class="container">
+<div style="text-align:center;margin-bottom:15px;">
+  <img src="_CapivaraNerdGenioIA_fundo_transparente.png" alt="Logotipo Capivara Nerd" style="max-width:180px;width:60%;height:auto;">
+</div>
 <h1>🚀 Partiu Revisão: Ciências</h1>
 <div class="progress-bar"><div class="progress" id="progress"></div></div>
 <div class="question" id="question"></div>
@@ -38,19 +41,24 @@ button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;font-s
 
 <script>
 
+// 🔀 Função para embaralhar (Fisher-Yates)
+function shuffleArray(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
 const bancoQuestoes=[
-// ROTAÇÃO E TRANSLAÇÃO
+// (Mantidas as mesmas 30 questões anteriores)
 {tema:"Rotação",q:"O Sol nasce em qual direção?",a:["Oeste","Leste","Sul"],c:1,e:"Nasce no Leste devido à rotação da Terra."},
 {tema:"Rotação",q:"O pôr do sol ocorre no:",a:["Leste","Oeste","Norte"],c:1,e:"O Sol se põe no Oeste."},
 {tema:"Rotação",q:"A rotação da Terra dura aproximadamente:",a:["24h","365 dias","7 dias"],c:0,e:"A Terra leva 24 horas para girar."},
 {tema:"Translação",q:"A translação dura cerca de:",a:["24h","30 dias","365 dias"],c:2,e:"A Terra leva cerca de 365 dias."},
 {tema:"Estações",q:"As estações existem por causa da:",a:["Inclinação do eixo","Lua cheia","Equador"],c:0,e:"O eixo inclinado altera a incidência solar."},
-
-// LINHA DO EQUADOR
 {tema:"Linha do Equador",q:"A Linha do Equador divide a Terra em:",a:["Leste/Oeste","Norte/Sul","Dia/Noite"],c:1,e:"Divide hemisfério Norte e Sul."},
 {tema:"Linha do Equador",q:"O Brasil é cortado pela:",a:["Linha do Equador","Linha Internacional de Data","Órbita"],c:0,e:"A Linha do Equador passa pelo Norte do Brasil."},
-
-// LUA E FASES
 {tema:"Lua",q:"A Lua gira ao redor da:",a:["Terra","Marte","Vênus"],c:0,e:"A Lua orbita a Terra."},
 {tema:"Fases da Lua",q:"Quantas fases principais existem?",a:["2","4","8"],c:1,e:"São quatro fases principais."},
 {tema:"Fases da Lua",q:"A sequência correta é:",a:["Nova-Crescente-Cheia-Minguante","Cheia-Nova-Crescente","Minguante-Cheia-Nova"],c:0,e:"Essa é a ordem do ciclo lunar."},
@@ -59,22 +67,16 @@ const bancoQuestoes=[
 {tema:"Fases da Lua",q:"Após a Cheia vem:",a:["Crescente","Minguante","Nova"],c:1,e:"Depois da cheia começa a fase minguante."},
 {tema:"Fases da Lua",q:"O ciclo lunar dura cerca de:",a:["28 dias","7 dias","365 dias"],c:0,e:"O ciclo dura aproximadamente 28 dias."},
 {tema:"Fases da Lua",q:"Quarto Crescente significa:",a:["Metade iluminada crescente","Totalmente escura","Totalmente iluminada"],c:0,e:"Metade visível e aumentando."},
-
-// MODELOS DO UNIVERSO
 {tema:"Aristóteles",q:"Aristóteles defendia modelo:",a:["Geocêntrico","Heliocêntrico","Espacial"],c:0,e:"Defendia a Terra no centro."},
 {tema:"Ptolomeu",q:"Ptolomeu aperfeiçoou o modelo:",a:["Heliocêntrico","Geocêntrico","Lunar"],c:1,e:"Aperfeiçoou o geocentrismo."},
 {tema:"Copérnico",q:"Copérnico defendia que o centro era:",a:["Terra","Sol","Lua"],c:1,e:"Modelo heliocêntrico."},
 {tema:"Galileu",q:"Galileu usou o:",a:["Microscópio","Telescópio","Satélite"],c:1,e:"Ele utilizou telescópio."},
 {tema:"Galileu",q:"Galileu observou luas de:",a:["Marte","Júpiter","Terra"],c:1,e:"Descobriu satélites de Júpiter."},
-
-// EXPLORAÇÃO ESPACIAL
 {tema:"Exploração",q:"Primeira ida à Lua foi em:",a:["1969","1985","2000"],c:0,e:"Apollo 11 ocorreu em 1969."},
 {tema:"Exploração",q:"Astronautas caminharam na Lua por cerca de:",a:["2 horas","2 dias","1 mês"],c:0,e:"Permaneceram cerca de duas horas."},
 {tema:"Satélites",q:"Satélites artificiais ajudam na:",a:["Previsão do tempo","Apagar Sol","Mover Lua"],c:0,e:"São usados em comunicação e meteorologia."},
 {tema:"Satélites",q:"Satélites orbitam a:",a:["Lua","Terra","Marte"],c:1,e:"Eles giram ao redor da Terra."},
 {tema:"Sondas",q:"Sondas espaciais são:",a:["Não tripuladas","Tripuladas","Turísticas"],c:0,e:"São missões sem astronautas."},
-
-// SISTEMA SOLAR
 {tema:"Sistema Solar",q:"O Sol é o centro do:",a:["Universo","Sistema Solar","Lua"],c:1,e:"É o centro do Sistema Solar."},
 {tema:"Sistema Solar",q:"A Terra é um:",a:["Planeta","Estrela","Satélite"],c:0,e:"A Terra é um planeta."},
 {tema:"Sistema Solar",q:"A Lua é um:",a:["Planeta","Satélite natural","Asteroide"],c:1,e:"A Lua é satélite natural da Terra."},
@@ -82,13 +84,25 @@ const bancoQuestoes=[
 {tema:"Sistema Solar",q:"Quando é dia no Brasil, do outro lado do planeta é:",a:["Verão","Noite","Inverno"],c:1,e:"Devido à rotação, ocorre dia e noite em lados opostos."}
 ];
 
-let questoesAtuais=[...bancoQuestoes];
+let questoesAtuais=[];
 let current=0;
 let score=0;
 let errosPorTema={};
 let questoesErradas=[];
 let tentativa=1;
 let historicoTentativas=[];
+
+function iniciarTentativa(lista){
+  questoesAtuais=shuffleArray([...lista]); // 🔀 embaralha a cada tentativa
+  current=0;
+  score=0;
+  errosPorTema={};
+  questoesErradas=[];
+  document.getElementById("result").innerHTML="";
+  document.getElementById("summary").innerHTML="";
+  document.getElementById("retryContainer").innerHTML="";
+  loadQuestion();
+}
 
 const qEl=document.getElementById("question");
 const aEl=document.getElementById("answers");
@@ -169,22 +183,9 @@ function criarBotaoRetry(){
   const retryBtn=document.createElement("button");
   retryBtn.textContent="🔁 Refazer apenas questões erradas";
   retryBtn.className="retry";
-  retryBtn.onclick=segundaRodada;
+  retryBtn.onclick=()=>{tentativa++; iniciarTentativa(questoesErradas)};
   retryContainer.innerHTML="";
   retryContainer.appendChild(retryBtn);
-}
-
-function segundaRodada(){
-  tentativa++;
-  questoesAtuais=[...questoesErradas];
-  questoesErradas=[];
-  errosPorTema={};
-  current=0;
-  score=0;
-  result.innerHTML="";
-  summary.innerHTML="";
-  retryContainer.innerHTML="";
-  loadQuestion();
 }
 
 function mostrarHistorico(){
@@ -206,7 +207,8 @@ function showRanking(){
   r.forEach((s,i)=>ranking.innerHTML+=`${i+1}º - ${s} pontos<br>`);
 }
 
-loadQuestion();
+// Inicia primeira tentativa já embaralhada
+iniciarTentativa(bancoQuestoes);
 
 </script>
 </body>
