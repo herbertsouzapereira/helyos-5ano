@@ -1712,30 +1712,37 @@ function showResults() {
 }
 
 function buildRanking() {
-  const leaderboard = [
-    {name:'Ana Lima', score: 28, total: 30},
-    {name:'Pedro Silva', score: 26, total: 30},
-    {name:'Carla Matos', score: 24, total: 30},
-    ...state.sessionHistory.slice(-5).map((h,i) => ({name:'Você', score:h.score, total:h.total})),
-  ];
-
-  // Add current session
-  leaderboard.push({name:'Você (agora)', score: state.score, total: state.questions.length});
-
-  // Sort
-  leaderboard.sort((a,b) => (b.score/b.total) - (a.score/a.total));
-
-  const posClasses = ['gold','silver','bronze'];
-  const medals = ['🥇','🥈','🥉'];
+  // Only real history - no fake players
+  const history = JSON.parse(localStorage.getItem('capivaraHistory') || '[]');
 
   const list = document.getElementById('ranking-list');
-  list.innerHTML = leaderboard.slice(0,6).map((p,i) => `
-    <div class="ranking-row">
-      <div class="rank-pos ${posClasses[i]||'other'}">${medals[i]||i+1}</div>
-      <div class="rank-name">${p.name}${p.name.includes('agora') ? ' ⭐' : ''}</div>
-      <div class="rank-score">${p.score}/${p.total} (${Math.round(p.score/p.total*100)}%)</div>
-    </div>
-  `).join('');
+
+  if (history.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:14px;padding:12px">Jogue mais vezes para construir seu histórico! 🎮</div>';
+    return;
+  }
+
+  // Sort by score descending (highest first)
+  const sorted = history.map((p, origIdx) => ({...p, origIdx}))
+                        .sort((a, b) => (b.score/b.total) - (a.score/a.total));
+
+  // The current session is the last entry saved
+  const currentOrigIdx = history.length - 1;
+
+  const posClasses = ['gold','silver','bronze'];
+  const medals = ['\u{1F947}','\u{1F948}','\u{1F949}'];
+
+  list.innerHTML = sorted.slice(0, 8).map((p, rankPos) => {
+    const isCurrent = p.origIdx === currentOrigIdx;
+    return '<div class="ranking-row" style="' + (isCurrent ? 'background:#F0F9FF;border-radius:10px;margin:2px -4px;padding:10px 4px;' : '') + '">'
+      + '<div class="rank-pos ' + (posClasses[rankPos] || 'other') + '">' + (medals[rankPos] || (rankPos+1)) + '</div>'
+      + '<div class="rank-name">'
+      + (isCurrent ? '<strong>Esta tentativa ⭐</strong>' : 'Tentativa ' + (p.origIdx + 1))
+      + ' <span style="font-size:12px;color:var(--text-light);font-weight:600;margin-left:6px">' + p.date + '</span>'
+      + '</div>'
+      + '<div class="rank-score">' + p.score + '/' + p.total + ' (' + p.pct + '%)</div>'
+      + '</div>';
+  }).join('');
 }
 
 function confirmQuit() {
