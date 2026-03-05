@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partiu Revisão</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+margin:0;
+padding:20px;
+text-align:center;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+}
+
+h1{
+color:#38bdf8;
+}
+
+.progress{
+background:#1e293b;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.progress-bar{
+height:12px;
+background:#38bdf8;
+width:0%;
+}
+
+.question{
+font-size:22px;
+margin-bottom:20px;
+}
+
+.option{
+background:#1e293b;
+padding:12px;
+margin:8px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.option:hover{
+background:#334155;
+}
+
+.feedback{
+margin-top:15px;
+padding:10px;
+border-radius:8px;
+}
+
+.correct{
+background:#065f46;
+}
+
+.wrong{
+background:#7f1d1d;
+}
+
+button{
+padding:12px 20px;
+margin:10px;
+border:none;
+border-radius:8px;
+background:#38bdf8;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#0ea5e9;
+}
+
+.ranking{
+background:#1e293b;
+padding:10px;
+border-radius:10px;
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎮 Partiu Revisão</h1>
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div id="game"></div>
+
+<div id="ranking" class="ranking"></div>
+
+</div>
+
+<script>
+
+let questions = [
+
+{q:"Na frase 'O cachorro correu rápido', qual é o substantivo?",
+o:["cachorro","correu","rápido"],
+a:0,t:"Substantivo",
+e:"Substantivo é o nome de seres, objetos ou lugares."},
+
+{q:"Qual palavra é um verbo?",o:["mesa","correr","azul"],a:1,t:"Verbo",e:"Verbo indica ação ou estado."},
+
+{q:"Na frase 'Ela chegou cedo', qual é o advérbio?",o:["ela","chegou","cedo"],a:2,t:"Advérbio",e:"Advérbio modifica o verbo indicando circunstância."},
+
+{q:"Qual palavra é um adjetivo?",o:["bonito","correr","cidade"],a:0,t:"Adjetivo",e:"Adjetivo caracteriza um substantivo."},
+
+{q:"Qual palavra indica quantidade?",o:["três","correr","rápido"],a:0,t:"Numeral",e:"Numeral indica quantidade ou ordem."},
+
+{q:"'Menina feliz'. Qual é o adjetivo?",o:["menina","feliz","é"],a:1,t:"Adjetivo",e:"'Feliz' caracteriza a menina."},
+
+{q:"Qual palavra é um substantivo?",o:["casa","bonito","andar"],a:0,t:"Substantivo",e:"Casa é nome de objeto."},
+
+{q:"Qual palavra é um advérbio?",o:["ontem","menino","verde"],a:0,t:"Advérbio",e:"Ontem indica tempo."},
+
+{q:"Qual palavra é um verbo?",o:["andar","porta","feliz"],a:0,t:"Verbo",e:"Andar indica ação."},
+
+{q:"Qual palavra é numeral?",o:["cinco","rápido","gato"],a:0,t:"Numeral",e:"Cinco indica quantidade."},
+
+{q:"Na frase 'O gato preto dorme', qual é o adjetivo?",o:["gato","preto","dorme"],a:1,t:"Adjetivo",e:"Preto caracteriza o gato."},
+
+{q:"Qual palavra é substantivo?",o:["cidade","correr","rápido"],a:0,t:"Substantivo",e:"Cidade é lugar."},
+
+{q:"Qual palavra indica ação?",o:["pular","mesa","alto"],a:0,t:"Verbo",e:"Pular é ação."},
+
+{q:"Qual palavra é advérbio?",o:["longe","cachorro","três"],a:0,t:"Advérbio",e:"Longe indica lugar."},
+
+{q:"Qual palavra é numeral?",o:["dois","andar","bonito"],a:0,t:"Numeral",e:"Dois indica quantidade."},
+
+{q:"Na frase 'O carro veloz passou', qual é o adjetivo?",o:["carro","veloz","passou"],a:1,t:"Adjetivo",e:"Veloz caracteriza carro."},
+
+{q:"Qual palavra é verbo?",o:["comer","mesa","verde"],a:0,t:"Verbo",e:"Comer é ação."},
+
+{q:"Qual palavra é substantivo?",o:["livro","correr","rapidamente"],a:0,t:"Substantivo",e:"Livro é objeto."},
+
+{q:"Qual palavra é advérbio?",o:["rapidamente","gato","azul"],a:0,t:"Advérbio",e:"Indica modo."},
+
+{q:"Qual palavra é numeral?",o:["dez","correr","alto"],a:0,t:"Numeral",e:"Dez indica quantidade."},
+
+{q:"Qual palavra é verbo?",o:["falar","mesa","bonito"],a:0,t:"Verbo",e:"Falar é ação."},
+
+{q:"Qual palavra é substantivo?",o:["menino","rápido","andar"],a:0,t:"Substantivo",e:"Menino é ser."},
+
+{q:"Qual palavra é advérbio?",o:["sempre","casa","verde"],a:0,t:"Advérbio",e:"Sempre indica tempo."},
+
+{q:"Qual palavra é numeral?",o:["sete","correr","azul"],a:0,t:"Numeral",e:"Sete indica quantidade."},
+
+{q:"Qual palavra é adjetivo?",o:["bonita","andar","cidade"],a:0,t:"Adjetivo",e:"Bonita caracteriza."},
+
+{q:"Qual palavra é verbo?",o:["estudar","mesa","alto"],a:0,t:"Verbo",e:"Estudar indica ação."},
+
+{q:"Qual palavra é substantivo?",o:["escola","correr","rápido"],a:0,t:"Substantivo",e:"Escola é lugar."},
+
+{q:"Qual palavra é advérbio?",o:["aqui","gato","verde"],a:0,t:"Advérbio",e:"Aqui indica lugar."},
+
+{q:"Qual palavra é numeral?",o:["nove","andar","feliz"],a:0,t:"Numeral",e:"Nove indica quantidade."},
+
+{q:"Na frase 'A menina alegre brinca', qual é o adjetivo?",o:["menina","alegre","brinca"],a:1,t:"Adjetivo",e:"Alegre caracteriza menina."}
+
+]
+
+let game=document.getElementById("game")
+let progress=document.getElementById("progressBar")
+
+let index=0
+let score=0
+let errors=[]
+let topicErrors={}
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+questions=shuffle(questions)
+
+function showQuestion(){
+
+let q=questions[index]
+
+let html=`<div class="question">${index+1}. ${q.q}</div>`
+
+q.o.forEach((opt,i)=>{
+html+=`<div class="option" onclick="answer(${i})">${opt}</div>`
+})
+
+game.innerHTML=html
+
+progress.style.width=((index/questions.length)*100)+"%"
+
+}
+
+function answer(i){
+
+let q=questions[index]
+
+if(i===q.a){
+
+score++
+
+game.innerHTML+=`<div class="feedback correct">✅ Correto!</div>`
+
+}else{
+
+errors.push(q)
+
+topicErrors[q.t]=(topicErrors[q.t]||0)+1
+
+game.innerHTML+=`<div class="feedback wrong">
+❌ Resposta correta: <b>${q.o[q.a]}</b><br>
+${q.e}
+</div>`
+
+}
+
+game.innerHTML+=`<button onclick="next()">Próxima</button>`
+
+}
+
+function next(){
+
+index++
+
+if(index<questions.length){
+
+showQuestion()
+
+}else{
+
+finish()
+
+}
+
+}
+
+function finish(){
+
+progress.style.width="100%"
+
+let summary=`<h2>Resultado</h2>
+<p>Pontuação: ${score} / ${questions.length}</p>`
+
+if(Object.keys(topicErrors).length>0){
+
+summary+="<h3>Estudar mais:</h3>"
+
+for(let t in topicErrors){
+
+summary+=`<p>${t}: ${topicErrors[t]} erros</p>`
+
+}
+
+summary+=`<button onclick="retryErrors()">Refazer apenas temas errados</button>`
+
+}
+
+summary+=`<button onclick="location.reload()">Jogar novamente</button>`
+
+game.innerHTML=summary
+
+updateRanking()
+
+}
+
+function retryErrors(){
+
+questions=shuffle(errors)
+
+index=0
+score=0
+errors=[]
+topicErrors={}
+
+showQuestion()
+
+}
+
+function updateRanking(){
+
+let r=JSON.parse(localStorage.getItem("ranking")||"[]")
+
+r.push(score)
+
+r.sort((a,b)=>b-a)
+
+r=r.slice(0,5)
+
+localStorage.setItem("ranking",JSON.stringify(r))
+
+let html="<h3>🏆 Ranking</h3>"
+
+r.forEach((s,i)=>{
+
+html+=`<p>${i+1}º lugar - ${s} pontos</p>`
+
+})
+
+document.getElementById("ranking").innerHTML=html
+
+}
+
+showQuestion()
+
+</script>
+
+</body>
+</html>
