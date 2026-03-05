@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partiu Revisão</title>
+
+<style>
+
+body{
+font-family: 'Segoe UI',sans-serif;
+background:#0f172a;
+color:white;
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:850px;
+margin:auto;
+padding:20px;
+}
+
+h1{
+color:#22c55e;
+}
+
+.mascote{
+width:140px;
+margin-bottom:10px;
+}
+
+.progress{
+background:#1e293b;
+border-radius:20px;
+overflow:hidden;
+height:14px;
+margin-bottom:20px;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#22c55e;
+transition:0.4s;
+}
+
+.question{
+font-size:22px;
+margin-bottom:20px;
+}
+
+.options{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+.option{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+cursor:pointer;
+font-weight:bold;
+transition:0.2s;
+}
+
+.option:hover{
+transform:scale(1.05);
+background:#334155;
+}
+
+.correct{
+background:#16a34a !important;
+}
+
+.wrong{
+background:#dc2626 !important;
+}
+
+.feedback{
+margin-top:15px;
+padding:10px;
+background:#1e293b;
+border-radius:10px;
+}
+
+button{
+margin-top:20px;
+padding:12px 25px;
+border:none;
+border-radius:10px;
+background:#22c55e;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#16a34a;
+}
+
+.ranking{
+margin-top:25px;
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+}
+
+@media(max-width:600px){
+
+.options{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<img class="mascote" src="CapivaraNerdGenioIA_fundo_transparente.png">
+
+<h1>🎮 Partiu Revisão</h1>
+
+<div class="progress">
+<div class="progress-bar" id="progress"></div>
+</div>
+
+<div id="game"></div>
+
+<div id="ranking"></div>
+
+</div>
+
+<script>
+
+let perguntas=[
+
+{q:"Na frase 'As crianças felizes correram rapidamente', qual é o advérbio?",o:["felizes","rapidamente","crianças","correram"],a:1,t:"Advérbio",e:"Advérbios indicam circunstâncias como modo, tempo ou intensidade."},
+
+{q:"Qual alternativa contém apenas substantivos?",o:["cidade, mesa, alegria","correr, pular","azul, bonito","rapidamente, ontem"],a:0,t:"Substantivo",e:"Substantivos nomeiam seres, objetos ou sentimentos."},
+
+{q:"Qual palavra é um numeral ordinal?",o:["primeiro","dois","dobro","triplo"],a:0,t:"Numeral",e:"Ordinal indica ordem."},
+
+{q:"Em 'O atleta correu veloz', 'veloz' é:",o:["substantivo","verbo","adjetivo","advérbio"],a:2,t:"Adjetivo",e:"Adjetivo caracteriza um substantivo."},
+
+{q:"Qual palavra indica ação?",o:["andar","mesa","bonito","aqui"],a:0,t:"Verbo",e:"Verbo indica ação ou estado."},
+
+{q:"Qual alternativa possui advérbio de tempo?",o:["sempre","azul","correr","cidade"],a:0,t:"Advérbio",e:"Sempre indica tempo."},
+
+{q:"'Três alunos chegaram'. 'Três' é:",o:["numeral","substantivo","verbo","advérbio"],a:0,t:"Numeral",e:"Numerais indicam quantidade."},
+
+{q:"Qual palavra é adjetivo?",o:["rápido","correr","cidade","dez"],a:0,t:"Adjetivo",e:"Adjetivo caracteriza substantivo."},
+
+{q:"Em 'O cachorro latiu alto', 'alto' é:",o:["advérbio","verbo","substantivo","numeral"],a:0,t:"Advérbio",e:"Modifica o verbo 'latir'."},
+
+{q:"Qual palavra é verbo?",o:["pensar","mesa","verde","sete"],a:0,t:"Verbo",e:"Pensar indica ação."},
+
+{q:"'A casa azul'. Azul é:",o:["adjetivo","verbo","advérbio","numeral"],a:0,t:"Adjetivo",e:"Caracteriza casa."},
+
+{q:"Qual alternativa tem advérbio de lugar?",o:["aqui","mesa","bonito","três"],a:0,t:"Advérbio",e:"Aqui indica lugar."},
+
+{q:"Qual palavra é substantivo abstrato?",o:["amor","mesa","cidade","gato"],a:0,t:"Substantivo",e:"Nomeia sentimento."},
+
+{q:"Qual palavra é numeral?",o:["vinte","andar","azul","longe"],a:0,t:"Numeral",e:"Indica quantidade."},
+
+{q:"Qual palavra é advérbio?",o:["rapidamente","mesa","bonito","dez"],a:0,t:"Advérbio",e:"Indica modo."},
+
+{q:"Em 'Eles estudaram muito', 'muito' é:",o:["advérbio","verbo","substantivo","numeral"],a:0,t:"Advérbio",e:"Intensifica o verbo."},
+
+{q:"Qual palavra é verbo?",o:["comer","mesa","feliz","sete"],a:0,t:"Verbo",e:"Comer é ação."},
+
+{q:"Qual palavra é substantivo?",o:["escola","andar","azul","rapidamente"],a:0,t:"Substantivo",e:"Nome de lugar."},
+
+{q:"Qual palavra é adjetivo?",o:["alegre","correr","cidade","dez"],a:0,t:"Adjetivo",e:"Caracteriza substantivo."},
+
+{q:"Qual palavra é advérbio?",o:["ontem","gato","verde","cinco"],a:0,t:"Advérbio",e:"Indica tempo."},
+
+{q:"Qual palavra é numeral multiplicativo?",o:["dobro","dois","primeiro","segundo"],a:0,t:"Numeral",e:"Multiplicativo indica multiplicação."},
+
+{q:"Qual palavra é verbo?",o:["estudar","mesa","alto","dez"],a:0,t:"Verbo",e:"Estudar é ação."},
+
+{q:"Qual palavra é substantivo?",o:["livro","correr","feliz","rapidamente"],a:0,t:"Substantivo",e:"Nome de objeto."},
+
+{q:"Qual palavra é advérbio?",o:["longe","gato","verde","cinco"],a:0,t:"Advérbio",e:"Indica lugar."},
+
+{q:"Qual palavra é numeral?",o:["nove","andar","feliz","longe"],a:0,t:"Numeral",e:"Indica quantidade."},
+
+{q:"Qual palavra é adjetivo?",o:["brilhante","correr","cidade","dez"],a:0,t:"Adjetivo",e:"Caracteriza substantivo."},
+
+{q:"Qual palavra é verbo?",o:["viajar","mesa","azul","cinco"],a:0,t:"Verbo",e:"Viajar é ação."},
+
+{q:"Qual palavra é substantivo?",o:["professor","andar","feliz","rapidamente"],a:0,t:"Substantivo",e:"Nome de pessoa."},
+
+{q:"Qual palavra é advérbio?",o:["sempre","mesa","bonito","sete"],a:0,t:"Advérbio",e:"Indica frequência."},
+
+{q:"Qual palavra é numeral?",o:["quatro","andar","feliz","aqui"],a:0,t:"Numeral",e:"Indica quantidade."}
+
+]
+
+let i=0
+let score=0
+let erros=[]
+let temas={}
+
+perguntas.sort(()=>Math.random()-0.5)
+
+function mostrar(){
+
+let q=perguntas[i]
+
+let html=`<div class="question">${i+1}. ${q.q}</div><div class="options">`
+
+q.o.forEach((op,index)=>{
+html+=`<div class="option" onclick="responder(${index})">${op}</div>`
+})
+
+html+="</div>"
+
+document.getElementById("game").innerHTML=html
+
+document.getElementById("progress").style.width=((i/perguntas.length)*100)+"%"
+
+}
+
+function responder(x){
+
+let q=perguntas[i]
+
+let opts=document.querySelectorAll(".option")
+
+if(x===q.a){
+
+opts[x].classList.add("correct")
+score++
+
+}else{
+
+opts[x].classList.add("wrong")
+opts[q.a].classList.add("correct")
+
+erros.push(q)
+
+temas[q.t]=(temas[q.t]||0)+1
+
+document.getElementById("game").innerHTML+=`<div class="feedback">💡 ${q.e}</div>`
+
+}
+
+document.getElementById("game").innerHTML+=`<button onclick="proxima()">Próxima</button>`
+
+}
+
+function proxima(){
+
+i++
+
+if(i<perguntas.length){
+
+mostrar()
+
+}else{
+
+fim()
+
+}
+
+}
+
+function fim(){
+
+let html=`<h2>Resultado</h2>
+<p>🏆 Pontuação: ${score} / ${perguntas.length}</p>`
+
+if(erros.length>0){
+
+html+="<h3>📚 Revisar:</h3>"
+
+for(let t in temas){
+
+html+=`<p>${t}: ${temas[t]} erros</p>`
+
+}
+
+html+=`<button onclick="refazer()">Refazer temas errados</button>`
+
+}
+
+html+=`<button onclick="location.reload()">Jogar novamente</button>`
+
+document.getElementById("game").innerHTML=html
+
+ranking()
+
+}
+
+function refazer(){
+
+perguntas=erros.sort(()=>Math.random()-0.5)
+
+i=0
+score=0
+erros=[]
+temas={}
+
+mostrar()
+
+}
+
+function ranking(){
+
+let r=JSON.parse(localStorage.getItem("ranking")||"[]")
+
+r.push(score)
+
+r.sort((a,b)=>b-a)
+
+r=r.slice(0,5)
+
+localStorage.setItem("ranking",JSON.stringify(r))
+
+let html="<div class='ranking'><h3>🏆 Ranking</h3>"
+
+r.forEach((s,i)=>{
+
+html+=`<p>${i+1}º lugar - ${s} pontos</p>`
+
+})
+
+html+="</div>"
+
+document.getElementById("ranking").innerHTML=html
+
+}
+
+mostrar()
+
+</script>
+
+</body>
+</html>
