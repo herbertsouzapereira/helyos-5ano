@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partiu Revisão - Locução Adjetiva</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+h1{
+color:#22c55e;
+}
+
+.mascote{
+width:140px;
+animation:flutuar 3s infinite ease-in-out;
+}
+
+@keyframes flutuar{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+.feliz{
+animation:feliz 0.5s;
+}
+
+@keyframes feliz{
+50%{transform:scale(1.3)}
+}
+
+.triste{
+animation:triste 0.5s;
+}
+
+@keyframes triste{
+25%{transform:rotate(-10deg)}
+75%{transform:rotate(10deg)}
+}
+
+.progress{
+background:#1e293b;
+height:14px;
+border-radius:20px;
+overflow:hidden;
+margin:20px 0;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:#22c55e;
+transition:0.3s;
+}
+
+.pergunta{
+font-size:22px;
+margin:20px 0;
+}
+
+.dropzone{
+
+border:2px dashed #22c55e;
+padding:15px;
+border-radius:10px;
+min-height:40px;
+margin-top:10px;
+
+}
+
+.opcoes{
+
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:center;
+margin-top:20px;
+
+}
+
+.opcao{
+
+background:#1e293b;
+padding:10px 16px;
+border-radius:8px;
+cursor:grab;
+font-weight:bold;
+
+}
+
+.opcao:hover{
+background:#334155;
+}
+
+button{
+
+margin-top:20px;
+padding:12px 25px;
+border:none;
+border-radius:10px;
+background:#22c55e;
+cursor:pointer;
+
+}
+
+button:hover{
+background:#16a34a;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<img id="capivara" class="mascote" src="CapivaraNerdGenioIA_fundo_transparente.png">
+
+<h1>🎮 Partiu Revisão - Locução Adjetiva</h1>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+<div id="game"></div>
+
+</div>
+
+<script>
+
+let perguntas=[
+
+{q:"viagem por mar",a:"marítima"},
+{q:"amor de pai",a:"paterna"},
+{q:"amor de irmão",a:"fraterna"},
+{q:"brincadeira de criança",a:"infantil"},
+{q:"indústria da cidade",a:"urbana"},
+{q:"paisagem da cidade",a:"urbana"},
+{q:"atividade da indústria",a:"industrial"},
+{q:"vida da família",a:"familiar"},
+{q:"esporte da juventude",a:"juvenil"},
+{q:"animal da água",a:"aquático"}
+
+]
+
+let opcoes=[
+"marítima",
+"paterna",
+"fraterna",
+"infantil",
+"urbana",
+"industrial",
+"familiar",
+"juvenil",
+"aquático",
+"celeste"
+]
+
+let i=0
+let pontos=0
+
+function mostrar(){
+
+let q=perguntas[i]
+
+document.getElementById("game").innerHTML=`
+
+<div class="pergunta">
+
+Substitua a locução adjetiva:
+
+<b>${q.q}</b>
+
+</div>
+
+<div class="dropzone" id="drop">
+Arraste o adjetivo correto aqui
+</div>
+
+<div class="opcoes">
+
+${opcoes.map(o=>`<div draggable="true" class="opcao">${o}</div>`).join("")}
+
+</div>
+
+`
+
+document.getElementById("bar").style.width=((i/perguntas.length)*100)+"%"
+
+ativarDrag()
+
+}
+
+function ativarDrag(){
+
+let itens=document.querySelectorAll(".opcao")
+let drop=document.getElementById("drop")
+
+itens.forEach(el=>{
+
+el.addEventListener("dragstart",e=>{
+
+e.dataTransfer.setData("text",el.innerText)
+
+})
+
+})
+
+drop.addEventListener("dragover",e=>e.preventDefault())
+
+drop.addEventListener("drop",e=>{
+
+e.preventDefault()
+
+let resposta=e.dataTransfer.getData("text")
+
+verificar(resposta)
+
+})
+
+}
+
+function feliz(){
+
+let c=document.getElementById("capivara")
+
+c.classList.add("feliz")
+
+setTimeout(()=>c.classList.remove("feliz"),500)
+
+}
+
+function triste(){
+
+let c=document.getElementById("capivara")
+
+c.classList.add("triste")
+
+setTimeout(()=>c.classList.remove("triste"),500)
+
+}
+
+function verificar(resp){
+
+let correta=perguntas[i].a
+
+if(resp===correta){
+
+pontos++
+
+feliz()
+
+document.getElementById("drop").innerHTML="✅ Correto!"
+
+}else{
+
+triste()
+
+document.getElementById("drop").innerHTML=
+
+`❌ Resposta correta: <b>${correta}</b>`
+
+}
+
+document.getElementById("game").innerHTML+=`
+
+<button onclick="proxima()">Próxima</button>
+
+`
+
+}
+
+function proxima(){
+
+i++
+
+if(i<perguntas.length){
+
+mostrar()
+
+}else{
+
+fim()
+
+}
+
+}
+
+function fim(){
+
+document.getElementById("bar").style.width="100%"
+
+document.getElementById("game").innerHTML=`
+
+<h2>🏆 Resultado</h2>
+
+<p>Você acertou <b>${pontos}</b> de ${perguntas.length}</p>
+
+<button onclick="location.reload()">Jogar novamente</button>
+
+`
+
+}
+
+mostrar()
+
+</script>
+
+</body>
+</html>
