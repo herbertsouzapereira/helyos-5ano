@@ -194,82 +194,214 @@ grid-template-columns:1fr;
 
 let perguntas=[
 
+// 1
 {
 q:"Os cientistas extremamente curiosos analisaram o fenômeno cuidadosamente. Qual palavra é advérbio?",
 o:["cientistas","curiosos","extremamente","fenômeno"],
 a:2,
 exp:`✅ <b>extremamente</b> é advérbio de intensidade, pois intensifica o adjetivo "curiosos".
 
-❌ cientistas → substantivo (nome de pessoas)
+❌ cientistas → substantivo
 
-❌ curiosos → adjetivo (caracteriza os cientistas)
+❌ curiosos → adjetivo
 
 ❌ fenômeno → substantivo`
 },
 
+// 2
 {
 q:"O aluno respondeu rapidamente à pergunta. O advérbio expressa:",
 o:["tempo","intensidade","modo","lugar"],
 a:2,
-exp:`✅ <b>Modo</b>. "Rapidamente" indica a forma como a ação foi realizada.
+exp:`✅ "Rapidamente" indica <b>modo</b>, pois mostra como a ação ocorreu.
 
-❌ tempo → indicaria quando (ontem, hoje)
+❌ tempo → quando ocorre
 
-❌ intensidade → indicaria grau (muito, bastante)
-
-❌ lugar → indicaria posição (aqui, ali)`
-},
-
-{
-q:"Eles chegaram ontem à cidade. O advérbio 'ontem' indica:",
-o:["modo","tempo","intensidade","lugar"],
-a:1,
-exp:`✅ <b>Tempo</b>, pois indica quando a ação ocorreu.
-
-❌ modo → como a ação ocorreu
-
-❌ intensidade → grau da ação
+❌ intensidade → grau
 
 ❌ lugar → posição`
 },
 
+// 3
+{
+q:"Eles chegaram ontem à cidade. O advérbio 'ontem' indica:",
+o:["modo","tempo","intensidade","lugar"],
+a:1,
+exp:`✅ "Ontem" é advérbio de <b>tempo</b>.
+
+❌ modo → como
+
+❌ intensidade → grau
+
+❌ lugar → posição`
+},
+
+// 4
 {
 q:"O atleta correu muito rapidamente. 'Muito' funciona como:",
 o:["advérbio de intensidade","advérbio de lugar","substantivo","verbo"],
 a:0,
-exp:`✅ "Muito" intensifica o advérbio "rapidamente", sendo advérbio de intensidade.
+exp:`✅ "Muito" intensifica o advérbio "rapidamente".
 
-❌ lugar → indicaria posição
+❌ lugar → posição
 
-❌ substantivo → nomearia algo
+❌ substantivo → nome
 
-❌ verbo → indicaria ação`
+❌ verbo → ação`
 },
 
+// 5
 {
 q:"Ela sempre estuda antes da prova. O advérbio 'sempre' indica:",
 o:["tempo/frequência","modo","lugar","negação"],
 a:0,
-exp:`✅ "Sempre" indica frequência (tempo habitual).
+exp:`✅ "Sempre" indica <b>frequência</b>.
 
-❌ modo → como algo acontece
+❌ modo → como
 
 ❌ lugar → posição
 
-❌ negação → palavras como 'não'`
+❌ negação → palavras como "não"`
 },
 
+// 6
 {
 q:"Ele mora longe da escola. O advérbio 'longe' indica:",
 o:["tempo","lugar","modo","intensidade"],
 a:1,
-exp:`✅ "Longe" indica distância espacial (lugar).
+exp:`✅ "Longe" indica <b>lugar</b>.
 
 ❌ tempo → quando
 
 ❌ modo → como
 
 ❌ intensidade → grau`
+},
+
+// 7
+{
+q:"Provavelmente choverá amanhã. O advérbio indica:",
+o:["tempo","dúvida","modo","lugar"],
+a:1,
+exp:`✅ "Provavelmente" é advérbio de <b>dúvida</b>.
+
+❌ tempo → amanhã
+
+❌ modo → como
+
+❌ lugar → posição`
+},
+
+// 8
+{
+q:"Ela falou muito baixo durante a reunião. 'Muito' expressa:",
+o:["tempo","intensidade","lugar","negação"],
+a:1,
+exp:`✅ "Muito" intensifica o advérbio "baixo".
+
+❌ tempo → quando
+
+❌ lugar → posição
+
+❌ negação → não`
+},
+
+// 9
+{
+q:"Aqui termina a estrada antiga. O advérbio 'aqui' indica:",
+o:["tempo","lugar","modo","frequência"],
+a:1,
+exp:`✅ "Aqui" indica <b>lugar</b>.
+
+❌ tempo → quando
+
+❌ modo → como
+
+❌ frequência → repetição`
+},
+
+// 10
+{
+q:"Talvez ele venha à reunião amanhã. 'Talvez' indica:",
+o:["dúvida","tempo","modo","intensidade"],
+a:0,
+exp:`✅ "Talvez" é advérbio de <b>dúvida</b>.
+
+❌ tempo → amanhã
+
+❌ modo → como
+
+❌ intensidade → grau`
+},
+
+// 11
+{
+q:"Eles raramente faltam às aulas. O advérbio 'raramente' indica:",
+o:["frequência","tempo","lugar","modo"],
+a:0,
+exp:`✅ "Raramente" indica <b>frequência baixa</b>.
+
+❌ tempo → quando
+
+❌ lugar → posição
+
+❌ modo → como`
+},
+
+// 12
+{
+q:"O pesquisador explicou o fenômeno muito claramente. 'Claramente' é advérbio de:",
+o:["tempo","modo","lugar","negação"],
+a:1,
+exp:`✅ "Claramente" indica <b>modo</b>.
+
+❌ tempo → quando
+
+❌ lugar → posição
+
+❌ negação → não`
+},
+
+// 13
+{
+q:"Jamais esquecerei aquele momento histórico. 'Jamais' expressa:",
+o:["negação","tempo","lugar","modo"],
+a:0,
+exp:`✅ "Jamais" é advérbio de <b>negação</b>.
+
+❌ tempo → quando
+
+❌ lugar → posição
+
+❌ modo → como`
+},
+
+// 14
+{
+q:"O professor explicou novamente o conceito. 'Novamente' indica:",
+o:["tempo/repetição","modo","lugar","intensidade"],
+a:0,
+exp:`✅ "Novamente" indica <b>repetição no tempo</b>.
+
+❌ modo → como
+
+❌ lugar → posição
+
+❌ intensidade → grau`
+},
+
+// 15
+{
+q:"O atleta quase venceu a competição. 'Quase' expressa:",
+o:["tempo","intensidade","lugar","negação"],
+a:1,
+exp:`✅ "Quase" é advérbio de <b>intensidade/grau</b>, indicando algo próximo de acontecer.
+
+❌ tempo → quando
+
+❌ lugar → posição
+
+❌ negação → não`
 }
 
 ]
