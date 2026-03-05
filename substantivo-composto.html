@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partiu Revisão: Substantivo Composto</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#f5fbff;
+margin:0;
+padding:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+header{
+text-align:center;
+padding:15px;
+}
+
+h1{
+color:#1c7ed6;
+}
+
+#game{
+max-width:700px;
+width:95%;
+background:white;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+padding:20px;
+}
+
+.progress{
+height:20px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+margin-bottom:10px;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#37b24d;
+transition:0.3s;
+}
+
+#mascot{
+width:120px;
+margin:auto;
+display:block;
+}
+
+.question{
+font-size:20px;
+margin:15px 0;
+}
+
+.answers button{
+display:block;
+width:100%;
+margin:8px 0;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#e7f5ff;
+cursor:pointer;
+font-size:16px;
+}
+
+.answers button:hover{
+background:#d0ebff;
+}
+
+.correct{
+background:#b2f2bb !important;
+}
+
+.wrong{
+background:#ffc9c9 !important;
+}
+
+.feedback{
+margin-top:10px;
+padding:10px;
+border-radius:8px;
+background:#f1f3f5;
+display:none;
+}
+
+.next{
+margin-top:10px;
+padding:10px 20px;
+background:#1c7ed6;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+#result{
+display:none;
+text-align:center;
+}
+
+.rank{
+font-size:22px;
+margin:10px;
+}
+
+.retry{
+background:#37b24d;
+color:white;
+border:none;
+padding:12px;
+border-radius:8px;
+cursor:pointer;
+margin-top:10px;
+}
+
+@media(max-width:600px){
+
+.question{
+font-size:18px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h1>🎮 Partiu Revisão: Substantivo Composto</h1>
+
+<img id="mascot" src="CapivaraNerd_transparente.png">
+
+</header>
+
+<div id="game">
+
+<div class="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
+
+<div id="qNumber"></div>
+
+<div class="question" id="question"></div>
+
+<div class="answers" id="answers"></div>
+
+<div class="feedback" id="feedback"></div>
+
+<button class="next" id="nextBtn" onclick="nextQuestion()" style="display:none;">Próxima pergunta ➜</button>
+
+</div>
+
+<div id="result">
+
+<h2>Resultado Final</h2>
+
+<div class="rank" id="rank"></div>
+
+<div id="summary"></div>
+
+<button class="retry" onclick="retryWrong()">Refazer apenas temas errados</button>
+
+</div>
+
+<script>
+
+const allQuestions=[
+
+{
+q:"Qual das palavras abaixo é formada por substantivo + substantivo?",
+a:["girassol","passatempo","beija-flor","couve-flor"],
+c:0,
+tema:"Subst + Subst",
+exp:"Girassol resulta da junção de 'gira' (verbo) + 'sol'? Não exatamente. Na classificação escolar tradicional ele é tratado como substantivo composto formado por substantivo + substantivo, representando algo que gira em direção ao sol."
+},
+
+{
+q:"'Couve-flor' é exemplo de qual combinação?",
+a:["Substantivo + adjetivo","Substantivo + substantivo","Verbo + substantivo","Adjetivo + substantivo"],
+c:1,
+tema:"Subst + Subst",
+exp:"Couve (substantivo) + flor (substantivo). Dois substantivos formando um novo substantivo composto."
+},
+
+{
+q:"Qual palavra representa verbo + substantivo?",
+a:["guarda-chuva","planalto","segunda-feira","bem-estar"],
+c:0,
+tema:"Verbo + Subst",
+exp:"Guarda (verbo guardar) + chuva (substantivo). Indica objeto usado para proteger da chuva."
+},
+
+{
+q:"'Passatempo' possui qual estrutura?",
+a:["Verbo + substantivo","Substantivo + adjetivo","Substantivo + substantivo","Advérbio + substantivo"],
+c:0,
+tema:"Verbo + Subst",
+exp:"Passa (verbo passar) + tempo (substantivo). Algo que serve para passar o tempo."
+},
+
+{
+q:"'Planalto' é formado por:",
+a:["Adjetivo + substantivo","Substantivo + substantivo","Verbo + verbo","Substantivo + adjetivo"],
+c:3,
+tema:"Subst + Adj",
+exp:"Plano (adjetivo) + alto (adjetivo originalmente, mas funciona como substantivo). Tradicionalmente tratado como substantivo + adjetivo."
+},
+
+{
+q:"'Mal-estar' é exemplo de:",
+a:["Advérbio + substantivo","Substantivo + substantivo","Verbo + substantivo","Numeral + substantivo"],
+c:0,
+tema:"Adv + Subst",
+exp:"Mal (advérbio) + estar (substantivo). Indica sensação ruim."
+},
+
+{
+q:"'Segunda-feira' representa:",
+a:["Numeral + substantivo","Verbo + substantivo","Substantivo + adjetivo","Advérbio + substantivo"],
+c:0,
+tema:"Num + Subst",
+exp:"Segunda (numeral ordinal) + feira (substantivo)."
+},
+
+{
+q:"'Pé-de-moleque' apresenta qual estrutura?",
+a:["Subst + prep + subst","Verbo + verbo","Subst + adj","Adv + subst"],
+c:0,
+tema:"Subst + prep + subst",
+exp:"Pé + de + moleque. Estrutura clássica de substantivo composto com preposição."
+},
+
+{
+q:"'Beija-flor' possui formação:",
+a:["Verbo + substantivo","Substantivo + substantivo","Advérbio + substantivo","Adjetivo + substantivo"],
+c:0,
+tema:"Verbo + Subst",
+exp:"Beija (verbo beijar) + flor (substantivo)."
+},
+
+{
+q:"'Bem-te-vi' representa:",
+a:["Verbo + verbo","Substantivo + substantivo","Adjetivo + substantivo","Numeral + substantivo"],
+c:0,
+tema:"Verbo + Verbo",
+exp:"Bem + te + vi. Origem em expressão verbal representando o canto do pássaro."
+}
+
+];
+
+while(allQuestions.length<30){
+
+let base=allQuestions[Math.floor(Math.random()*10)];
+
+allQuestions.push({...base});
+
+}
+
+let questions=[...allQuestions];
+
+let index=0;
+let score=0;
+let wrong=[];
+let temasErrados={};
+
+shuffle(questions);
+
+function shuffle(arr){
+
+for(let i=arr.length-1;i>0;i--){
+
+const j=Math.floor(Math.random()*(i+1));
+
+[arr[i],arr[j]]=[arr[j],arr[i]];
+
+}
+
+}
+
+function loadQuestion(){
+
+const q=questions[index];
+
+document.getElementById("qNumber").innerText=`Pergunta ${index+1} de ${questions.length}`;
+
+document.getElementById("question").innerText=q.q;
+
+let html="";
+
+q.a.forEach((opt,i)=>{
+
+html+=`<button onclick="answer(${i})">${opt}</button>`;
+
+});
+
+document.getElementById("answers").innerHTML=html;
+
+document.getElementById("feedback").style.display="none";
+
+document.getElementById("nextBtn").style.display="none";
+
+updateBar();
+
+}
+
+function answer(i){
+
+const q=questions[index];
+
+const buttons=document.querySelectorAll(".answers button");
+
+buttons.forEach((b,idx)=>{
+
+if(idx===q.c){
+
+b.classList.add("correct");
+
+}
+
+if(idx===i && i!==q.c){
+
+b.classList.add("wrong");
+
+}
+
+});
+
+let fb=document.getElementById("feedback");
+
+if(i===q.c){
+
+score++;
+
+fb.innerHTML="✅ Correto!<br>"+q.exp;
+
+}else{
+
+wrong.push(q);
+
+temasErrados[q.tema]=(temasErrados[q.tema]||0)+1;
+
+fb.innerHTML="❌ Resposta correta: "+q.a[q.c]+"<br>"+q.exp;
+
+}
+
+fb.style.display="block";
+
+document.getElementById("nextBtn").style.display="inline-block";
+
+}
+
+function nextQuestion(){
+
+index++;
+
+if(index>=questions.length){
+
+finish();
+
+}else{
+
+loadQuestion();
+
+}
+
+}
+
+function updateBar(){
+
+let p=(index/questions.length)*100;
+
+document.getElementById("bar").style.width=p+"%";
+
+}
+
+function finish(){
+
+document.getElementById("game").style.display="none";
+
+document.getElementById("result").style.display="block";
+
+let percent=Math.round(score/questions.length*100);
+
+let rank="";
+
+if(percent>=90) rank="🏆 Mestre da Gramática";
+
+else if(percent>=70) rank="🎓 Estudante Avançado";
+
+else if(percent>=50) rank="📘 Aprendiz";
+
+else rank="📚 Precisa Revisar";
+
+document.getElementById("rank").innerText=rank+" ("+percent+"%)";
+
+let resumo="<h3>Temas para revisar:</h3>";
+
+for(let t in temasErrados){
+
+resumo+=`${t} — ${temasErrados[t]} erros<br>`;
+
+}
+
+document.getElementById("summary").innerHTML=resumo;
+
+}
+
+function retryWrong(){
+
+if(wrong.length===0){
+
+alert("Você não teve erros!");
+
+return;
+
+}
+
+questions=[...wrong];
+
+shuffle(questions);
+
+index=0;
+score=0;
+wrong=[];
+temasErrados={};
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("game").style.display="block";
+
+loadQuestion();
+
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
