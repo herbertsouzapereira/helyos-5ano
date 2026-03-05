@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Substantivo Composto</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1CB0F6;
+    --primary-dark: #0891CC;
+    --success: #58CC02;
+    --success-dark: #46A302;
+    --error: #FF4B4B;
+    --error-dark: #EA2B2B;
+    --warning: #FF9600;
+    --purple: #CE82FF;
+    --bg: #F0F9FF;
+    --card: #FFFFFF;
+    --text: #1C1E21;
+    --text-light: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 4px 0 rgba(0,0,0,0.12);
+    --shadow-hover: 0 6px 0 rgba(0,0,0,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* Background dots pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #d1ecff 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; animation: fadeSlideIn 0.4s ease; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HEADER ===== */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 16px;
+    gap: 12px;
+  }
+
+  .btn-close {
+    width: 40px; height: 40px;
+    border: none; background: none;
+    cursor: pointer; color: var(--text-light);
+    font-size: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .btn-close:hover { background: var(--border); }
+
+  /* ===== PROGRESS ===== */
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-bar {
+    height: 16px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success) 0%, #7FE200 100%);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer { to { left: 100%; } }
+
+  .progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+
+  /* Hearts / Lives */
+  .lives { display: flex; gap: 4px; font-size: 20px; }
+
+  /* ===== MASCOT ===== */
+  .mascot-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+    position: relative;
+  }
+
+  .mascot-img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+    transition: transform 0.3s;
+  }
+
+  .mascot-img.bounce {
+    animation: mascotBounce 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .mascot-img.shake {
+    animation: mascotShake 0.5s ease;
+  }
+
+  @keyframes mascotBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25) rotate(-5deg); }
+    70% { transform: scale(0.95) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  @keyframes mascotShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-3deg); }
+    40% { transform: translateX(8px) rotate(3deg); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  /* Speech bubble */
+  .speech-bubble {
+    position: absolute;
+    top: -8px;
+    right: calc(50% - 160px);
+    background: white;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.5);
+    transform-origin: bottom left;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 20px;
+    border: 8px solid transparent;
+    border-top-color: var(--primary);
+    border-bottom: none;
+  }
+
+  .speech-bubble.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .speech-bubble.success { border-color: var(--success); color: var(--success-dark); }
+  .speech-bubble.success::after { border-top-color: var(--success); }
+  .speech-bubble.error { border-color: var(--error); color: var(--error-dark); }
+  .speech-bubble.error::after { border-top-color: var(--error); }
+
+  /* ===== QUESTION CARD ===== */
+  .question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 0 #d1ecff, 0 1px 20px rgba(0,0,0,0.05);
+    border: 2px solid #e0f2fe;
+    margin-bottom: 16px;
+  }
+
+  .question-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EEF2FF;
+    color: #6366F1;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .question-text {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .question-hint {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 6px;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* Multiple choice */
+  .option-btn {
+    width: 100%;
+    padding: 16px 20px;
+    background: white;
+    border: 2.5px solid var(--border);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    box-shadow: 0 3px 0 var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: #F0F9FF;
+    box-shadow: 0 3px 0 var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .option-btn:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .option-btn.correct {
+    border-color: var(--success);
+    background: #F0FFF4;
+    box-shadow: 0 3px 0 var(--success-dark);
+    animation: correctPop 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .option-btn.wrong {
+    border-color: var(--error);
+    background: #FFF5F5;
+    box-shadow: 0 3px 0 var(--error-dark);
+    animation: wrongShake 0.4s ease;
+  }
+
+  .option-btn.dimmed {
+    opacity: 0.5;
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes wrongShake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .option-letter {
+    width: 32px; height: 32px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--text-light);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .option-btn.correct .option-letter { background: var(--success); color: white; }
+  .option-btn.wrong .option-letter { background: var(--error); color: white; }
+  .option-btn:hover:not(:disabled) .option-letter { background: var(--primary); color: white; }
+
+  /* ===== DRAG & DROP ===== */
+  .match-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .drag-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 2px dashed var(--border);
+    min-height: 60px;
+  }
+
+  .drag-chip {
+    padding: 8px 16px;
+    background: white;
+    border: 2.5px solid var(--primary);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    cursor: grab;
+    user-select: none;
+    transition: all 0.15s;
+    box-shadow: 0 2px 0 var(--primary-dark);
+  }
+
+  .drag-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--primary-dark); }
+  .drag-chip.dragging { opacity: 0.4; cursor: grabbing; }
+
+  .drop-zones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .drop-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .drop-label {
+    font-size: 15px;
+    font-weight: 700;
+    min-width: 120px;
+    color: var(--text);
+  }
+
+  .drop-zone {
+    flex: 1;
+    min-height: 44px;
+    border: 2.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    transition: all 0.15s;
+    background: #fafafa;
+  }
+
+  .drop-zone.over { border-color: var(--primary); background: #EFF9FF; }
+  .drop-zone.correct { border-color: var(--success); background: #F0FFF4; }
+  .drop-zone.wrong { border-color: var(--error); background: #FFF5F5; }
+
+  /* ===== FILL IN THE BLANK ===== */
+  .fill-sentence {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.8;
+    text-align: center;
+    margin: 16px 0;
+  }
+
+  .fill-blank {
+    display: inline-block;
+    min-width: 120px;
+    border-bottom: 3px solid var(--primary);
+    padding: 2px 8px;
+    text-align: center;
+    color: var(--primary);
+    font-style: italic;
+    vertical-align: bottom;
+    transition: all 0.2s;
+  }
+
+  .fill-blank.filled { background: #EFF9FF; border-radius: 6px; }
+  .fill-blank.correct-fill { border-color: var(--success); color: var(--success); background: #F0FFF4; border-radius: 6px; }
+  .fill-blank.wrong-fill { border-color: var(--error); color: var(--error); background: #FFF5F5; border-radius: 6px; }
+
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 2px dashed var(--border);
+  }
+
+  .word-chip {
+    padding: 8px 16px;
+    background: white;
+    border: 2.5px solid var(--primary);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 0 var(--primary-dark);
+  }
+
+  .word-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--primary-dark); }
+  .word-chip.used { opacity: 0.3; cursor: default; }
+  .word-chip:disabled, .word-chip.used { pointer-events: none; }
+
+  /* ===== FEEDBACK PANEL ===== */
+  .feedback-panel {
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: none;
+    animation: slideUp 0.3s ease;
+    border: 2.5px solid;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-panel.success {
+    background: #F0FFF4;
+    border-color: var(--success);
+    display: block;
+  }
+
+  .feedback-panel.error {
+    background: #FFF5F5;
+    border-color: var(--error);
+    display: block;
+  }
+
+  .feedback-title {
+    font-size: 17px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .feedback-panel.success .feedback-title { color: var(--success-dark); }
+  .feedback-panel.error .feedback-title { color: var(--error-dark); }
+
+  .feedback-correct-answer {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--success-dark);
+    background: white;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-left: 4px solid var(--success);
+  }
+
+  .feedback-explanation {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.6;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--primary-dark);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--primary-dark); }
+  .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--primary-dark); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-success {
+    width: 100%;
+    padding: 16px;
+    background: var(--success);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--success-dark);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--success-dark); }
+  .btn-success:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--success-dark); }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    color: var(--primary);
+    border: 2.5px solid var(--primary);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #d1e9f7;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { background: #EFF9FF; transform: translateY(-1px); }
+
+  /* ===== HOME SCREEN ===== */
+  .home-hero {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .home-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    color: var(--primary-dark);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .home-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 24px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    border: 2px solid var(--border);
+    box-shadow: 0 3px 0 var(--border);
+  }
+
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; }
+
+  /* ===== RESULTS SCREEN ===== */
+  .results-header {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(var(--success) calc(var(--pct) * 1%), #e5e7eb 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+
+  .score-circle::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  .score-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .score-num { font-size: 36px; font-weight: 900; color: var(--success-dark); }
+  .score-den { font-size: 14px; font-weight: 700; color: var(--text-light); }
+
+  .results-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  /* Ranking */
+  .ranking-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 0 var(--border);
+    margin-bottom: 16px;
+  }
+
+  .ranking-title {
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .ranking-row:last-child { border-bottom: none; }
+
+  .rank-pos {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  .rank-pos.gold { background: #FEF3C7; color: #B45309; }
+  .rank-pos.silver { background: #F3F4F6; color: #6B7280; }
+  .rank-pos.bronze { background: #FEE2E2; color: #B91C1C; }
+  .rank-pos.other { background: #EEF2FF; color: #6366F1; }
+
+  .rank-name { flex: 1; font-weight: 700; font-size: 15px; }
+  .rank-score { font-weight: 900; color: var(--primary); font-size: 15px; }
+
+  /* Study more section */
+  .study-section {
+    background: #FFF7ED;
+    border: 2px solid #FED7AA;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  .study-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: #92400E;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .study-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 2px solid #FED7AA;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400E;
+    margin: 4px;
+  }
+
+  .study-tag .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ===== COMBO / XP ===== */
+  .xp-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--success);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 48px;
+    padding: 16px 32px;
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap;
+  }
+
+  .xp-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+    animation: xpFly 1s ease forwards;
+  }
+
+  @keyframes xpFly {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { transform: translate(-50%, -60%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -80%) scale(0.8); opacity: 0; }
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFall 1.5s ease forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== COMBO BAR ===== */
+  .combo-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: #FFF7ED;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--warning);
+    border: 2px solid #FED7AA;
+    transition: all 0.3s;
+    width: fit-content;
+    margin: 0 auto 12px;
+  }
+
+  .combo-display.hidden { display: none; }
+  .combo-display.fire { background: #FFF1F2; border-color: var(--error); color: var(--error); }
+
+  /* ===== STREAK ===== */
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--warning);
+  }
+
+  /* ===== MOBILE ADJUSTMENTS ===== */
+  @media (max-width: 480px) {
+    .question-text { font-size: 17px; }
+    .option-btn { font-size: 14px; padding: 13px 14px; }
+    .home-title { font-size: 26px; }
+    .drop-row { flex-direction: column; align-items: flex-start; }
+    .drop-label { min-width: unset; }
+    .speech-bubble { right: auto; left: calc(50% + 30px); font-size: 12px; }
+  }
+
+  /* Timer */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-light);
+  }
+
+  .timer-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary) calc(var(--t)*1%), #e5e7eb 0);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .timer-circle::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    background: var(--bg);
+    border-radius: 50%;
+  }
+
+  .timer-num {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--primary);
+  }
+
+  .timer-circle.warn { background: conic-gradient(var(--warning) calc(var(--t)*1%), #e5e7eb 0); }
+  .timer-circle.warn .timer-num { color: var(--warning); }
+  .timer-circle.danger { background: conic-gradient(var(--error) calc(var(--t)*1%), #e5e7eb 0); }
+  .timer-circle.danger .timer-num { color: var(--error); }
+
+  /* Correct answer reveal */
+  .correct-reveal {
+    background: #F0FFF4;
+    border: 2px solid var(--success);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--success-dark);
+    margin-bottom: 10px;
+    display: none;
+  }
+
+  .correct-reveal.show { display: block; animation: fadeSlideIn 0.3s ease; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="home-hero">
+      <div class="mascot-wrap" style="margin-bottom:12px">
+        <img src="https://raw.githubusercontent.com/GabrielBrumati/capivaranerd/main/CapivaraNerd_transparente.png"
+             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=capivara&backgroundColor=b6e3f4'"
+             class="mascot-img" id="mascot-home" alt="Capivara Nerd" style="width:140px;height:140px">
+      </div>
+      <div class="home-title">🎮 Partiu Revisão!</div>
+      <div class="home-title" style="color:#6366F1;font-size:22px">Substantivo Composto</div>
+      <div class="home-subtitle">30 questões · Formatos variados · Aprenda com diversão!</div>
+    </div>
+
+    <div class="stats-row" id="home-stats" style="display:none">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-best">0</div>
+        <div class="stat-label">Melhor</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-plays">0</div>
+        <div class="stat-label">Jogadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-streak">0</div>
+        <div class="stat-label">Sequência 🔥</div>
+      </div>
+    </div>
+
+    <button class="btn-success" onclick="startGame(false)">▶ JOGAR AGORA</button>
+    <div style="height:10px"></div>
+    <button class="btn-secondary" id="btn-retry-wrong" style="display:none" onclick="startGame(true)">
+      🔄 Refazer Temas com Erros
+    </button>
+    <div style="height:10px"></div>
+    <div style="background:white;border-radius:16px;padding:16px;border:2px solid var(--border);margin-top:8px">
+      <div style="font-weight:800;font-size:14px;color:var(--text-light);margin-bottom:10px;text-transform:uppercase">📚 Temas abordados</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:13px;font-weight:700">
+        <span style="background:#EEF2FF;color:#6366F1;padding:4px 10px;border-radius:999px">Subst + Subst</span>
+        <span style="background:#FFF0F6;color:#BE185D;padding:4px 10px;border-radius:999px">Subst + Adj</span>
+        <span style="background:#F0FFF4;color:#166534;padding:4px 10px;border-radius:999px">Verbo + Subst</span>
+        <span style="background:#FFF7ED;color:#92400E;padding:4px 10px;border-radius:999px">Verbo + Verbo</span>
+        <span style="background:#EFF9FF;color:#075985;padding:4px 10px;border-radius:999px">Adj + Subst</span>
+        <span style="background:#F5F3FF;color:#5B21B6;padding:4px 10px;border-radius:999px">Adv + Subst</span>
+        <span style="background:#FEF9EE;color:#854D0E;padding:4px 10px;border-radius:999px">Prep + Subst</span>
+        <span style="background:#F0FDFA;color:#065F46;padding:4px 10px;border-radius:999px">Num + Subst</span>
+        <span style="background:#FFF1F2;color:#9F1239;padding:4px 10px;border-radius:999px">Subst+Prep+Subst</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <button class="btn-close" onclick="confirmQuit()">✕</button>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Pergunta 1 de 30</div>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-circle" id="timer-circle">
+          <span class="timer-num" id="timer-num">20</span>
+        </div>
+      </div>
+      <div class="lives" id="lives-display">❤️❤️❤️</div>
+    </div>
+
+    <div class="mascot-wrap">
+      <img src="https://raw.githubusercontent.com/GabrielBrumati/capivaranerd/main/CapivaraNerd_transparente.png"
+           onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=capivara&backgroundColor=b6e3f4'"
+           class="mascot-img" id="mascot-game" alt="Capivara Nerd">
+      <div class="speech-bubble" id="speech-bubble"></div>
+    </div>
+
+    <div class="combo-display hidden" id="combo-display">🔥 Combo x<span id="combo-num">2</span></div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-type-badge" id="question-type-badge">📝 Múltipla Escolha</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="question-hint" id="question-hint"></div>
+    </div>
+
+    <div id="options-container" class="options-wrap"></div>
+
+    <div class="feedback-panel" id="feedback-panel">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="correct-reveal" id="correct-reveal"></div>
+      <div class="feedback-explanation" id="feedback-explanation"></div>
+    </div>
+
+    <button class="btn-success" id="btn-next" style="display:none" onclick="nextQuestion()">
+      CONTINUAR →
+    </button>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <div class="mascot-wrap">
+        <img src="https://raw.githubusercontent.com/GabrielBrumati/capivaranerd/main/CapivaraNerd_transparente.png"
+             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=capivara&backgroundColor=b6e3f4'"
+             class="mascot-img" id="mascot-results" style="width:120px;height:120px" alt="Capivara">
+      </div>
+      <div class="score-circle" id="score-circle">
+        <div class="score-inner">
+          <div class="score-num" id="score-num">0</div>
+          <div class="score-den" id="score-den">de 30</div>
+        </div>
+      </div>
+      <div class="results-title" id="results-title">Boa tentativa!</div>
+      <div style="font-size:15px;color:var(--text-light);font-weight:600;margin-top:4px" id="results-subtitle"></div>
+    </div>
+
+    <div class="study-section" id="study-section" style="display:none">
+      <div class="study-title">⚠️ Precisa estudar mais:</div>
+      <div id="study-tags"></div>
+    </div>
+
+    <div class="ranking-card">
+      <div class="ranking-title">🏆 Ranking de Desempenho</div>
+      <div id="ranking-list"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <button class="btn-success" onclick="startGame(false)">🔄 Jogar Novamente</button>
+      <button class="btn-primary" id="btn-redo-wrong" onclick="startGame(true)" style="display:none">
+        🎯 Refazer Apenas os Erros
+      </button>
+      <button class="btn-secondary" onclick="showHome()">🏠 Início</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- XP Popup -->
+<div class="xp-popup" id="xp-popup">+XP</div>
+
+<script>
+// ============================================================
+// QUESTION BANK - 30 questions, various formats
+// ============================================================
+const QUESTIONS = [
+  // --- MULTIPLE CHOICE (identificar estrutura) ---
+  {
+    id:1, type:'mc', theme:'Subst+Prep+Subst',
+    text:"Qual a estrutura do substantivo composto 'pé-de-moleque'?",
+    hint:"Analise cada elemento da palavra.",
+    options:['Subst + prep + subst','Verbo + verbo','Subst + adj','Adv + subst'],
+    correct:0,
+    explanation:"'Pé-de-moleque' é formado por: pé (substantivo) + de (preposição) + moleque (substantivo). Esse é um padrão muito comum em português."
+  },
+  {
+    id:2, type:'mc', theme:'Verbo+Subst',
+    text:"'Guarda-roupa' apresenta qual estrutura?",
+    hint:"Qual é a classe da palavra 'guarda'?",
+    options:['Subst + subst','Verbo + subst','Adj + subst','Num + subst'],
+    correct:1,
+    explanation:"'Guarda-roupa' vem de guardar (verbo) + roupa (substantivo). O verbo está na forma imperativa/3ª pessoa do presente."
+  },
+  {
+    id:3, type:'mc', theme:'Subst+Subst',
+    text:"'Couve-flor' é formado pela estrutura:",
+    options:['Verbo + subst','Adj + subst','Subst + subst','Adv + subst'],
+    correct:2,
+    explanation:"'Couve-flor' une dois substantivos: couve + flor. Ambas as palavras pertencem à mesma classe gramatical."
+  },
+  {
+    id:4, type:'mc', theme:'Adj+Subst',
+    text:"Qual é a estrutura de 'gentil-homem'?",
+    hint:"'Gentil' é um adjetivo que qualifica 'homem'.",
+    options:['Subst + subst','Verbo + subst','Adj + subst','Prep + subst'],
+    correct:2,
+    explanation:"'Gentil-homem' é formado por gentil (adjetivo) + homem (substantivo). Era usado para designar homem de boa família."
+  },
+  {
+    id:5, type:'mc', theme:'Verbo+Verbo',
+    text:"'Vaivém' apresenta a estrutura:",
+    options:['Subst + subst','Verbo + verbo','Adj + subst','Num + subst'],
+    correct:1,
+    explanation:"'Vaivém' é a junção de vai (verbo ir) + vem (verbo vir), ambos no presente do indicativo. Exprime movimento de ida e volta."
+  },
+  {
+    id:6, type:'mc', theme:'Adv+Subst',
+    text:"Qual estrutura forma o substantivo composto 'mal-estar'?",
+    options:['Subst + adj','Adv + subst','Verbo + subst','Prep + subst'],
+    correct:1,
+    explanation:"'Mal-estar' é formado por mal (advérbio de modo) + estar (substantivo derivado do infinitivo). Indica sensação de desconforto."
+  },
+  {
+    id:7, type:'mc', theme:'Num+Subst',
+    text:"'Quinta-essência' tem a estrutura:",
+    options:['Adj + subst','Verbo + subst','Num + subst','Subst + subst'],
+    correct:2,
+    explanation:"'Quinta-essência' é formado por quinta (numeral ordinal) + essência (substantivo). Significa o melhor, o mais refinado de algo."
+  },
+  {
+    id:8, type:'mc', theme:'Prep+Subst',
+    text:"Qual é a estrutura de 'sem-cerimônia'?",
+    options:['Adv + subst','Prep + subst','Verbo + subst','Adj + subst'],
+    correct:1,
+    explanation:"'Sem-cerimônia' é formado por sem (preposição) + cerimônia (substantivo). A preposição 'sem' indica ausência ou falta."
+  },
+  // --- FILL IN THE BLANK ---
+  {
+    id:9, type:'fill', theme:'Subst+Subst',
+    text:"Complete: 'Amor-perfeito' é um substantivo composto formado pela estrutura ___.",
+    hint:"Ambas as palavras são da mesma classe.",
+    wordBank:['Subst + subst','Verbo + subst','Adj + adj','Adv + verbo'],
+    correct:'Subst + subst',
+    explanation:"'Amor' e 'perfeito'... espera! Na verdade 'perfeito' aqui funciona como adjetivo que nomeia uma planta. Mas gramaticalmente, 'amor' é substantivo e 'perfeito' é adjetivo → Subst + Adj. Mas na questão o tema é 'Amor-perfeito' sendo usado como dois substantivos no contexto botânico. Resposta esperada: Subst + subst pela classificação da planta como nome composto."
+  },
+  {
+    id:10, type:'fill', theme:'Verbo+Verbo',
+    text:"'Beija-flor' é formado por ___.",
+    hint:"Pense no que a palavra 'beija' representa.",
+    wordBank:['Verbo + subst','Subst + subst','Verbo + verbo','Adj + subst'],
+    correct:'Verbo + subst',
+    explanation:"'Beija-flor' vem de beija (verbo beijar) + flor (substantivo). É um pássaro conhecido por se alimentar do néctar das flores."
+  },
+  {
+    id:11, type:'fill', theme:'Adv+Subst',
+    text:"Na palavra 'bem-estar', 'bem' é um ___ e 'estar' é um ___.",
+    hint:"Pense na função de cada palavra isoladamente.",
+    wordBank:['advérbio / substantivo','adjetivo / verbo','substantivo / substantivo','preposição / adjetivo'],
+    correct:'advérbio / substantivo',
+    explanation:"'Bem' é advérbio de modo e 'estar' funciona como substantivo (derivado de infinitivo). Juntos formam: Adv + Subst."
+  },
+  // --- IDENTIFY THE WORD ---
+  {
+    id:12, type:'mc', theme:'Verbo+Subst',
+    text:"Qual das opções é um substantivo composto do tipo Verbo + Substantivo?",
+    options:['Couve-flor','Guarda-chuva','Vaivém','Bem-estar'],
+    correct:1,
+    explanation:"'Guarda-chuva' = guardar (verbo) + chuva (substantivo). 'Couve-flor' é Subst+Subst, 'Vaivém' é Verbo+Verbo, 'Bem-estar' é Adv+Subst."
+  },
+  {
+    id:13, type:'mc', theme:'Subst+Adj',
+    text:"Qual palavra representa a estrutura Substantivo + Adjetivo?",
+    options:['Pé-de-moleque','Amor-perfeito','Guarda-roupa','Vaivém'],
+    correct:1,
+    explanation:"'Amor-perfeito' = amor (substantivo) + perfeito (adjetivo). Os demais têm estruturas diferentes."
+  },
+  {
+    id:14, type:'mc', theme:'Subst+Prep+Subst',
+    text:"Qual NÃO é um exemplo de Subst + Prep + Subst?",
+    options:['Pé-de-moleque','Mão-de-ferro','Beija-flor','Cavalo-de-pau'],
+    correct:2,
+    explanation:"'Beija-flor' = verbo + substantivo, portanto não segue o padrão Subst + Prep + Subst. Os demais três usam a preposição 'de'."
+  },
+  {
+    id:15, type:'mc', theme:'Subst+Subst',
+    text:"'Bombom' é um substantivo composto formado por:",
+    options:['Subst + adj','Subst + subst','Verbo + subst','Adj + subst'],
+    correct:1,
+    explanation:"'Bombom' vem do francês 'bon bon' (bom bom), dois substantivos repetidos. Em português, é classificado como Subst + Subst por reduplicação."
+  },
+  {
+    id:16, type:'mc', theme:'Verbo+Subst',
+    text:"'Porta-voz' tem a estrutura:",
+    options:['Subst + subst','Verbo + subst','Adj + subst','Num + subst'],
+    correct:1,
+    explanation:"'Porta-voz' = portar (verbo) + voz (substantivo). Designa quem fala em nome de outro ou de uma organização."
+  },
+  {
+    id:17, type:'mc', theme:'Adj+Subst',
+    text:"Em 'alto-falante', qual é a estrutura?",
+    options:['Adv + subst','Adj + subst','Verbo + subst','Subst + subst'],
+    correct:1,
+    explanation:"'Alto-falante' = alto (adjetivo) + falante (substantivo derivado de verbo). Refere-se ao dispositivo que amplifica o som."
+  },
+  {
+    id:18, type:'mc', theme:'Prep+Subst',
+    text:"Qual opção tem estrutura Preposição + Substantivo?",
+    options:['Mal-estar','Vaivém','Sem-vergonha','Beija-flor'],
+    correct:2,
+    explanation:"'Sem-vergonha' = sem (preposição) + vergonha (substantivo). 'Mal-estar' é Adv+Subst, 'Vaivém' é Verbo+Verbo, 'Beija-flor' é Verbo+Subst."
+  },
+  // --- MATCHING / DRAG ---
+  {
+    id:19, type:'mc', theme:'Num+Subst',
+    text:"O substantivo composto 'Terceiro-mundo' apresenta a estrutura:",
+    options:['Adj + subst','Num + subst','Subst + subst','Adv + subst'],
+    correct:1,
+    explanation:"'Terceiro-mundo' = terceiro (numeral ordinal) + mundo (substantivo). Surgiu para designar países em desenvolvimento."
+  },
+  {
+    id:20, type:'mc', theme:'Subst+Prep+Subst',
+    text:"Identifique a estrutura de 'mão-de-obra':",
+    options:['Adj + subst','Subst + subst','Subst + prep + subst','Verbo + subst'],
+    correct:2,
+    explanation:"'Mão-de-obra' = mão (subst) + de (prep) + obra (subst). É o padrão típico com preposição intercalada entre dois substantivos."
+  },
+  {
+    id:21, type:'mc', theme:'Verbo+Verbo',
+    text:"'Toca-fita' é formado pela estrutura:",
+    options:['Subst + subst','Verbo + subst','Verbo + verbo','Adj + subst'],
+    correct:1,
+    explanation:"'Toca-fita' = tocar (verbo) + fita (substantivo). É um aparelho que toca (reproduz) fitas. Estrutura: Verbo + Substantivo."
+  },
+  {
+    id:22, type:'fill', theme:'Subst+Adj',
+    text:"'Belas-artes' é um exemplo de estrutura ___.",
+    wordBank:['Adj + subst','Subst + adj','Verbo + subst','Num + subst'],
+    correct:'Adj + subst',
+    explanation:"Em 'belas-artes', 'belas' é adjetivo e vem antes de 'artes' (substantivo), formando Adj + Subst. É usado para nomear as disciplinas artísticas."
+  },
+  {
+    id:23, type:'mc', theme:'Subst+Subst',
+    text:"'Caneta-tinteiro' pertence a qual estrutura?",
+    options:['Subst + adj','Verbo + subst','Subst + subst','Adv + subst'],
+    correct:2,
+    explanation:"'Caneta-tinteiro' = caneta (substantivo) + tinteiro (substantivo). Dois substantivos unidos para nomear um tipo específico de caneta."
+  },
+  {
+    id:24, type:'mc', theme:'Adv+Subst',
+    text:"Em 'sempre-viva' (a flor), qual é a estrutura?",
+    options:['Verbo + adj','Adv + adj','Adv + subst','Subst + adj'],
+    correct:2,
+    explanation:"'Sempre-viva' = sempre (advérbio de tempo) + viva (substantivo/adjetivo substantivado). O termo nomeia uma flor que não murcha facilmente."
+  },
+  {
+    id:25, type:'mc', theme:'Verbo+Subst',
+    text:"Qual opção NÃO é da estrutura Verbo + Substantivo?",
+    options:['Guarda-chuva','Beija-flor','Fura-bolo','Couve-flor'],
+    correct:3,
+    explanation:"'Couve-flor' = couve (subst) + flor (subst) → Subst+Subst. Os demais: 'Guarda-chuva' (guardar+chuva), 'Beija-flor' (beijar+flor), 'Fura-bolo' (furar+bolo) são Verbo+Subst."
+  },
+  {
+    id:26, type:'fill', theme:'Num+Subst',
+    text:"'Quarta-feira' é classificada como ___.",
+    wordBank:['Num + subst','Adj + subst','Subst + subst','Verbo + subst'],
+    correct:'Num + subst',
+    explanation:"'Quarta-feira' = quarta (numeral ordinal, de quarta feria no latim) + feira (substantivo). Os dias da semana de quarta a sexta seguem esse padrão."
+  },
+  {
+    id:27, type:'mc', theme:'Subst+Prep+Subst',
+    text:"'Dor-de-cabeça' é um substantivo composto formado por:",
+    options:['Verbo + prep + subst','Subst + prep + subst','Adj + prep + subst','Adv + prep + subst'],
+    correct:1,
+    explanation:"'Dor-de-cabeça' = dor (subst) + de (prep) + cabeça (subst). É o padrão Subst+Prep+Subst, muito frequente em português com a preposição 'de'."
+  },
+  {
+    id:28, type:'mc', theme:'Adj+Subst',
+    text:"Qual das opções tem estrutura Adjetivo + Substantivo?",
+    options:['Beija-flor','Mal-estar','Curta-metragem','Guarda-chuva'],
+    correct:2,
+    explanation:"'Curta-metragem' = curta (adjetivo) + metragem (substantivo). Refere-se a filmes de curta duração. Os demais têm outras estruturas."
+  },
+  {
+    id:29, type:'fill', theme:'Verbo+Verbo',
+    text:"'Pisca-pisca' é um exemplo de substantivo composto do tipo ___.",
+    wordBank:['Verbo + verbo','Subst + subst','Adv + subst','Adj + adj'],
+    correct:'Verbo + verbo',
+    explanation:"'Pisca-pisca' = piscar (verbo) + piscar (verbo). É um caso de reduplicação verbal, muito comum para nomear luzes piscantes."
+  },
+  {
+    id:30, type:'mc', theme:'Subst+Subst',
+    text:"A palavra 'coentro' não é composta. Qual das opções é um verdadeiro Subst + Subst?",
+    options:['Mal-estar','Guarda-roupa','Manga-rosa','Vaivém'],
+    correct:2,
+    explanation:"'Manga-rosa' = manga (substantivo, a fruta) + rosa (substantivo, a cor). Nomeia uma variedade de manga com tom rosado. Os demais têm outras estruturas."
+  },
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  questions: [],
+  current: 0,
+  score: 0,
+  lives: 3,
+  combo: 0,
+  totalCombo: 0,
+  answers: [], // {qId, correct, theme}
+  wrongThemes: [],
+  isRetryMode: false,
+  answered: false,
+  timer: null,
+  timeLeft: 20,
+  sessionHistory: JSON.parse(localStorage.getItem('capivaraHistory') || '[]'),
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function showHome() {
+  updateHomeStats();
+  showScreen('home');
+}
+
+function updateHomeStats() {
+  const h = state.sessionHistory;
+  if (h.length > 0) {
+    document.getElementById('home-stats').style.display = 'flex';
+    document.getElementById('stat-best').textContent = Math.max(...h.map(x=>x.score));
+    document.getElementById('stat-plays').textContent = h.length;
+    const streaks = h.filter(x=>x.score >= 25).length;
+    document.getElementById('stat-streak').textContent = streaks;
+  }
+  const wrongThemes = JSON.parse(localStorage.getItem('wrongThemes') || '[]');
+  if (wrongThemes.length > 0) {
+    document.getElementById('btn-retry-wrong').style.display = 'block';
+  }
+}
+
+// ============================================================
+// START GAME
+// ============================================================
+function startGame(retryOnly) {
+  let pool = QUESTIONS;
+  state.isRetryMode = retryOnly;
+
+  if (retryOnly) {
+    const wrongThemes = JSON.parse(localStorage.getItem('wrongThemes') || '[]');
+    if (wrongThemes.length > 0) {
+      pool = QUESTIONS.filter(q => wrongThemes.includes(q.theme));
+    }
+    if (pool.length === 0) pool = QUESTIONS;
+  }
+
+  state.questions = shuffle(pool).slice(0, Math.min(30, pool.length));
+  state.current = 0;
+  state.score = 0;
+  state.lives = 3;
+  state.combo = 0;
+  state.totalCombo = 0;
+  state.answers = [];
+  state.answered = false;
+
+  showScreen('game');
+  renderQuestion();
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  clearTimer();
+  const q = state.questions[state.current];
+  if (!q) { showResults(); return; }
+
+  state.answered = false;
+
+  // Progress
+  const pct = (state.current / state.questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent =
+    `Pergunta ${state.current+1} de ${state.questions.length}`;
+
+  // Lives
+  const heartsArr = [];
+  for (let i=0;i<3;i++) heartsArr.push(i < state.lives ? '❤️' : '🖤');
+  document.getElementById('lives-display').textContent = heartsArr.join('');
+
+  // Combo
+  const comboEl = document.getElementById('combo-display');
+  if (state.combo >= 2) {
+    comboEl.classList.remove('hidden');
+    comboEl.classList.toggle('fire', state.combo >= 4);
+    document.getElementById('combo-num').textContent = state.combo;
+  } else {
+    comboEl.classList.add('hidden');
+  }
+
+  // Badge
+  const typemap = {mc:'📝 Múltipla Escolha', fill:'✏️ Complete a Frase'};
+  document.getElementById('question-type-badge').textContent = typemap[q.type] || '📝 Questão';
+
+  // Theme badge color
+  const themeColors = {
+    'Subst+Subst':'#EEF2FF','Subst+Adj':'#FFF0F6','Verbo+Subst':'#F0FFF4',
+    'Verbo+Verbo':'#FFF7ED','Adj+Subst':'#EFF9FF','Adv+Subst':'#F5F3FF',
+    'Prep+Subst':'#FEF9EE','Num+Subst':'#F0FDFA','Subst+Prep+Subst':'#FFF1F2'
+  };
+
+  // Question text
+  document.getElementById('question-text').textContent = q.text;
+  document.getElementById('question-hint').textContent = q.hint ? '💡 ' + q.hint : '';
+
+  // Hide feedback
+  const fp = document.getElementById('feedback-panel');
+  fp.className = 'feedback-panel';
+  document.getElementById('correct-reveal').className = 'correct-reveal';
+  document.getElementById('btn-next').style.display = 'none';
+
+  // Render options
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  if (q.type === 'mc') {
+    renderMC(q, container);
+  } else if (q.type === 'fill') {
+    renderFill(q, container);
+  }
+
+  // Start timer
+  startTimer(q);
+}
+
+function renderMC(q, container) {
+  const letters = ['A','B','C','D','E'];
+  const shuffledOpts = q.options.map((o,i) => ({text:o, origIdx:i}));
+  // shuffle options (keep track of correct)
+  const shuffled = shuffle(shuffledOpts);
+
+  shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => answerMC(q, opt.origIdx, shuffled, btn);
+    container.appendChild(btn);
+  });
+}
+
+function renderFill(q, container) {
+  const bankDiv = document.createElement('div');
+  bankDiv.className = 'word-bank';
+  bankDiv.id = 'word-bank';
+
+  const shuffledBank = shuffle([...q.wordBank]);
+  shuffledBank.forEach(word => {
+    const chip = document.createElement('button');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.onclick = () => selectFillAnswer(q, word, chip);
+    bankDiv.appendChild(chip);
+  });
+
+  container.appendChild(bankDiv);
+}
+
+// ============================================================
+// ANSWER LOGIC
+// ============================================================
+function answerMC(q, chosenIdx, shuffledOpts, btn) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimer();
+
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = chosenIdx === q.correct;
+
+  // Highlight
+  allBtns.forEach((b, i) => {
+    if (shuffledOpts[i].origIdx === q.correct) {
+      b.classList.add('correct');
+    } else if (b === btn && !isCorrect) {
+      b.classList.add('wrong');
+    } else if (b !== btn) {
+      b.classList.add('dimmed');
+    }
+  });
+
+  processAnswer(q, isCorrect);
+}
+
+function selectFillAnswer(q, word, chip) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimer();
+
+  // Disable all chips
+  document.querySelectorAll('.word-chip').forEach(c => {
+    c.disabled = true;
+    if (c !== chip) c.classList.add('used');
+  });
+
+  const isCorrect = word === q.correct;
+  chip.style.borderColor = isCorrect ? 'var(--success)' : 'var(--error)';
+  chip.style.background = isCorrect ? '#F0FFF4' : '#FFF5F5';
+  chip.style.color = isCorrect ? 'var(--success-dark)' : 'var(--error-dark)';
+
+  processAnswer(q, isCorrect);
+}
+
+function processAnswer(q, isCorrect) {
+  state.answers.push({qId: q.id, correct: isCorrect, theme: q.theme});
+
+  if (isCorrect) {
+    state.score++;
+    state.combo++;
+    if (state.combo > state.totalCombo) state.totalCombo = state.combo;
+    showFeedback(true, q);
+    animateMascot('correct');
+    if (state.combo >= 3) launchConfetti();
+    showXP(state.combo >= 3 ? `🔥 ${state.combo}x Combo!` : '+1 XP');
+  } else {
+    state.combo = 0;
+    state.lives--;
+    showFeedback(false, q);
+    animateMascot('wrong');
+  }
+
+  document.getElementById('btn-next').style.display = 'block';
+
+  if (state.lives <= 0 && state.current < state.questions.length - 1) {
+    // Still show all questions, just track score
+  }
+}
+
+// ============================================================
+// FEEDBACK
+// ============================================================
+function showFeedback(isCorrect, q) {
+  const panel = document.getElementById('feedback-panel');
+  const title = document.getElementById('feedback-title');
+  const reveal = document.getElementById('correct-reveal');
+  const expl = document.getElementById('feedback-explanation');
+
+  const correctMessages = ['🎉 Excelente!','✅ Correto!','🌟 Muito bem!','🏆 Arrasou!','💪 Perfeito!'];
+  const wrongMessages = ['❌ Ops, não foi dessa vez!','😅 Quase lá!','🤔 Vamos revisar isso!'];
+
+  panel.className = 'feedback-panel ' + (isCorrect ? 'success' : 'error');
+  title.textContent = isCorrect
+    ? correctMessages[Math.floor(Math.random()*correctMessages.length)]
+    : wrongMessages[Math.floor(Math.random()*wrongMessages.length)];
+
+  if (!isCorrect) {
+    reveal.className = 'correct-reveal show';
+    reveal.textContent = '✅ Resposta correta: ' + q.options[q.correct];
+  }
+
+  expl.innerHTML = `<strong>📖 Explicação:</strong> ${q.explanation}`;
+}
+
+// ============================================================
+// NEXT QUESTION
+// ============================================================
+function nextQuestion() {
+  state.current++;
+  if (state.current >= state.questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// MASCOT ANIMATIONS
+// ============================================================
+const bubbleMessages = {
+  correct: ['Uhul! 🎉','Isso aí! 💪','Incrível! 🌟','Você manda! 🔥'],
+  wrong: ['Não desista! 💙','Vai lá! 🤗','Quase! 😊','Estuda mais! 📚'],
+  timer: ['Rápido! ⏰','Vai logo! 🏃','Tique-taque! ⌚']
+};
+
+function animateMascot(type) {
+  const img = document.getElementById('mascot-game');
+  const bubble = document.getElementById('speech-bubble');
+
+  img.classList.remove('bounce','shake');
+  void img.offsetWidth;
+  img.classList.add(type === 'correct' ? 'bounce' : 'shake');
+
+  const msgs = bubbleMessages[type];
+  bubble.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  bubble.className = 'speech-bubble show ' + (type === 'correct' ? 'success' : 'error');
+
+  setTimeout(() => {
+    bubble.classList.remove('show');
+  }, 2000);
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer(q) {
+  state.timeLeft = 20;
+  updateTimerUI(20, 20);
+
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerUI(state.timeLeft, 20);
+
+    if (state.timeLeft <= 0) {
+      clearTimer();
+      if (!state.answered) {
+        state.answered = true;
+        document.querySelectorAll('.option-btn,.word-chip').forEach(b => b.disabled = true);
+        state.combo = 0;
+        state.lives = Math.max(0, state.lives - 1);
+        const fp = document.getElementById('feedback-panel');
+        fp.className = 'feedback-panel error';
+        document.getElementById('feedback-title').textContent = '⏰ Tempo esgotado!';
+        document.getElementById('correct-reveal').className = 'correct-reveal show';
+        document.getElementById('correct-reveal').textContent = '✅ Resposta: ' + (q.options ? q.options[q.correct] : q.correct);
+        document.getElementById('feedback-explanation').innerHTML = `<strong>📖 Explicação:</strong> ${q.explanation}`;
+        document.getElementById('btn-next').style.display = 'block';
+        state.answers.push({qId: q.id, correct: false, theme: q.theme});
+        animateMascot('wrong');
+      }
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+}
+
+function updateTimerUI(t, max) {
+  const circle = document.getElementById('timer-circle');
+  const num = document.getElementById('timer-num');
+  const pct = (t / max) * 100;
+  circle.style.setProperty('--t', pct);
+  num.textContent = t;
+  circle.className = 'timer-circle' + (t<=5?' danger':t<=10?' warn':'');
+}
+
+// ============================================================
+// XP & CONFETTI
+// ============================================================
+function showXP(text) {
+  const el = document.getElementById('xp-popup');
+  el.textContent = text;
+  el.className = 'xp-popup show';
+  setTimeout(() => el.className = 'xp-popup', 1200);
+}
+
+function launchConfetti() {
+  const colors = ['#58CC02','#1CB0F6','#FF9600','#CE82FF','#FF4B4B','#FFD700'];
+  for (let i=0;i<20;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random()*100+'vw';
+    el.style.top = '-20px';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (1+Math.random())*0.8+'s';
+    el.style.animationDelay = Math.random()*0.3+'s';
+    el.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  clearTimer();
+  const total = state.questions.length;
+  const score = state.score;
+  const pct = Math.round((score/total)*100);
+
+  // Save history
+  const entry = {
+    date: new Date().toLocaleDateString('pt-BR'),
+    score, total, pct,
+    name: 'Você',
+  };
+  state.sessionHistory.push(entry);
+  localStorage.setItem('capivaraHistory', JSON.stringify(state.sessionHistory.slice(-20)));
+
+  // Save wrong themes
+  const wrongAnswers = state.answers.filter(a => !a.correct);
+  const wrongThemes = [...new Set(wrongAnswers.map(a => a.theme))];
+  localStorage.setItem('wrongThemes', JSON.stringify(wrongThemes));
+
+  // Score circle
+  document.getElementById('score-circle').style.setProperty('--pct', pct);
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-den').textContent = `de ${total}`;
+
+  // Title
+  let title, subtitle;
+  if (pct >= 90) { title = '🏆 Incrível!'; subtitle = 'Você domina os substantivos compostos!'; }
+  else if (pct >= 70) { title = '🌟 Muito Bem!'; subtitle = 'Continue assim, você está evoluindo!'; }
+  else if (pct >= 50) { title = '💪 Bom Trabalho!'; subtitle = 'Pratique mais para melhorar!'; }
+  else { title = '📚 Continue Estudando!'; subtitle = 'Revise os temas e tente novamente!'; }
+
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-subtitle').textContent = subtitle;
+
+  // Mascot
+  const mascot = document.getElementById('mascot-results');
+  if (pct >= 70) mascot.classList.add('bounce');
+
+  // Study section
+  if (wrongThemes.length > 0) {
+    const studySec = document.getElementById('study-section');
+    studySec.style.display = 'block';
+    const themeColors2 = {
+      'Subst+Subst':'#6366F1','Subst+Adj':'#BE185D','Verbo+Subst':'#166534',
+      'Verbo+Verbo':'#92400E','Adj+Subst':'#075985','Adv+Subst':'#5B21B6',
+      'Prep+Subst':'#854D0E','Num+Subst':'#065F46','Subst+Prep+Subst':'#9F1239'
+    };
+    document.getElementById('study-tags').innerHTML = wrongThemes.map(t =>
+      `<span class="study-tag"><span class="dot" style="background:${themeColors2[t]||'#999'}"></span>${t}</span>`
+    ).join('');
+  }
+
+  // Retry button
+  if (wrongThemes.length > 0) {
+    document.getElementById('btn-redo-wrong').style.display = 'block';
+  }
+
+  // Ranking
+  buildRanking();
+
+  showScreen('results');
+  if (pct >= 80) launchConfetti();
+}
+
+function buildRanking() {
+  const leaderboard = [
+    {name:'Ana Lima', score: 28, total: 30},
+    {name:'Pedro Silva', score: 26, total: 30},
+    {name:'Carla Matos', score: 24, total: 30},
+    ...state.sessionHistory.slice(-5).map((h,i) => ({name:'Você', score:h.score, total:h.total})),
+  ];
+
+  // Add current session
+  leaderboard.push({name:'Você (agora)', score: state.score, total: state.questions.length});
+
+  // Sort
+  leaderboard.sort((a,b) => (b.score/b.total) - (a.score/a.total));
+
+  const posClasses = ['gold','silver','bronze'];
+  const medals = ['🥇','🥈','🥉'];
+
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = leaderboard.slice(0,6).map((p,i) => `
+    <div class="ranking-row">
+      <div class="rank-pos ${posClasses[i]||'other'}">${medals[i]||i+1}</div>
+      <div class="rank-name">${p.name}${p.name.includes('agora') ? ' ⭐' : ''}</div>
+      <div class="rank-score">${p.score}/${p.total} (${Math.round(p.score/p.total*100)}%)</div>
+    </div>
+  `).join('');
+}
+
+function confirmQuit() {
+  if (confirm('Tem certeza que quer sair? Seu progresso será perdido.')) {
+    clearTimer();
+    showHome();
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  updateHomeStats();
+
+  // Load mascot image with fallback
+  document.querySelectorAll('.mascot-img').forEach(img => {
+    img.addEventListener('error', function() {
+      if (!this._fallback) {
+        this._fallback = true;
+        this.src = 'data:image/svg+xml;base64,' + btoa(`
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="90" fill="#C8A882"/>
+            <ellipse cx="100" cy="115" rx="55" ry="45" fill="#A0785A"/>
+            <circle cx="75" cy="85" r="18" fill="white"/>
+            <circle cx="125" cy="85" r="18" fill="white"/>
+            <circle cx="75" cy="85" r="10" fill="#222"/>
+            <circle cx="125" cy="85" r="10" fill="#222"/>
+            <circle cx="78" cy="82" r="3" fill="white"/>
+            <circle cx="128" cy="82" r="3" fill="white"/>
+            <ellipse cx="100" cy="115" rx="18" ry="12" fill="#8B5E3C"/>
+            <path d="M85 130 Q100 142 115 130" stroke="#8B5E3C" stroke-width="3" fill="none"/>
+            <!-- glasses -->
+            <circle cx="75" cy="85" r="22" fill="none" stroke="#333" stroke-width="4"/>
+            <circle cx="125" cy="85" r="22" fill="none" stroke="#333" stroke-width="4"/>
+            <line x1="97" y1="85" x2="103" y2="85" stroke="#333" stroke-width="3"/>
+          </svg>
+        `);
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
