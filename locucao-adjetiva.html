@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Partiu Revisão - Locução Adjetiva</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+h1{
+color:#22c55e;
+}
+
+.mascote{
+width:150px;
+animation:flutuar 3s ease-in-out infinite;
+}
+
+@keyframes flutuar{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+.feliz{
+animation:feliz 0.5s;
+}
+
+@keyframes feliz{
+0%{transform:scale(1)}
+50%{transform:scale(1.3)}
+100%{transform:scale(1)}
+}
+
+.triste{
+animation:triste 0.5s;
+}
+
+@keyframes triste{
+0%{transform:rotate(0)}
+25%{transform:rotate(-10deg)}
+50%{transform:rotate(10deg)}
+75%{transform:rotate(-10deg)}
+100%{transform:rotate(0)}
+}
+
+.progress{
+background:#1e293b;
+height:14px;
+border-radius:20px;
+overflow:hidden;
+margin:20px 0;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:#22c55e;
+transition:0.3s;
+}
+
+.pergunta{
+font-size:22px;
+margin-bottom:20px;
+}
+
+.opcoes{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+.opcao{
+background:#1e293b;
+padding:14px;
+border-radius:10px;
+cursor:pointer;
+transition:0.2s;
+font-weight:bold;
+}
+
+.opcao:hover{
+background:#334155;
+transform:scale(1.05);
+}
+
+.correta{
+background:#16a34a!important;
+}
+
+.errada{
+background:#dc2626!important;
+}
+
+.explicacao{
+margin-top:20px;
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+text-align:left;
+}
+
+button{
+margin-top:20px;
+padding:12px 25px;
+border:none;
+border-radius:10px;
+background:#22c55e;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+background:#16a34a;
+}
+
+@media(max-width:600px){
+
+.opcoes{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<img id="capivara" class="mascote" src="CapivaraNerdGenioIA_fundo_transparente.png">
+
+<h1>🎮 Partiu Revisão - Locução Adjetiva</h1>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+<div id="game"></div>
+
+</div>
+
+<script>
+
+let perguntas=[
+
+{
+q:"Qual alternativa contém uma locução adjetiva?",
+o:["amor maternal","amor de mãe","amor intenso","amor verdadeiro"],
+a:1,
+exp:`✅ <b>amor de mãe</b> é locução adjetiva, pois a expressão "de mãe" funciona como um adjetivo qualificando "amor". Poderia ser substituída por "amor maternal".
+
+❌ amor maternal → já é adjetivo simples.
+
+❌ amor intenso → adjetivo simples.
+
+❌ amor verdadeiro → adjetivo simples.`
+},
+
+{
+q:"Na expressão 'água da chuva', a parte 'da chuva' é:",
+o:["locução adjetiva","advérbio","verbo","numeral"],
+a:0,
+exp:`✅ "da chuva" caracteriza o substantivo "água", indicando origem. Portanto é uma locução adjetiva.
+
+❌ advérbio → modifica verbo, adjetivo ou advérbio.
+
+❌ verbo → indica ação.
+
+❌ numeral → indica quantidade ou ordem.`
+},
+
+{
+q:"Qual opção possui locução adjetiva equivalente a 'solar'?",
+o:["luz solar","luz do sol","luz intensa","luz clara"],
+a:1,
+exp:`✅ "luz do sol" é locução adjetiva equivalente ao adjetivo "solar".
+
+❌ luz solar → adjetivo simples.
+
+❌ luz intensa → adjetivo simples.
+
+❌ luz clara → adjetivo simples.`
+},
+
+{
+q:"Na expressão 'amor de pai', temos:",
+o:["locução adjetiva","advérbio","verbo","substantivo abstrato"],
+a:0,
+exp:`✅ "de pai" qualifica o substantivo "amor", sendo locução adjetiva.
+
+❌ advérbio → não modifica verbo.
+
+❌ verbo → não indica ação.
+
+❌ substantivo abstrato → amor é substantivo abstrato, mas a pergunta refere-se à expressão qualificadora.`
+},
+
+{
+q:"Qual expressão apresenta locução adjetiva?",
+o:["história antiga","história de criança","história longa","história curiosa"],
+a:1,
+exp:`✅ "de criança" caracteriza o substantivo história, funcionando como adjetivo.
+
+❌ antiga → adjetivo simples.
+
+❌ longa → adjetivo simples.
+
+❌ curiosa → adjetivo simples.`
+},
+
+{
+q:"Em 'anel de ouro', 'de ouro' é:",
+o:["locução adjetiva","verbo","advérbio","numeral"],
+a:0,
+exp:`✅ "de ouro" caracteriza o substantivo "anel", indicando material. Portanto é locução adjetiva.
+
+❌ verbo → não indica ação.
+
+❌ advérbio → não modifica verbo.
+
+❌ numeral → não indica quantidade.`
+},
+
+{
+q:"Qual alternativa contém locução adjetiva equivalente a 'marinho'?",
+o:["água marinha","água do mar","água limpa","água clara"],
+a:1,
+exp:`✅ "água do mar" equivale ao adjetivo "marinha".
+
+❌ água marinha → adjetivo simples.
+
+❌ água limpa → adjetivo.
+
+❌ água clara → adjetivo.`
+},
+
+{
+q:"Em 'casa de campo', 'de campo' funciona como:",
+o:["locução adjetiva","advérbio","verbo","pronome"],
+a:0,
+exp:`✅ caracteriza o substantivo casa, sendo locução adjetiva.
+
+❌ advérbio → modifica verbo.
+
+❌ verbo → ação.
+
+❌ pronome → substitui substantivo.`
+},
+
+{
+q:"Qual alternativa apresenta locução adjetiva equivalente a 'noturno'?",
+o:["atividade noturna","atividade da noite","atividade longa","atividade difícil"],
+a:1,
+exp:`✅ "da noite" equivale ao adjetivo "noturna".
+
+❌ noturna → adjetivo simples.
+
+❌ longa → adjetivo.
+
+❌ difícil → adjetivo.`
+},
+
+{
+q:"Na expressão 'estrada de ferro', 'de ferro' indica:",
+o:["material","tempo","lugar","modo"],
+a:0,
+exp:`✅ indica material da estrada (ferro), funcionando como locução adjetiva.
+
+❌ tempo → quando ocorre.
+
+❌ lugar → posição.
+
+❌ modo → como ocorre.`
+},
+
+{
+q:"Qual opção possui locução adjetiva?",
+o:["vento forte","vento do norte","vento rápido","vento gelado"],
+a:1,
+exp:`✅ "do norte" caracteriza o substantivo vento.
+
+❌ forte → adjetivo.
+
+❌ rápido → adjetivo.
+
+❌ gelado → adjetivo.`
+},
+
+{
+q:"Na expressão 'amor de irmão', temos:",
+o:["locução adjetiva","advérbio","verbo","numeral"],
+a:0,
+exp:`✅ "de irmão" caracteriza o substantivo amor.
+
+❌ advérbio → modifica verbo.
+
+❌ verbo → ação.
+
+❌ numeral → quantidade.`
+},
+
+{
+q:"Qual expressão contém locução adjetiva?",
+o:["voz suave","voz da criança","voz forte","voz alta"],
+a:1,
+exp:`✅ "da criança" caracteriza o substantivo voz.
+
+❌ suave → adjetivo.
+
+❌ forte → adjetivo.
+
+❌ alta → adjetivo.`
+},
+
+{
+q:"Em 'sapato de couro', 'de couro' indica:",
+o:["material","tempo","lugar","modo"],
+a:0,
+exp:`✅ indica material do sapato, funcionando como locução adjetiva.
+
+❌ tempo → quando.
+
+❌ lugar → posição.
+
+❌ modo → como.`
+},
+
+{
+q:"Qual alternativa apresenta locução adjetiva equivalente a 'paterno'?",
+o:["amor paterno","amor de pai","amor grande","amor forte"],
+a:1,
+exp:`✅ "de pai" equivale ao adjetivo "paterno".
+
+❌ paterno → adjetivo simples.
+
+❌ grande → adjetivo.
+
+❌ forte → adjetivo.`
+}
+
+]
+
+let i=0
+let pontos=0
+
+function mostrar(){
+
+let q=perguntas[i]
+
+let html=`<div class="pergunta">${q.q}</div><div class="opcoes">`
+
+q.o.forEach((op,index)=>{
+html+=`<div class="opcao" onclick="responder(${index})">${op}</div>`
+})
+
+html+="</div>"
+
+document.getElementById("game").innerHTML=html
+
+document.getElementById("bar").style.width=((i/perguntas.length)*100)+"%"
+
+}
+
+function feliz(){
+
+let c=document.getElementById("capivara")
+
+c.classList.add("feliz")
+
+setTimeout(()=>c.classList.remove("feliz"),400)
+
+}
+
+function triste(){
+
+let c=document.getElementById("capivara")
+
+c.classList.add("triste")
+
+setTimeout(()=>c.classList.remove("triste"),400)
+
+}
+
+function responder(x){
+
+let q=perguntas[i]
+
+let opcoes=document.querySelectorAll(".opcao")
+
+if(x===q.a){
+
+opcoes[x].classList.add("correta")
+
+pontos++
+
+feliz()
+
+}else{
+
+opcoes[x].classList.add("errada")
+
+opcoes[q.a].classList.add("correta")
+
+triste()
+
+}
+
+document.getElementById("game").innerHTML+=`<div class="explicacao">${q.exp}</div>`
+
+document.getElementById("game").innerHTML+=`<button onclick="proxima()">Próxima</button>`
+
+}
+
+function proxima(){
+
+i++
+
+if(i<perguntas.length){
+
+mostrar()
+
+}else{
+
+fim()
+
+}
+
+}
+
+function fim(){
+
+document.getElementById("bar").style.width="100%"
+
+document.getElementById("game").innerHTML=`
+<h2>🏆 Resultado</h2>
+<p>Você acertou <b>${pontos}</b> de ${perguntas.length}</p>
+<button onclick="location.reload()">Jogar novamente</button>
+`
+
+}
+
+mostrar()
+
+</script>
+
+</body>
+</html>
