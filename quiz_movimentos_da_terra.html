@@ -1082,7 +1082,7 @@ function buildQuestion(q) {
 
   document.getElementById('q-type-badge').textContent = isFill ? 'Complete a Lacuna' : 'Múltipla Escolha';
   document.getElementById('q-type-badge').className = 'question-type-badge ' + (isFill ? 'badge-fill' : 'badge-mc');
-  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-text').textContent = isFill ? '' : q.text;
   document.getElementById('mc-options').innerHTML = '';
   document.getElementById('fill-area').style.display = 'none';
   document.getElementById('feedback-panel').className = 'feedback-panel';
