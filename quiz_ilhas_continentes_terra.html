@@ -71,12 +71,6 @@
     gap: 12px;
   }
 
-  .game-header .logo-mini {
-    height: 36px;
-    width: auto;
-    object-fit: contain;
-  }
-
   .btn-close {
     width: 40px; height: 40px;
     border: none; background: none;
@@ -469,13 +463,6 @@
     text-align: center;
   }
 
-  .home-logo {
-    max-width: 200px;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
-
   .home-mascot { width: 120px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2)); }
 
   .home-title {
@@ -723,12 +710,11 @@
 
   <div id="screen-home" class="screen active">
     <div class="home-hero">
-      <img src="logo.png" class="home-logo" id="home-logo" alt="Partiu Revisão" onerror="this.style.display='none'">
       <img src="capivaraAcerto.png" class="home-mascot" id="home-mascot" alt="Capivara" onerror="this.src='capivaraAcerto.png'">
       <div class="home-title">Partiu Revisão:<br><span>Ilhas e Continentes da Terra</span></div>
-      <div class="home-subtitle">30 perguntas sobre continentes, ilhas, oceanos e o nosso planeta. Você consegue zerar? 🌍</div>
+      <div class="home-subtitle">24 perguntas sobre continentes, ilhas, oceanos e o nosso planeta. Você consegue zerar? 🌍</div>
       <div class="stats-row">
-        <div class="stat-chip">❓ 30 perguntas</div>
+        <div class="stat-chip">❓ 24 perguntas</div>
         <div class="stat-chip">❤️ 5 vidas</div>
         <div class="stat-chip">⏱️ 30s por questão</div>
       </div>
@@ -744,12 +730,11 @@
   <div id="screen-game" class="screen">
     <div class="game-header">
       <button class="btn-close" onclick="confirmQuit()">✕</button>
-      <img src="logo.png" class="logo-mini" alt="" onerror="this.style.display='none'">
       <div class="progress-wrap">
         <div class="progress-bar">
           <div class="progress-fill" id="progress-fill" style="width:0%"></div>
         </div>
-        <div class="progress-label" id="progress-label">Pergunta 1 de 30</div>
+        <div class="progress-label" id="progress-label">Pergunta 1 de 24</div>
       </div>
       <div class="lives" id="lives-display"></div>
     </div>
@@ -852,35 +837,29 @@ const ALL_QUESTIONS = [
   {id:3, text:"De modo geral, as ilhas são:", options:["Maiores que os continentes","Menores que os continentes","Do mesmo tamanho que os continentes","Sempre cobertas de gelo"], correct:1, theme:"ilhas", explanation:"As ilhas são, em geral, menores que os continentes. Continentes são as maiores porções de terra; ilhas são porções menores também cercadas por água."},
   {id:4, text:"Os continentes são caracterizados por serem:", options:["Porções pequenas de terra","Grandes extensões de terra","Partes do oceano","Somente montanhas"], correct:1, theme:"continentes", explanation:"Os continentes são grandes extensões de terra emersa. Eles abrigam países, cidades, florestas, rios e diversas formas de vida."},
   {id:5, text:"As terras emersas são aquelas que:", options:["Estão abaixo da água","Estão acima do nível do mar","Estão dentro dos rios","Estão no fundo do oceano"], correct:1, theme:"terras-emersas", explanation:"Terras emersas são as porções de terra que ficam acima do nível do mar — ou seja, continentes e ilhas, em oposição aos oceanos e mares."},
-  {id:6, text:"Na imagem da superfície terrestre, os oceanos aparecem principalmente na cor:", options:["Verde","Amarela","Azul-escuro","Branca"], correct:2, theme:"imagem-planeta", explanation:"Nas imagens do planeta (visto do espaço), os oceanos aparecem em tons de azul, pois a água absorve e reflete a luz de forma que vemos o azul."},
+  {id:6, text:"Em uma imagem da superfície terrestre, os oceanos aparecem principalmente na cor:", options:["Verde","Amarela","Azul-escuro","Branca"], correct:2, theme:"imagem-planeta", explanation:"Nas imagens do planeta (visto do espaço), os oceanos aparecem em tons de azul, pois a água absorve e reflete a luz de forma que vemos o azul."},
   {id:7, text:"As áreas brancas na imagem do planeta indicam principalmente:", options:["Desertos","Áreas com gelo","Florestas","Oceanos"], correct:1, theme:"imagem-planeta", explanation:"As áreas brancas nas imagens da Terra representam principalmente regiões cobertas por gelo e neve, como os polos e algumas montanhas altas."},
   {id:8, text:"Qual elemento natural cerca ilhas e continentes?", options:["Areia","Água","Vento","Pedra"], correct:1, theme:"oceanos", explanation:"Tanto ilhas quanto continentes são cercados por água — oceanos e mares. A água é o elemento que separa e delimita essas porções de terra."},
   {id:9, text:"A Terra gira ao redor do Sol em um movimento chamado:", options:["Rotação","Translação","Inclinação","Oscilação"], correct:1, theme:"movimentos", explanation:"O movimento da Terra em órbita ao redor do Sol é chamado de translação. Ele dura aproximadamente 365 dias e está ligado às estações do ano."},
   {id:10, text:"O movimento que a Terra faz ao redor de seu próprio eixo é chamado de:", options:["Translação","Rotação","Orbitação","Revolução"], correct:1, theme:"movimentos", explanation:"Rotação é o movimento que a Terra faz girando em torno do seu próprio eixo imaginário. Esse movimento dura cerca de 24 horas e está ligado ao dia e à noite."},
   {id:11, text:"No globo terrestre, o movimento que podemos simular ao girá-lo é:", options:["Translação","Rotação","Eclipse","Inclinação"], correct:1, theme:"movimentos", explanation:"Quando giramos um globo terrestre com a mão, estamos simulando o movimento de rotação da Terra em torno do seu próprio eixo."},
-  {id:12, text:"Na imagem do globo com as letras A e B, a área B representa:", options:["Terra firme","Área de oceano","Montanhas","Deserto"], correct:1, theme:"imagem-planeta", explanation:"Em representações do globo, as áreas em azul geralmente indicam oceanos e mares; as áreas em tons de marrom/verde representam terra firme."},
-  {id:13, text:"Na mesma imagem, a área A representa:", options:["Terra firme ou continente","Somente gelo","O fundo do oceano","Nuvens"], correct:0, theme:"imagem-planeta", explanation:"A área A, em contraste com o oceano (B), representa terra firme — continentes ou ilhas, onde há solo e formas de vida terrestre."},
-  {id:14, text:"Os oceanos são importantes porque:", options:["Abrigam muitas formas de vida marinha","São feitos apenas de gelo","Não possuem vida","São desertos"], correct:0, theme:"oceanos", explanation:"Os oceanos abrigam uma enorme diversidade de vida: peixes, mamíferos marinhos, corais, plantas aquáticas e muitos outros seres que dependem da água salgada."},
-  {id:15, text:"Os continentes são locais onde:", options:["Vivem seres humanos e existem florestas, rios e cidades","Só existem oceanos","Não há vida","Só existem montanhas"], correct:0, theme:"continentes", explanation:"Nos continentes vivem seres humanos e há florestas, rios, lagos, cidades, desertos e montanhas — ou seja, grande parte da vida e da atividade humana."},
-  {id:16, text:"Quantos continentes são considerados no texto?", options:["Cinco","Seis","Sete","Quatro"], correct:1, theme:"continentes", explanation:"Geralmente consideramos seis continentes: América, Europa, Ásia, África, Oceania e Antártida. (Alguns modelos consideram sete, separando as Américas.)"},
-  {id:17, text:"A Antártida é conhecida por:", options:["Ser um grande deserto quente","Ser uma região coberta por gelo","Ser o maior oceano","Ser um arquipélago tropical"], correct:1, theme:"continentes", explanation:"A Antártida é o continente mais frio do planeta, coberto por uma enorme camada de gelo. É um dos polos da Terra e abriga poucos habitantes permanentes."},
-  {id:18, text:"As terras emersas incluem:", options:["Somente montanhas","Continentes e ilhas","Somente planícies","Somente desertos"], correct:1, theme:"terras-emersas", explanation:"Terras emersas são todas as porções de terra acima do nível do mar: continentes e ilhas, com suas montanhas, planícies, desertos e florestas."},
-  {id:19, text:"Os oceanos são habitat principalmente de:", options:["Animais marinhos e peixes","Apenas plantas terrestres","Apenas humanos","Somente aves"], correct:0, theme:"oceanos", explanation:"Os oceanos são o habitat de peixes, baleias, golfinhos, tubarões, corais, algas e muitas outras formas de vida que dependem da água salgada."},
-  {id:20, text:"A poluição dos oceanos pode prejudicar:", options:["Somente os peixes","A vida marinha e o meio ambiente","Somente as praias","Somente os navios"], correct:1, theme:"poluicao", explanation:"A poluição dos oceanos afeta toda a vida marinha, o equilíbrio dos ecossistemas, as praias e, indiretamente, os seres humanos que dependem do mar."},
-  {id:21, text:"Uma causa comum da poluição dos mares é:", options:["Descarte de lixo e resíduos","Chuva natural","Vento forte","Ondas do mar"], correct:0, theme:"poluicao", explanation:"O descarte incorreto de lixo, plásticos e resíduos industriais nos rios e mares é uma das principais causas da poluição marinha."},
-  {id:22, text:"Um efeito da poluição marinha é:", options:["Aumento da vida marinha","Morte de animais marinhos","Formação de novas ilhas","Diminuição das ondas"], correct:1, theme:"poluicao", explanation:"A poluição pode causar morte de peixes e outros animais marinhos, destruição de corais e desequilíbrio nos ecossistemas oceânicos."},
-  {id:23, text:"Uma forma de reduzir a poluição dos oceanos é:", options:["Jogar lixo no mar","Reduzir e reciclar resíduos","Ignorar o problema","Despejar mais plástico"], correct:1, theme:"poluicao", explanation:"Reduzir o consumo de plástico, reciclar e descartar o lixo corretamente ajudam a diminuir a quantidade de resíduos que chegam aos oceanos."},
-  {id:24, text:"Segundo o poema, a Terra vista de longe parece:", options:["Verde","Azul","Amarela","Preta"], correct:1, theme:"poema", explanation:"No poema, a Terra vista de longe é descrita como azul, pois os oceanos ocupam grande parte da superfície e refletem essa cor no espaço."},
-  {id:25, text:"Segundo o poema, a Terra vista de perto parece:", options:["Pequena","Enorme","Transparente","Quadrada"], correct:1, theme:"poema", explanation:"Vista de perto, a Terra nos parece enorme: com seus continentes, oceanos, montanhas e florestas, o planeta é imenso para quem está na superfície."},
-  {id:26, text:"No poema, a Lua é descrita como algo que:", options:["Se afasta da Terra","Vigia e acompanha a Terra","Desaparece sempre","Cai na Terra"], correct:1, theme:"poema", explanation:"Em versos poéticos, a Lua muitas vezes é retratada como uma companheira que vigia ou acompanha a Terra no céu."},
-  {id:27, text:"A expressão 'Minha Terra é azul' está relacionada principalmente:", options:["À grande quantidade de água no planeta","À presença de montanhas","À areia dos desertos","À cor do céu"], correct:0, theme:"poema", explanation:"A Terra é chamada de 'azul' porque a maior parte da superfície visível do espaço é coberta por oceanos e mares, que refletem a luz em tons de azul."},
-  {id:28, text:"O poema menciona que na Terra existem:", options:["Somente desertos","Água e continentes cheios de vida","Apenas gelo","Somente oceanos"], correct:1, theme:"poema", explanation:"O planeta Terra tem tanto água (oceanos, rios, lagos) quanto continentes onde há vida, cidades, florestas e diversidade."},
-  {id:29, text:"Quando observamos o planeta do espaço, percebemos que:", options:["A água cobre grande parte da superfície","A Terra é totalmente seca","Só existem continentes","Não existem oceanos"], correct:0, theme:"imagem-planeta", explanation:"Vista do espaço, a Terra mostra que a água (oceanos e mares) cobre a maior parte da superfície — por isso o planeta é chamado de 'planeta azul'."},
-  {id:30, text:"Preservar os oceanos é importante porque:", options:["Eles não têm importância","Mantêm o equilíbrio da vida no planeta","Servem apenas para navegação","Não possuem seres vivos"], correct:1, theme:"preservacao", explanation:"Os oceanos regulam o clima, produzem oxigênio, abrigam biodiversidade e são fonte de alimento — preservá-los é essencial para a vida na Terra."},
+  {id:12, text:"Os oceanos são importantes porque:", options:["Abriga muitas formas de vida marinha","São feitos apenas de gelo","Não possuem vida","São desertos"], correct:0, theme:"oceanos", explanation:"Os oceanos abrigam uma enorme diversidade de vida: peixes, mamíferos marinhos, corais, plantas aquáticas e muitos outros seres que dependem da água salgada."},
+  {id:13, text:"Os continentes são locais onde:", options:["Vivem seres humanos e existem florestas, rios e cidades","Só existem oceanos","Não há vida","Só existem montanhas"], correct:0, theme:"continentes", explanation:"Nos continentes vivem seres humanos e há florestas, rios, lagos, cidades, desertos e montanhas — ou seja, grande parte da vida e da atividade humana."},
+  {id:14, text:"Quantos continentes são considerados no texto?", options:["Cinco","Seis","Sete","Quatro"], correct:1, theme:"continentes", explanation:"Geralmente consideramos seis continentes: América, Europa, Ásia, África, Oceania e Antártida. (Alguns modelos consideram sete, separando as Américas.)"},
+  {id:15, text:"A Antártida é conhecida por:", options:["Ser um grande deserto quente","Ser uma região coberta por gelo","Ser o maior oceano","Ser um arquipélago tropical"], correct:1, theme:"continentes", explanation:"A Antártida é o continente mais frio do planeta, coberto por uma enorme camada de gelo. É um dos polos da Terra e abriga poucos habitantes permanentes."},
+  {id:16, text:"As terras emersas incluem:", options:["Somente montanhas","Continentes e ilhas","Somente planícies","Somente desertos"], correct:1, theme:"terras-emersas", explanation:"Terras emersas são todas as porções de terra acima do nível do mar: continentes e ilhas, com suas montanhas, planícies, desertos e florestas."},
+  {id:17, text:"Os oceanos são habitat principalmente de:", options:["Animais marinhos e peixes","Apenas plantas terrestres","Apenas humanos","Somente aves"], correct:0, theme:"oceanos", explanation:"Os oceanos são o habitat de peixes, baleias, golfinhos, tubarões, corais, algas e muitas outras formas de vida que dependem da água salgada."},
+  {id:18, text:"A poluição dos oceanos pode prejudicar:", options:["Somente os peixes","A vida marinha e o meio ambiente","Somente as praias","Somente os navios"], correct:1, theme:"poluicao", explanation:"A poluição dos oceanos afeta toda a vida marinha, o equilíbrio dos ecossistemas, as praias e, indiretamente, os seres humanos que dependem do mar."},
+  {id:19, text:"Uma causa comum da poluição dos mares é:", options:["Descarte de lixo e resíduos","Chuva natural","Vento forte","Ondas do mar"], correct:0, theme:"poluicao", explanation:"O descarte incorreto de lixo, plásticos e resíduos industriais nos rios e mares é uma das principais causas da poluição marinha."},
+  {id:20, text:"Um efeito da poluição marinha é:", options:["Aumento da vida marinha","Morte de animais marinhos","Formação de novas ilhas","Diminuição das ondas"], correct:1, theme:"poluicao", explanation:"A poluição pode causar morte de peixes e outros animais marinhos, destruição de corais e desequilíbrio nos ecossistemas oceânicos."},
+  {id:21, text:"Uma forma de reduzir a poluição dos oceanos é:", options:["Jogar lixo no mar","Reduzir e reciclar resíduos","Ignorar o problema","Despejar mais plástico"], correct:1, theme:"poluicao", explanation:"Reduzir o consumo de plástico, reciclar e descartar o lixo corretamente ajudam a diminuir a quantidade de resíduos que chegam aos oceanos."},
+  {id:22, text:"A expressão 'Minha Terra é azul' está relacionada principalmente:", options:["À grande quantidade de água no planeta","À presença de montanhas","À areia dos desertos","À cor do céu"], correct:0, theme:"poema", explanation:"A Terra é chamada de 'azul' porque a maior parte da superfície visível do espaço é coberta por oceanos e mares, que refletem a luz em tons de azul."},
+  {id:23, text:"Quando observamos o planeta do espaço, percebemos que:", options:["A água cobre grande parte da superfície","A Terra é totalmente seca","Só existem continentes","Não existem oceanos"], correct:0, theme:"imagem-planeta", explanation:"Vista do espaço, a Terra mostra que a água (oceanos e mares) cobre a maior parte da superfície — por isso o planeta é chamado de 'planeta azul'."},
+  {id:24, text:"Preservar os oceanos é importante porque:", options:["Eles não têm importância","Mantêm o equilíbrio da vida no planeta","Servem apenas para navegação","Não possuem seres vivos"], correct:1, theme:"preservacao", explanation:"Os oceanos regulam o clima, produzem oxigênio, abrigam biodiversidade e são fonte de alimento — preservá-los é essencial para a vida na Terra."},
 ];
 
-// Metade múltipla escolha, metade complete a lacuna (word bank)
-const FILL_QUESTIONS = new Set([2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]);
+// Metade múltipla escolha, metade complete a lacuna (word bank) — 24 questões
+const FILL_QUESTIONS = new Set([2,4,6,8,10,12,14,16,18,20,22,24]);
 
 const THEME_LABELS = {
   "continentes": "Continentes",
