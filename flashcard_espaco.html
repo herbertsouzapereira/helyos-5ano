@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão – Flashcards do Espaço</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #0A0E2A;
+  --deep: #060918;
+  --teal: #00C9C8;
+  --teal-dark: #007E9E;
+  --gold: #FFD84D;
+  --gold-dark: #CC9A00;
+  --coral: #FF6B6B;
+  --green: #4AFFA3;
+  --purple: #A78BFA;
+  --card-front: linear-gradient(145deg, #0E1740 0%, #151E50 100%);
+  --card-back: linear-gradient(145deg, #0B2A36 0%, #0D3A50 100%);
+  --text: #EEF2FF;
+  --text-dim: #94A3C8;
+  --border-glow: rgba(0,201,200,0.35);
+  --shadow-glow: 0 0 30px rgba(0,201,200,0.2), 0 8px 32px rgba(0,0,0,0.6);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--deep);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ─── STARFIELD ─── */
+#stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--dur, 3s) var(--del, 0s) infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: var(--min-op, 0.2); transform: scale(1); }
+  to   { opacity: var(--max-op, 1);   transform: scale(1.4); }
+}
+
+/* Orbit ring decorations */
+.orbit-ring {
+  position: fixed;
+  border-radius: 50%;
+  border: 1px solid rgba(0,201,200,0.07);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── LAYOUT ─── */
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── HEADER ─── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 24px;
+}
+.header-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(0,201,200,0.5));
+}
+.header-titles h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(20px, 4vw, 26px);
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255,216,77,0.5);
+  line-height: 1.1;
+}
+.header-titles p {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  margin-top: 2px;
+}
+
+/* ─── DECK TABS ─── */
+.deck-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.deck-tab {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(0,201,200,0.25);
+  background: rgba(0,201,200,0.06);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.2s;
+}
+.deck-tab:hover { border-color: var(--teal); color: var(--teal); }
+.deck-tab.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #000;
+  box-shadow: 0 0 16px rgba(0,201,200,0.4);
+}
+
+/* ─── PROGRESS BAR ─── */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.progress-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--gold));
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+  overflow: hidden;
+}
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 1.8s infinite;
+}
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.progress-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-dim);
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* ─── FLASHCARD ─── */
+.card-scene {
+  perspective: 1200px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.card-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(.45,.05,.55,.95);
+  cursor: pointer;
+}
+.card-wrapper.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 28px 24px;
+  border: 1.5px solid var(--border-glow);
+  box-shadow: var(--shadow-glow);
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.card-front {
+  background: var(--card-front);
+}
+.card-back {
+  background: var(--card-back);
+  transform: rotateY(180deg);
+}
+
+/* card glow halo */
+.card-face::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(0,201,200,0.15), transparent 50%, rgba(255,216,77,0.08));
+  pointer-events: none;
+}
+
+/* floating particles inside card */
+.card-particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--teal);
+  opacity: 0.4;
+  animation: floatParticle var(--dur) var(--del) infinite ease-in-out alternate;
+}
+@keyframes floatParticle {
+  from { transform: translateY(0) translateX(0); opacity: 0.3; }
+  to   { transform: translateY(-20px) translateX(10px); opacity: 0.7; }
+}
+
+.card-category-badge {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.card-hint {
+  position: absolute;
+  bottom: 16px;
+  right: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.7;
+}
+
+.card-icon {
+  font-size: 54px;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 12px rgba(255,216,77,0.5));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+@keyframes iconFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.card-term {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 5vw, 42px);
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,216,77,0.4);
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal);
+  text-align: center;
+  opacity: 0.85;
+}
+
+/* Back face content */
+.card-def-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: var(--teal);
+  text-align: center;
+  margin-bottom: 14px;
+  text-shadow: 0 0 12px rgba(0,201,200,0.4);
+}
+
+.card-def-text {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--text);
+  text-align: center;
+  max-width: 500px;
+}
+
+.card-def-bullets {
+  list-style: none;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+}
+.card-def-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dim);
+  line-height: 1.45;
+  text-align: left;
+}
+.card-def-bullets li::before {
+  content: '✦';
+  color: var(--teal);
+  font-size: 10px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.bullet-gold::before { color: var(--gold) !important; }
+.bullet-coral::before { color: var(--coral) !important; }
+.bullet-green::before { color: var(--green) !important; }
+.bullet-purple::before { color: var(--purple) !important; }
+
+/* card number badge */
+.card-num {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text-dim);
+}
+
+/* ─── CONTROL BUTTONS ─── */
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 22px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-prev {
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.12);
+  color: var(--text-dim);
+}
+.btn-prev:hover:not(:disabled) { background: rgba(255,255,255,0.13); color: var(--text); }
+.btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-flip {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: #000;
+  box-shadow: 0 4px 16px rgba(0,201,200,0.4);
+  flex: 1;
+  max-width: 200px;
+  justify-content: center;
+}
+.btn-flip:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,201,200,0.5); }
+.btn-flip:active { transform: translateY(1px); }
+
+.btn-next {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #000;
+  box-shadow: 0 4px 16px rgba(255,216,77,0.35);
+}
+.btn-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,216,77,0.5); }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ─── SELF EVAL ─── */
+.self-eval {
+  display: none;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: fadeSlideIn 0.35s ease;
+}
+.self-eval.show { display: flex; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.eval-btn {
+  flex: 1;
+  max-width: 160px;
+  padding: 11px 10px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.eval-ok {
+  background: rgba(74,255,163,0.12);
+  border-color: var(--green);
+  color: var(--green);
+}
+.eval-ok:hover { background: var(--green); color: #000; }
+
+.eval-review {
+  background: rgba(255,216,77,0.1);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.eval-review:hover { background: var(--gold); color: #000; }
+
+.eval-hard {
+  background: rgba(255,107,107,0.1);
+  border-color: var(--coral);
+  color: var(--coral);
+}
+.eval-hard:hover { background: var(--coral); color: #fff; }
+
+/* ─── MINI MAP / DOTS ─── */
+.dots-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.dot.current {
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  transform: scale(1.3);
+}
+.dot.ok     { background: var(--green); }
+.dot.review { background: var(--gold); }
+.dot.hard   { background: var(--coral); }
+.dot.seen   { background: rgba(255,255,255,0.3); }
+
+/* ─── SUMMARY SCREEN ─── */
+#screen-summary {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  animation: fadeSlideIn 0.5s ease;
+}
+#screen-summary.show { display: flex; }
+
+.summary-logo { width: 100px; filter: drop-shadow(0 0 20px rgba(0,201,200,0.5)); }
+
+.summary-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,216,77,0.4);
+  text-align: center;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.summary-box {
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 10px;
+  text-align: center;
+}
+.summary-box .val {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  display: block;
+}
+.summary-box .lbl {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.val-ok     { color: var(--green); text-shadow: 0 0 12px rgba(74,255,163,0.4); }
+.val-review { color: var(--gold); text-shadow: 0 0 12px rgba(255,216,77,0.4); }
+.val-hard   { color: var(--coral); text-shadow: 0 0 12px rgba(255,107,107,0.4); }
+
+.review-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.review-list-title {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+.review-item {
+  background: rgba(255,107,107,0.08);
+  border: 1.5px solid rgba(255,107,107,0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--coral);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.review-item-ok {
+  background: rgba(74,255,163,0.06);
+  border-color: rgba(74,255,163,0.25);
+  color: var(--text-dim);
+}
+
+.btn-restart {
+  width: 100%;
+  max-width: 360px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  border: none;
+  border-radius: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0,201,200,0.4);
+  transition: all 0.2s;
+}
+.btn-restart:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,201,200,0.5); }
+
+.btn-hard-only {
+  width: 100%;
+  max-width: 360px;
+  padding: 13px;
+  background: rgba(255,107,107,0.12);
+  border: 2px solid var(--coral);
+  border-radius: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--coral);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-hard-only:hover { background: var(--coral); color: #fff; }
+.btn-hard-only:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ─── TOOLTIP card flip indicator ─── */
+.flip-indicator {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.pip { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); transition: background 0.3s; }
+.pip.active { background: var(--teal); box-shadow: 0 0 6px var(--teal); }
+
+/* ─── KEYBOARD HINT ─── */
+.key-hints {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.key-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.key {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 480px) {
+  .card-term { font-size: 28px; }
+  .card-def-text { font-size: 14px; }
+  .controls { gap: 7px; }
+  .ctrl-btn { padding: 11px 14px; font-size: 14px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"></div>
+
+<!-- Orbit rings -->
+<div class="orbit-ring" style="width:600px;height:600px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+<div class="orbit-ring" style="width:900px;height:900px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+<div class="orbit-ring" style="width:1200px;height:1200px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="Capivara_-_Logo_-_Partiu_Revisao.png" class="header-logo" alt="Logo Partiu Revisão">
+    <div class="header-titles">
+      <h1>Partiu Revisão</h1>
+      <p>🌍 Flashcards — O Espaço e os Movimentos da Terra</p>
+    </div>
+  </div>
+
+  <!-- DECK TABS -->
+  <div class="deck-tabs" id="deck-tabs"></div>
+
+  <!-- PROGRESS -->
+  <div class="progress-row">
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">0 / 0</div>
+  </div>
+
+  <!-- DOTS -->
+  <div class="dots-row" id="dots-row"></div>
+
+  <!-- MAIN CONTENT -->
+  <div id="screen-cards">
+
+    <!-- FLIP SIDE INDICATORS -->
+    <div class="flip-indicator">
+      <div class="pip active" id="pip-front"></div>
+      <div class="pip" id="pip-back"></div>
+    </div>
+
+    <!-- FLASHCARD -->
+    <div class="card-scene">
+      <div class="card-wrapper" id="card-wrapper" onclick="flipCard()">
+
+        <div class="card-face card-front" id="card-front">
+          <!-- particles injected by JS -->
+          <span class="card-num" id="card-num">1 / 10</span>
+          <div class="card-category-badge" id="card-badge"></div>
+          <div class="card-icon" id="card-icon">🌍</div>
+          <div class="card-term" id="card-term">Carregando…</div>
+          <div class="card-subtitle" id="card-subtitle"></div>
+          <div class="card-hint">Toque para revelar ↻</div>
+        </div>
+
+        <div class="card-face card-back" id="card-back">
+          <span class="card-num" id="card-num-back">1 / 10</span>
+          <div class="card-def-title" id="def-title"></div>
+          <div class="card-def-text" id="def-text"></div>
+          <ul class="card-def-bullets" id="def-bullets"></ul>
+          <div class="card-hint">Toque para voltar ↻</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SELF-EVAL -->
+    <div class="self-eval" id="self-eval">
+      <button class="eval-btn eval-hard" onclick="evaluate('hard')">😰 Difícil</button>
+      <button class="eval-btn eval-review" onclick="evaluate('review')">🤔 Revisar</button>
+      <button class="eval-btn eval-ok" onclick="evaluate('ok')">✅ Sei bem!</button>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="ctrl-btn btn-prev" id="btn-prev" onclick="prevCard()">← Anterior</button>
+      <button class="ctrl-btn btn-flip" onclick="flipCard()">↻ Virar</button>
+      <button class="ctrl-btn btn-next" id="btn-next" onclick="nextCard()">Próximo →</button>
+    </div>
+
+    <!-- KEY HINTS -->
+    <div class="key-hints">
+      <span class="key-hint"><kbd class="key">Espaço</kbd> virar</span>
+      <span class="key-hint"><kbd class="key">←</kbd> anterior</span>
+      <span class="key-hint"><kbd class="key">→</kbd> próximo</span>
+    </div>
+
+  </div><!-- /screen-cards -->
+
+  <!-- SUMMARY SCREEN -->
+  <div id="screen-summary">
+    <img src="Capivara_-_Logo_-_Partiu_Revisao.png" class="summary-logo" alt="Logo">
+    <div class="summary-title" id="summary-title">Sessão Completa! 🎉</div>
+
+    <div class="summary-grid">
+      <div class="summary-box">
+        <span class="val val-ok" id="sum-ok">0</span>
+        <span class="lbl">Sei bem</span>
+      </div>
+      <div class="summary-box">
+        <span class="val val-review" id="sum-review">0</span>
+        <span class="lbl">Revisar</span>
+      </div>
+      <div class="summary-box">
+        <span class="val val-hard" id="sum-hard">0</span>
+        <span class="lbl">Difícil</span>
+      </div>
+    </div>
+
+    <div class="review-list" id="review-list"></div>
+
+    <button class="btn-restart" onclick="restartAll()">🔄 Estudar Tudo Novamente</button>
+    <button class="btn-hard-only" id="btn-hard-only" onclick="retryHard()">🔥 Só os Difíceis</button>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════
+// FLASHCARD DATA
+// ═══════════════════════════════════════
+const DECKS = [
+  {
+    id: 'all',
+    label: '⭐ Todos',
+    cards: [] // filled from others
+  },
+  {
+    id: 'espaco',
+    label: '🔭 O Espaço',
+    cards: [
+      {
+        icon: '🔭',
+        term: 'Estudo do Espaço',
+        subtitle: 'Como os cientistas exploram o universo?',
+        category: 'O Espaço',
+        categoryColor: '#A78BFA',
+        defTitle: 'Instrumentos Tecnológicos',
+        defText: 'Para estudar o espaço, os cientistas precisam de muitos instrumentos tecnológicos.',
+        bullets: [
+          { text: 'Satélites artificiais orbitam a Terra', color: 'teal' },
+          { text: 'Permitem estudar oceanos, continentes e atmosfera do Brasil', color: 'teal' },
+          { text: 'Monitoram montanhas e grandes rios', color: 'teal' },
+        ]
+      },
+      {
+        icon: '🛰️',
+        term: 'Satélites Artificiais',
+        subtitle: 'Para que servem?',
+        category: 'O Espaço',
+        categoryColor: '#A78BFA',
+        defTitle: 'Aplicações dos Satélites',
+        defText: 'Os satélites artificiais têm diversas utilidades para a humanidade.',
+        bullets: [
+          { text: 'Para viver melhor', color: 'green' },
+          { text: 'Para curar doenças', color: 'green' },
+          { text: 'Para desenvolver tecnologia', color: 'gold' },
+          { text: 'Para estudar a natureza', color: 'gold' },
+        ]
+      },
+      {
+        icon: '⭕',
+        term: 'Órbita da Terra',
+        subtitle: 'Qual é o formato do caminho?',
+        category: 'O Espaço',
+        categoryColor: '#A78BFA',
+        defTitle: 'Quase uma Circunferência',
+        defText: 'A órbita da Terra ao redor do Sol é quase uma circunferência — levemente elíptica, mas muito próxima de um círculo perfeito.',
+        bullets: []
+      },
+    ]
+  },
+  {
+    id: 'estacoes',
+    label: '🍂 Estações',
+    cards: [
+      {
+        icon: '🌡️',
+        term: 'Estações do Ano',
+        subtitle: 'Como variam pelo planeta?',
+        category: 'Estações',
+        categoryColor: '#F59E0B',
+        defTitle: 'Variação Regional',
+        defText: 'As estações apresentam-se de formas diferentes em cada região do planeta, mesmo na mesma data.',
+        bullets: [
+          { text: 'Dependem do eixo inclinado da Terra', color: 'gold' },
+          { text: 'A inclinação do eixo é sempre a mesma', color: 'gold' },
+          { text: 'Se em um lado é inverno → no outro é verão', color: 'coral' },
+        ]
+      },
+      {
+        icon: '🌏',
+        term: 'Linha do Equador',
+        subtitle: 'Como afeta as estações?',
+        category: 'Estações',
+        categoryColor: '#F59E0B',
+        defTitle: 'Região Equatorial e Tropical',
+        defText: 'Nas regiões próximas à linha do Equador, as estações não ficam bem definidas.',
+        bullets: [
+          { text: 'Região equatorial: temperatura quase não muda', color: 'green' },
+          { text: 'Nos polos: a variação de calor é grande', color: 'coral' },
+          { text: 'Regiões equatoriais e tropicais têm estações indefinidas', color: 'teal' },
+        ]
+      },
+      {
+        icon: '🌿',
+        term: 'Translação',
+        subtitle: 'Movimento ao redor do Sol',
+        category: 'Estações',
+        categoryColor: '#F59E0B',
+        defTitle: 'Movimento de Translação',
+        defText: 'O movimento que a Terra faz ao redor do Sol. Cria as estações do ano.',
+        bullets: [
+          { text: '🌸 Primavera', color: 'green' },
+          { text: '☀️ Verão — dias longos', color: 'gold' },
+          { text: '🍂 Outono', color: 'teal' },
+          { text: '❄️ Inverno — noites longas', color: 'purple' },
+          { text: 'Cada estação dura ~3 meses', color: 'teal' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'movimentos',
+    label: '🌀 Movimentos',
+    cards: [
+      {
+        icon: '🌀',
+        term: 'Rotação',
+        subtitle: 'A Terra girando sobre si mesma',
+        category: 'Movimentos',
+        categoryColor: '#00C9C8',
+        defTitle: 'Movimento de Rotação',
+        defText: 'A Terra gira ao redor de seu próprio eixo, no sentido de oeste para leste. Cria o dia e a noite.',
+        bullets: [
+          { text: 'Duração: 23h 56min 4seg', color: 'teal' },
+          { text: 'Sentido: oeste → leste', color: 'gold' },
+          { text: 'O eixo é imaginário!', color: 'coral' },
+          { text: 'Gera a alternância dia/noite', color: 'green' },
+        ]
+      },
+      {
+        icon: '☀️',
+        term: 'Solstício',
+        subtitle: 'Iluminação desigual',
+        category: 'Movimentos',
+        categoryColor: '#00C9C8',
+        defTitle: 'O que é Solstício?',
+        defText: 'Período em que a Terra é iluminada de forma desigual pelo Sol.',
+        bullets: [
+          { text: 'Solstício de verão: dias maiores', color: 'gold' },
+          { text: 'Solstício de inverno: noites mais longas', color: 'purple' },
+        ]
+      },
+      {
+        icon: '⚖️',
+        term: 'Equinócio',
+        subtitle: 'O equilíbrio entre dia e noite',
+        category: 'Movimentos',
+        categoryColor: '#00C9C8',
+        defTitle: 'O que é Equinócio?',
+        defText: 'Período intermediário entre o Solstício de verão e o de inverno, quando a maior intensidade da luz do Sol incide sobre a linha do Equador.',
+        bullets: [
+          { text: 'Dias e noites com a mesma duração', color: 'green' },
+          { text: 'Acontece 2 vezes por ano', color: 'teal' },
+          { text: 'Marca início da primavera e do outono', color: 'gold' },
+        ]
+      },
+    ]
+  },
+];
+
+// Fill "all" deck
+DECKS[0].cards = DECKS.slice(1).flatMap(d => d.cards);
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activeDeck = DECKS[0];
+let queue = [];
+let currentIdx = 0;
+let isFlipped = false;
+let evaluations = {}; // cardKey -> 'ok'|'review'|'hard'
+let hardOnly = [];
+
+function cardKey(card) { return card.term; }
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function init() {
+  buildStars();
+  buildDeckTabs();
+  loadDeck(DECKS[0]);
+}
+
+function buildStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}vw;
+      top:${Math.random()*100}vh;
+      --dur:${2+Math.random()*4}s;
+      --del:${Math.random()*5}s;
+      --min-op:${0.1+Math.random()*0.3};
+      --max-op:${0.6+Math.random()*0.4};
+    `;
+    container.appendChild(s);
+  }
+}
+
+function buildDeckTabs() {
+  const container = document.getElementById('deck-tabs');
+  DECKS.forEach(deck => {
+    const tab = document.createElement('button');
+    tab.className = 'deck-tab' + (deck === activeDeck ? ' active' : '');
+    tab.textContent = deck.label;
+    tab.addEventListener('click', () => {
+      evaluations = {};
+      loadDeck(deck);
+    });
+    container.appendChild(tab);
+  });
+}
+
+function loadDeck(deck) {
+  activeDeck = deck;
+  queue = [...deck.cards];
+  currentIdx = 0;
+  isFlipped = false;
+
+  // Update tabs
+  document.querySelectorAll('.deck-tab').forEach((t, i) => {
+    t.classList.toggle('active', DECKS[i] === deck);
+  });
+
+  document.getElementById('screen-cards').style.display = '';
+  document.getElementById('screen-summary').classList.remove('show');
+
+  buildDots();
+  renderCard();
+}
+
+// ═══════════════════════════════════════
+// DOTS
+// ═══════════════════════════════════════
+function buildDots() {
+  const row = document.getElementById('dots-row');
+  row.innerHTML = '';
+  queue.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.title = queue[i].term;
+    d.addEventListener('click', () => jumpTo(i));
+    row.appendChild(d);
+  });
+  updateDots();
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((d, i) => {
+    const ev = evaluations[cardKey(queue[i])];
+    d.className = 'dot' +
+      (i === currentIdx ? ' current' : '') +
+      (ev ? ' ' + ev : i < currentIdx ? ' seen' : '');
+  });
+}
+
+function jumpTo(i) {
+  currentIdx = i;
+  isFlipped = false;
+  renderCard();
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function renderCard() {
+  if (currentIdx >= queue.length) { showSummary(); return; }
+  const card = queue[currentIdx];
+  const total = queue.length;
+
+  // Flip reset
+  const wrapper = document.getElementById('card-wrapper');
+  wrapper.classList.remove('flipped');
+  isFlipped = false;
+  document.getElementById('pip-front').classList.add('active');
+  document.getElementById('pip-back').classList.remove('active');
+  document.getElementById('self-eval').classList.remove('show');
+
+  // Front
+  document.getElementById('card-num').textContent = `${currentIdx + 1} / ${total}`;
+  document.getElementById('card-num-back').textContent = `${currentIdx + 1} / ${total}`;
+  document.getElementById('card-icon').textContent = card.icon;
+  document.getElementById('card-term').textContent = card.term;
+  document.getElementById('card-subtitle').textContent = card.subtitle || '';
+
+  const badge = document.getElementById('card-badge');
+  badge.textContent = card.category;
+  badge.style.background = (card.categoryColor || '#00C9C8') + '22';
+  badge.style.color = card.categoryColor || '#00C9C8';
+  badge.style.border = `1.5px solid ${card.categoryColor || '#00C9C8'}44`;
+
+  // Particles
+  injectParticles('card-front');
+  injectParticles('card-back');
+
+  // Back
+  document.getElementById('def-title').textContent = card.defTitle || card.term;
+  document.getElementById('def-text').textContent = card.defText || '';
+
+  const bulletsEl = document.getElementById('def-bullets');
+  bulletsEl.innerHTML = '';
+  (card.bullets || []).forEach(b => {
+    const li = document.createElement('li');
+    li.textContent = b.text;
+    if (b.color) li.classList.add('bullet-' + b.color);
+    bulletsEl.appendChild(li);
+  });
+
+  // Progress
+  const pct = Math.round((currentIdx / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${currentIdx + 1} / ${total}`;
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = currentIdx === 0;
+  document.getElementById('btn-next').disabled = currentIdx >= total - 1;
+
+  updateDots();
+}
+
+function injectParticles(faceId) {
+  const face = document.getElementById(faceId);
+  face.querySelectorAll('.card-particle').forEach(p => p.remove());
+  for (let i = 0; i < 5; i++) {
+    const p = document.createElement('div');
+    p.className = 'card-particle';
+    p.style.cssText = `
+      left:${10+Math.random()*80}%;
+      top:${10+Math.random()*80}%;
+      --dur:${2+Math.random()*3}s;
+      --del:${Math.random()*2}s;
+      width:${3+Math.random()*4}px;
+      height:${3+Math.random()*4}px;
+      background:${Math.random()>0.5?'#00C9C8':'#FFD84D'};
+    `;
+    face.appendChild(p);
+  }
+}
+
+// ═══════════════════════════════════════
+// FLIP
+// ═══════════════════════════════════════
+function flipCard() {
+  const wrapper = document.getElementById('card-wrapper');
+  isFlipped = !isFlipped;
+  wrapper.classList.toggle('flipped', isFlipped);
+  document.getElementById('pip-front').classList.toggle('active', !isFlipped);
+  document.getElementById('pip-back').classList.toggle('active', isFlipped);
+  if (isFlipped) {
+    document.getElementById('self-eval').classList.add('show');
+  } else {
+    document.getElementById('self-eval').classList.remove('show');
+  }
+}
+
+// ═══════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════
+function nextCard() {
+  if (currentIdx < queue.length - 1) {
+    currentIdx++;
+    isFlipped = false;
+    renderCard();
+  } else {
+    showSummary();
+  }
+}
+
+function prevCard() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    isFlipped = false;
+    renderCard();
+  }
+}
+
+// ═══════════════════════════════════════
+// EVALUATE
+// ═══════════════════════════════════════
+function evaluate(level) {
+  const card = queue[currentIdx];
+  evaluations[cardKey(card)] = level;
+  updateDots();
+  // Auto-advance after short delay
+  setTimeout(() => {
+    if (currentIdx < queue.length - 1) {
+      nextCard();
+    } else {
+      showSummary();
+    }
+  }, 350);
+}
+
+// ═══════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════
+function showSummary() {
+  document.getElementById('screen-cards').style.display = 'none';
+  const sumEl = document.getElementById('screen-summary');
+  sumEl.classList.add('show');
+
+  const cards = activeDeck.cards;
+  let ok = 0, review = 0, hard = 0;
+  hardOnly = [];
+  cards.forEach(c => {
+    const ev = evaluations[cardKey(c)];
+    if (ev === 'ok') ok++;
+    else if (ev === 'review') review++;
+    else if (ev === 'hard') { hard++; hardOnly.push(c); }
+  });
+
+  document.getElementById('sum-ok').textContent = ok;
+  document.getElementById('sum-review').textContent = review;
+  document.getElementById('sum-hard').textContent = hard;
+
+  const total = cards.length;
+  const pct = Math.round((ok / total) * 100);
+  document.getElementById('summary-title').textContent =
+    pct >= 80 ? '🌟 Incrível! Você arrasouu!' :
+    pct >= 50 ? '💪 Bom trabalho! Continue!' :
+    '📚 Continue estudando!';
+
+  // Review list
+  const listEl = document.getElementById('review-list');
+  listEl.innerHTML = '';
+
+  const hardItems = cards.filter(c => evaluations[cardKey(c)] === 'hard');
+  const reviewItems = cards.filter(c => evaluations[cardKey(c)] === 'review');
+  const unseen = cards.filter(c => !evaluations[cardKey(c)]);
+
+  if (hardItems.length || reviewItems.length || unseen.length) {
+    const title = document.createElement('div');
+    title.className = 'review-list-title';
+    title.textContent = '⚠️ Para Revisar:';
+    listEl.appendChild(title);
+
+    [...hardItems, ...reviewItems, ...unseen].forEach(c => {
+      const item = document.createElement('div');
+      const ev = evaluations[cardKey(c)];
+      item.className = 'review-item';
+      item.innerHTML = `${c.icon} ${c.term} <span style="margin-left:auto;font-size:11px;opacity:.7">${ev === 'hard' ? '😰 Difícil' : ev === 'review' ? '🤔 Revisar' : '👁️ Não visto'}</span>`;
+      listEl.appendChild(item);
+    });
+  } else {
+    const item = document.createElement('div');
+    item.className = 'review-item review-item-ok';
+    item.textContent = '✅ Você marcou todos como "Sei bem"! Parabéns!';
+    listEl.appendChild(item);
+  }
+
+  document.getElementById('btn-hard-only').disabled = hardOnly.length === 0;
+
+  // Progress to 100%
+  document.getElementById('progress-bar').style.width = '100%';
+  document.getElementById('progress-label').textContent = `${total} / ${total}`;
+}
+
+function restartAll() {
+  evaluations = {};
+  loadDeck(activeDeck);
+}
+
+function retryHard() {
+  if (!hardOnly.length) return;
+  evaluations = {};
+  document.getElementById('screen-summary').classList.remove('show');
+  document.getElementById('screen-cards').style.display = '';
+  queue = [...hardOnly];
+  currentIdx = 0;
+  isFlipped = false;
+  buildDots();
+  renderCard();
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  else if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === '1') evaluate('hard');
+  else if (e.key === '2') evaluate('review');
+  else if (e.key === '3') evaluate('ok');
+});
+
+// ═══════════════════════════════════════
+// START
+// ═══════════════════════════════════════
+init();
+</script>
+</body>
+</html>
