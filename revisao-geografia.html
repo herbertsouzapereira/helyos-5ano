@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capivara Geógrafa — Quiz do 5º Ano</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2ec27e;
+    --verde-escuro: #1a8a56;
+    --azul: #1d7fc4;
+    --azul-claro: #4fc3f7;
+    --amarelo: #f9c12e;
+    --laranja: #f76d2b;
+    --vermelho: #e63946;
+    --marrom: #8B5E3C;
+    --creme: #fdf6ec;
+    --texto: #2d2d2d;
+    --fundo: #0d1b2a;
+    --card: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--fundo);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Estrelinhas de fundo */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, #1a3a5c 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, #1a2e1a 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, #0d1b2a 0%, #060d14 100%);
+    z-index: -2;
+  }
+
+  .stars {
+    position: fixed; inset: 0; z-index: -1;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 5%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 8%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(2px 2px at 15% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 60%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(2px 2px at 85% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 45%, rgba(255,255,255,0.5) 0%, transparent 100%);
+  }
+
+  /* TELA INICIAL */
+  #tela-inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .capivara-hero {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f0c060, #8B5E3C);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 60px rgba(249,193,46,0.4), 0 20px 40px rgba(0,0,0,0.5);
+    animation: float 3s ease-in-out infinite;
+    overflow: hidden;
+  }
+
+  .capivara-hero img {
+    width: 190px; height: 190px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    color: var(--amarelo);
+    text-shadow: 3px 3px 0 var(--marrom), 0 0 40px rgba(249,193,46,0.5);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitulo {
+    font-size: 1.2rem;
+    color: var(--azul-claro);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .badges {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+
+  .badge {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-facil { background: rgba(46,194,126,0.2); color: var(--verde); border: 2px solid var(--verde); }
+  .badge-medio { background: rgba(249,193,46,0.2); color: var(--amarelo); border: 2px solid var(--amarelo); }
+  .badge-dificil { background: rgba(230,57,70,0.2); color: #ff6b6b; border: 2px solid #ff6b6b; }
+
+  .info-box {
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    margin: 1rem 0 2rem;
+    max-width: 520px;
+    text-align: left;
+  }
+
+  .info-box h3 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--amarelo);
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .info-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .info-item span:first-child { font-size: 1.3rem; }
+
+  .btn-start {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    color: var(--fundo);
+    background: linear-gradient(135deg, var(--amarelo), var(--laranja));
+    border: none;
+    border-radius: 60px;
+    padding: 1rem 3.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 30px rgba(249,193,46,0.4), 0 4px 0 rgba(0,0,0,0.3);
+    letter-spacing: 0.03em;
+  }
+
+  .btn-start:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 14px 40px rgba(249,193,46,0.6), 0 4px 0 rgba(0,0,0,0.3);
+  }
+
+  .btn-start:active { transform: translateY(0); }
+
+  /* TELA DO QUIZ */
+  #tela-quiz {
+    display: none;
+    min-height: 100vh;
+    padding: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quiz-header {
+    width: 100%; max-width: 720px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 0 0.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .progresso-wrap {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .progresso-info {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+  }
+
+  .barra-outer {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .barra-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde), var(--azul-claro));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+  }
+
+  .placar {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(249,193,46,0.15);
+    border: 2px solid rgba(249,193,46,0.4);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--amarelo);
+  }
+
+  .nivel-badge {
+    padding: 0.3rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  /* Card da questão */
+  .card-questao {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 28px;
+    padding: 2rem;
+    width: 100%; max-width: 720px;
+    margin: 1rem 0;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .questao-meta {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .q-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    color: rgba(255,255,255,0.15);
+    line-height: 1;
+  }
+
+  .q-tema {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--azul-claro);
+    background: rgba(79,195,247,0.1);
+    padding: 0.2rem 0.7rem;
+    border-radius: 50px;
+  }
+
+  .q-emoji { font-size: 1.8rem; }
+
+  .enunciado {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  .opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .opcao-btn {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 0.9rem 1.2rem;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+
+  .opcao-letra {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .opcao-btn:hover:not(:disabled) {
+    background: rgba(79,195,247,0.15);
+    border-color: var(--azul-claro);
+    transform: translateX(6px);
+  }
+
+  .opcao-btn:hover:not(:disabled) .opcao-letra {
+    background: var(--azul-claro);
+    color: var(--fundo);
+  }
+
+  .opcao-btn.certa {
+    background: rgba(46,194,126,0.2);
+    border-color: var(--verde);
+    animation: bounce 0.4s ease;
+  }
+
+  .opcao-btn.certa .opcao-letra {
+    background: var(--verde);
+    color: #fff;
+  }
+
+  .opcao-btn.errada {
+    background: rgba(230,57,70,0.15);
+    border-color: var(--vermelho);
+  }
+
+  .opcao-btn.errada .opcao-letra {
+    background: var(--vermelho);
+    color: #fff;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+
+  /* Feedback */
+  .feedback-box {
+    margin-top: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.5;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .feedback-box.certa {
+    background: rgba(46,194,126,0.15);
+    border: 2px solid rgba(46,194,126,0.4);
+    color: #a8f5d0;
+  }
+
+  .feedback-box.errada {
+    background: rgba(230,57,70,0.12);
+    border: 2px solid rgba(230,57,70,0.3);
+    color: #ffaaaa;
+  }
+
+  .feedback-icon { font-size: 1.4rem; margin-right: 0.5rem; }
+
+  .btn-proxima {
+    margin-top: 1.2rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--fundo);
+    background: linear-gradient(135deg, var(--verde), var(--azul-claro));
+    border: none;
+    border-radius: 50px;
+    padding: 0.8rem 2.5rem;
+    cursor: pointer;
+    display: none;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(46,194,126,0.3);
+    width: 100%;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-proxima:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(46,194,126,0.5);
+  }
+
+  /* TELA RESULTADO */
+  #tela-resultado {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .trofeu {
+    font-size: 6rem;
+    margin-bottom: 1rem;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  .resultado-titulo {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .resultado-nota {
+    font-family: 'Fredoka One', cursive;
+    font-size: 5rem;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--amarelo), var(--laranja));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0.5rem 0;
+  }
+
+  .resultado-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .resultado-stats {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: center;
+    margin: 1rem 0 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    min-width: 120px;
+  }
+
+  .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.3rem;
+  }
+
+  .mensagem-resultado {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 1.2rem 2rem;
+    max-width: 480px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 2rem;
+  }
+
+  .btns-resultado {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-retry {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--fundo);
+    background: linear-gradient(135deg, var(--amarelo), var(--laranja));
+    border: none; border-radius: 50px;
+    padding: 0.9rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 25px rgba(249,193,46,0.35);
+  }
+
+  .btn-retry:hover { transform: translateY(-3px) scale(1.05); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Partículas de comemoração */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: confetti-fall linear forwards;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Timer */
+  .timer-wrap {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .timer-wrap.urgente { color: var(--vermelho); animation: pulse 0.5s ease infinite alternate; }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+  }
+
+  /* Responsivo */
+  @media (max-width: 500px) {
+    .card-questao { padding: 1.5rem 1rem; }
+    h1 { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- TELA INÍCIO -->
+<div id="tela-inicio">
+  <div class="capivara-hero">
+    <img src="capivaraGeografia.png" alt="Capivara Geógrafa" onerror="this.style.display='none';this.parentElement.innerHTML='🦦'">
+  </div>
+  <h1>Capivara<br>Geógrafa</h1>
+  <p class="subtitulo">Quiz de Geografia — 5º Ano</p>
+
+  <div class="badges">
+    <span class="badge badge-facil">🟢 10 Fáceis</span>
+    <span class="badge badge-medio">🟡 10 Médias</span>
+    <span class="badge badge-dificil">🔴 10 Avançadas</span>
+  </div>
+
+  <div class="info-box">
+    <h3>📚 O que vai cair?</h3>
+    <div class="info-item"><span>🌡️</span><span><strong>Zonas Climáticas</strong> — Tropical, Polar, Temperada e mais</span></div>
+    <div class="info-item"><span>🌊</span><span><strong>Oceanos</strong> — Os 5 oceanos do mundo</span></div>
+    <div class="info-item"><span>🌍</span><span><strong>Continentes</strong> — Os 6 continentes e seus países</span></div>
+    <div class="info-item"><span>⏱️</span><span>30 segundos por questão</span></div>
+    <div class="info-item"><span>⭐</span><span>Cada acerto vale pontos — errando não perde!</span></div>
+  </div>
+
+  <button class="btn-start" onclick="iniciarQuiz()">🗺️ Vamos Explorar!</button>
+</div>
+
+<!-- TELA QUIZ -->
+<div id="tela-quiz">
+  <div class="quiz-header">
+    <div class="progresso-wrap">
+      <div class="progresso-info">
+        <span id="q-atual">Questão 1</span>
+        <span id="q-total">de 30</span>
+      </div>
+      <div class="barra-outer">
+        <div class="barra-inner" id="barra-prog" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="timer-wrap" id="timer-display">⏱️ <span id="timer-num">30</span>s</div>
+    <div class="placar">⭐ <span id="placar-num">0</span></div>
+  </div>
+
+  <div class="card-questao" id="card-questao">
+    <div class="questao-meta">
+      <div class="q-num" id="qnum">01</div>
+      <div class="q-emoji" id="qemoji">🌡️</div>
+      <div class="q-tema" id="qtema">ZONAS CLIMÁTICAS</div>
+      <div class="nivel-badge" id="qnivel">Fácil</div>
+    </div>
+    <div class="enunciado" id="enunciado">Carregando...</div>
+    <div class="opcoes" id="opcoes"></div>
+    <div class="feedback-box" id="feedback"></div>
+    <button class="btn-proxima" id="btn-proxima" onclick="proximaQuestao()">Próxima Questão →</button>
+  </div>
+</div>
+
+<!-- TELA RESULTADO -->
+<div id="tela-resultado">
+  <div class="trofeu" id="trofeu">🏆</div>
+  <div class="resultado-titulo" id="res-titulo">Parabéns!</div>
+  <div class="resultado-nota" id="res-nota">10</div>
+  <div class="resultado-sub" id="res-sub">pontos de 300</div>
+
+  <div class="resultado-stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-acertos" style="color:var(--verde)">0</div>
+      <div class="stat-label">Acertos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-erros" style="color:var(--vermelho)">0</div>
+      <div class="stat-label">Erros</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-tempo" style="color:var(--azul-claro)">0s</div>
+      <div class="stat-label">Tempo total</div>
+    </div>
+  </div>
+
+  <div class="mensagem-resultado" id="mensagem-resultado">
+    Ótima participação! Continue estudando, Geógrafo(a)!
+  </div>
+
+  <div class="btns-resultado">
+    <button class="btn-retry" onclick="reiniciar()">🔄 Jogar Novamente</button>
+  </div>
+</div>
+
+<script>
+const questoes = [
+  // ===== FÁCEIS (1-10) =====
+  {
+    nivel: "Fácil", pontos: 5, tema: "ZONAS CLIMÁTICAS", emoji: "🌡️",
+    pergunta: "Qual zona climática fica próxima à linha do Equador e tem temperaturas muito quentes o ano todo?",
+    opcoes: ["Zona Polar", "Zona Tropical", "Zona Temperada", "Zona Fria"],
+    certa: 1,
+    feedback: "A Zona Tropical fica entre os Trópicos de Câncer e Capricórnio, próxima ao Equador, e tem calor o ano inteiro! 🌞"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Quantos oceanos existem no mundo?",
+    opcoes: ["3", "4", "5", "6"],
+    certa: 2,
+    feedback: "São 5 oceanos: Pacífico, Atlântico, Índico, Ártico e Antártico (Austral). 🌊"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Quantos continentes existem no mundo?",
+    opcoes: ["5", "6", "7", "8"],
+    certa: 1,
+    feedback: "São 6 continentes: América, Europa, África, Ásia, Oceania e Antártida. 🌍"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual é o maior oceano do mundo?",
+    opcoes: ["Atlântico", "Índico", "Pacífico", "Ártico"],
+    certa: 2,
+    feedback: "O Oceano Pacífico é o maior do mundo, cobrindo cerca de 1/3 da superfície da Terra! 🌏"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Em qual continente o Brasil está localizado?",
+    opcoes: ["África", "Europa", "América", "Ásia"],
+    certa: 2,
+    feedback: "O Brasil fica na América do Sul, que faz parte do continente Americano! 🇧🇷"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "ZONAS CLIMÁTICAS", emoji: "❄️",
+    pergunta: "Qual zona climática tem temperaturas extremamente frias e fica nos polos?",
+    opcoes: ["Zona Tropical", "Zona Temperada", "Zona Polar", "Zona Equatorial"],
+    certa: 2,
+    feedback: "A Zona Polar fica nos polos Norte e Sul e tem temperaturas muito baixas, com gelo o ano todo! ❄️"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual é o maior continente do mundo?",
+    opcoes: ["América", "África", "Ásia", "Europa"],
+    certa: 2,
+    feedback: "A Ásia é o maior continente do mundo, tanto em extensão quanto em população! 🌏"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual oceano banha a costa do Brasil?",
+    opcoes: ["Oceano Pacífico", "Oceano Atlântico", "Oceano Índico", "Oceano Ártico"],
+    certa: 1,
+    feedback: "O Oceano Atlântico banha toda a costa leste do Brasil! 🌊🇧🇷"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "ZONAS CLIMÁTICAS", emoji: "🍂",
+    pergunta: "A Zona Temperada é conhecida por ter:",
+    opcoes: ["Calor extremo o ano todo", "Frio intenso constante", "As quatro estações do ano", "Apenas duas estações"],
+    certa: 2,
+    feedback: "Na Zona Temperada ocorrem as quatro estações: primavera, verão, outono e inverno! 🍂"
+  },
+  {
+    nivel: "Fácil", pontos: 5, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual continente é também considerado um país?",
+    opcoes: ["Antártida", "Oceania", "Austrália", "Europa"],
+    certa: 2,
+    feedback: "A Austrália é ao mesmo tempo um país e um continente (junto com a Oceania)! 🦘"
+  },
+
+  // ===== MÉDIAS (11-20) =====
+  {
+    nivel: "Médio", pontos: 10, tema: "ZONAS CLIMÁTICAS", emoji: "🌡️",
+    pergunta: "As zonas climáticas da Terra são divididas com base em qual fator principal?",
+    opcoes: ["Quantidade de chuva", "Distância do Equador e incidência solar", "Altitude das montanhas", "Presença de oceanos"],
+    certa: 1,
+    feedback: "As zonas climáticas são definidas pela latitude (distância do Equador) e pela quantidade de luz solar recebida! ☀️"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual oceano fica entre a África, a Ásia e a Austrália?",
+    opcoes: ["Atlântico", "Pacífico", "Índico", "Ártico"],
+    certa: 2,
+    feedback: "O Oceano Índico fica entre a África, o sul da Ásia e a Austrália! 🌊"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual continente é o mais populoso do mundo?",
+    opcoes: ["Europa", "América", "Ásia", "África"],
+    certa: 2,
+    feedback: "A Ásia abriga mais de 4 bilhões de pessoas, sendo o continente mais populoso do planeta! 👥"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "ZONAS CLIMÁTICAS", emoji: "☀️",
+    pergunta: "A região próxima à linha do Equador recebe mais calor porque:",
+    opcoes: ["Está mais perto do Sol no espaço", "O Sol bate de forma mais direta e concentrada", "Tem menos nuvens no céu", "Fica no centro da Terra"],
+    certa: 1,
+    feedback: "Na linha do Equador, os raios solares chegam mais perpendiculares (diretos), concentrando mais calor numa área menor! ☀️"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual o continente mais frio do mundo?",
+    opcoes: ["Ásia", "América", "Antártida", "Europa"],
+    certa: 2,
+    feedback: "A Antártida é o continente mais frio do mundo e fica no polo Sul da Terra! 🧊"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual oceano fica no polo Norte do planeta?",
+    opcoes: ["Oceano Antártico", "Oceano Pacífico", "Oceano Atlântico", "Oceano Ártico"],
+    certa: 3,
+    feedback: "O Oceano Ártico fica ao redor do polo Norte e grande parte dele fica coberta de gelo! ❄️"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "ZONAS CLIMÁTICAS", emoji: "🌡️",
+    pergunta: "O Brasil está predominantemente em qual zona climática?",
+    opcoes: ["Zona Polar", "Zona Temperada", "Zona Tropical", "Zona Ártica"],
+    certa: 2,
+    feedback: "A maior parte do Brasil está na Zona Tropical, por isso temos tanto calor e chuvas abundantes! 🌿"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual continente tem o maior número de países?",
+    opcoes: ["Ásia", "Europa", "África", "América"],
+    certa: 2,
+    feedback: "A África tem 54 países reconhecidos, sendo o continente com mais nações do mundo! 🌍"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual oceano separa a América da Europa e da África?",
+    opcoes: ["Oceano Pacífico", "Oceano Índico", "Oceano Atlântico", "Oceano Ártico"],
+    certa: 2,
+    feedback: "O Oceano Atlântico fica entre as Américas a oeste e a Europa/África a leste! 🌊"
+  },
+  {
+    nivel: "Médio", pontos: 10, tema: "ZONAS CLIMÁTICAS", emoji: "❄️",
+    pergunta: "Quais países do mundo têm climas mais frios, da Zona Temperada e Polar?",
+    opcoes: ["Brasil e Argentina", "Rússia e Canadá", "China e Índia", "Egito e Austrália"],
+    certa: 1,
+    feedback: "Rússia e Canadá são países com grandes regiões frias, pois ficam em altas latitudes próximas ao polo Norte! 🥶"
+  },
+
+  // ===== AVANÇADAS (21-30) =====
+  {
+    nivel: "Avançado", pontos: 15, tema: "ZONAS CLIMÁTICAS", emoji: "🌡️",
+    pergunta: "Os Trópicos de Câncer e Capricórnio são as linhas que delimitam qual zona climática?",
+    opcoes: ["Zona Polar", "Zona Temperada", "Zona Tropical (Intertropical)", "Zona Equatorial"],
+    certa: 2,
+    feedback: "Os Trópicos de Câncer (norte) e Capricórnio (sul) delimitam a Zona Intertropical ou Tropical! 🌡️"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "O Oceano Antártico (Austral) envolve qual continente?",
+    opcoes: ["América do Sul", "Antártida", "Austrália", "África"],
+    certa: 1,
+    feedback: "O Oceano Antártico (Austral) envolve completamente o continente da Antártida, no polo Sul! 🐧"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "A Oceania é um continente formado principalmente por:",
+    opcoes: ["Grandes savanas africanas", "Florestas temperadas europeias", "Austrália, Nova Zelândia e ilhas do Pacífico", "Ilhas do Caribe"],
+    certa: 2,
+    feedback: "A Oceania é composta pela Austrália, Nova Zelândia e milhares de ilhas espalhadas pelo Oceano Pacífico! 🦘"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "ZONAS CLIMÁTICAS", emoji: "☀️",
+    pergunta: "Por que as zonas polares recebem menos calor do Sol que as zonas tropicais?",
+    opcoes: [
+      "Porque ficam mais longe do Sol no espaço",
+      "Porque os raios solares chegam inclinados e menos concentrados",
+      "Porque não têm atmosfera",
+      "Porque o Sol não aparece nos polos"
+    ],
+    certa: 1,
+    feedback: "Nos polos, os raios do Sol chegam muito inclinados, espalhando o calor numa área maior e por isso a temperatura é muito menor! ☀️"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual continente é atravessado pela Linha do Equador, pelo Trópico de Câncer E pelo Trópico de Capricórnio?",
+    opcoes: ["América", "Europa", "África", "Ásia"],
+    certa: 2,
+    feedback: "A África é o único continente atravessado pela Linha do Equador, pelo Trópico de Câncer (ao norte) e pelo Trópico de Capricórnio (ao sul)! 🌍"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "Qual é a principal característica do Oceano Pacífico em relação aos outros?",
+    opcoes: [
+      "É o mais salgado do mundo",
+      "É o maior e mais profundo oceano do planeta",
+      "Tem mais corais que qualquer outro",
+      "É o mais quente do planeta"
+    ],
+    certa: 1,
+    feedback: "O Oceano Pacífico é o maior e o mais profundo oceano, com a Fossa das Marianas — o ponto mais fundo da Terra (quase 11 km)! 🌊"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "ZONAS CLIMÁTICAS", emoji: "🌡️",
+    pergunta: "Em qual zona climática estão localizados países como França, Alemanha e parte dos EUA?",
+    opcoes: ["Zona Tropical", "Zona Polar", "Zona Temperada", "Zona Equatorial"],
+    certa: 2,
+    feedback: "França, Alemanha e boa parte dos EUA ficam na Zona Temperada, onde as 4 estações são bem definidas! 🍁"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "CONTINENTES", emoji: "🌍",
+    pergunta: "Qual continente é o único que não tem países soberanos e é protegido por tratado internacional?",
+    opcoes: ["Oceania", "Ásia", "Europa", "Antártida"],
+    certa: 3,
+    feedback: "A Antártida não possui países e é protegida pelo Tratado Antártico (1959), que proíbe atividades militares e garante pesquisa científica! 🐧"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "ZONAS CLIMÁTICAS", emoji: "🌿",
+    pergunta: "A Zona Temperada é dividida em subzonas. Qual par abaixo representa corretamente essas divisões?",
+    opcoes: [
+      "Tropical seca e tropical úmida",
+      "Temperada oceânica e temperada continental",
+      "Polar ártica e polar antártica",
+      "Equatorial e subequatorial"
+    ],
+    certa: 1,
+    feedback: "Na Zona Temperada existem subcategorias como oceânica (próxima aos oceanos, mais amena) e continental (interior dos continentes, mais extrema)! 🌦️"
+  },
+  {
+    nivel: "Avançado", pontos: 15, tema: "OCEANOS", emoji: "🌊",
+    pergunta: "A Corrente do Golfo é uma corrente marinha quente que influencia o clima de:",
+    opcoes: [
+      "Costa do Pacífico sul-americano",
+      "Noroeste da Europa, deixando-o mais ameno",
+      "Costa africana do Índico",
+      "Polo Sul"
+    ],
+    certa: 1,
+    feedback: "A Corrente do Golfo leva água quente do Caribe até o norte da Europa, fazendo com que países como a Inglaterra tenham climas mais suaves! 🌊🌡️"
+  }
+];
+
+let questaoAtual = 0;
+let pontuacao = 0;
+let acertos = 0;
+let erros = 0;
+let timer;
+let timerSeg = 30;
+let tempoTotal = 0;
+let timerTotal;
+let respondida = false;
+
+function iniciarQuiz() {
+  document.getElementById('tela-inicio').style.display = 'none';
+  document.getElementById('tela-quiz').style.display = 'flex';
+  questaoAtual = 0;
+  pontuacao = 0;
+  acertos = 0;
+  erros = 0;
+  tempoTotal = 0;
+  timerTotal = setInterval(() => tempoTotal++, 1000);
+  mostrarQuestao();
+}
+
+function mostrarQuestao() {
+  if (questaoAtual >= questoes.length) {
+    encerrarQuiz();
+    return;
+  }
+
+  respondida = false;
+  const q = questoes[questaoAtual];
+
+  // Atualiza header
+  document.getElementById('q-atual').textContent = `Questão ${questaoAtual + 1}`;
+  document.getElementById('barra-prog').style.width = `${((questaoAtual) / questoes.length) * 100}%`;
+
+  // Questão
+  const num = String(questaoAtual + 1).padStart(2, '0');
+  document.getElementById('qnum').textContent = num;
+  document.getElementById('qemoji').textContent = q.emoji;
+  document.getElementById('qtema').textContent = q.tema;
+
+  const nBadge = document.getElementById('qnivel');
+  nBadge.textContent = q.nivel;
+  if (q.nivel === 'Fácil') {
+    nBadge.style.background = 'rgba(46,194,126,0.2)';
+    nBadge.style.color = 'var(--verde)';
+    nBadge.style.border = '2px solid var(--verde)';
+  } else if (q.nivel === 'Médio') {
+    nBadge.style.background = 'rgba(249,193,46,0.2)';
+    nBadge.style.color = 'var(--amarelo)';
+    nBadge.style.border = '2px solid var(--amarelo)';
+  } else {
+    nBadge.style.background = 'rgba(230,57,70,0.15)';
+    nBadge.style.color = '#ff6b6b';
+    nBadge.style.border = '2px solid #ff6b6b';
+  }
+
+  document.getElementById('enunciado').textContent = q.pergunta;
+
+  const opcDiv = document.getElementById('opcoes');
+  opcDiv.innerHTML = '';
+  const letras = ['A', 'B', 'C', 'D'];
+  q.opcoes.forEach((opc, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcao-btn';
+    btn.innerHTML = `<span class="opcao-letra">${letras[i]}</span> ${opc}`;
+    btn.onclick = () => responder(i, btn);
+    opcDiv.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  fb.textContent = '';
+
+  const btnProx = document.getElementById('btn-proxima');
+  btnProx.style.display = 'none';
+
+  // Timer
+  timerSeg = 30;
+  clearInterval(timer);
+  atualizarTimer();
+  timer = setInterval(() => {
+    timerSeg--;
+    atualizarTimer();
+    if (timerSeg <= 0) {
+      clearInterval(timer);
+      if (!respondida) tempoEsgotado();
+    }
+  }, 1000);
+
+  // Scroll
+  document.getElementById('card-questao').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function atualizarTimer() {
+  const el = document.getElementById('timer-num');
+  const wrap = document.getElementById('timer-display');
+  el.textContent = timerSeg;
+  if (timerSeg <= 10) wrap.className = 'timer-wrap urgente';
+  else wrap.className = 'timer-wrap';
+}
+
+function tempoEsgotado() {
+  respondida = true;
+  erros++;
+  const q = questoes[questaoAtual];
+
+  // Marcar correta
+  const btns = document.querySelectorAll('.opcao-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.certa) b.classList.add('certa');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback-box errada';
+  fb.innerHTML = `<span class="feedback-icon">⏰</span> Tempo esgotado! A resposta certa era a opção ${['A','B','C','D'][q.certa]}. ${q.feedback}`;
+  fb.style.display = 'block';
+
+  document.getElementById('btn-proxima').style.display = 'block';
+}
+
+function responder(idx, btn) {
+  if (respondida) return;
+  respondida = true;
+  clearInterval(timer);
+
+  const q = questoes[questaoAtual];
+  const btns = document.querySelectorAll('.opcao-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback');
+
+  if (idx === q.certa) {
+    btn.classList.add('certa');
+    pontuacao += q.pontos;
+    acertos++;
+    document.getElementById('placar-num').textContent = pontuacao;
+    fb.className = 'feedback-box certa';
+    fb.innerHTML = `<span class="feedback-icon">🎉</span> Correto! +${q.pontos} pontos! ${q.feedback}`;
+  } else {
+    btn.classList.add('errada');
+    btns[q.certa].classList.add('certa');
+    erros++;
+    fb.className = 'feedback-box errada';
+    fb.innerHTML = `<span class="feedback-icon">😅</span> Quase! ${q.feedback}`;
+  }
+
+  fb.style.display = 'block';
+  document.getElementById('btn-proxima').style.display = 'block';
+}
+
+function proximaQuestao() {
+  questaoAtual++;
+  mostrarQuestao();
+}
+
+function encerrarQuiz() {
+  clearInterval(timer);
+  clearInterval(timerTotal);
+
+  document.getElementById('tela-quiz').style.display = 'none';
+  const tr = document.getElementById('tela-resultado');
+  tr.style.display = 'flex';
+
+  const total = questoes.reduce((acc, q) => acc + q.pontos, 0);
+  const pct = Math.round((pontuacao / total) * 100);
+
+  document.getElementById('res-nota').textContent = pontuacao;
+  document.getElementById('res-sub').textContent = `pontos de ${total} (${pct}%)`;
+  document.getElementById('stat-acertos').textContent = acertos;
+  document.getElementById('stat-erros').textContent = erros;
+  document.getElementById('stat-tempo').textContent = `${tempoTotal}s`;
+
+  let titulo, trofeu, msg;
+  if (pct >= 90) {
+    titulo = "🌟 Geógrafo Mestre!"; trofeu = "🏆";
+    msg = `Incrível! Você acertou ${acertos} de 30 questões com ${pct}% de aproveitamento! Você manda muito bem em Geografia! 🗺️🌍`;
+  } else if (pct >= 70) {
+    titulo = "😄 Muito Bem!"; trofeu = "🥇";
+    msg = `Parabéns! ${acertos} acertos e ${pct}% de aproveitamento! Continue estudando e você chega lá! 📚`;
+  } else if (pct >= 50) {
+    titulo = "👍 Bom Esforço!"; trofeu = "🥈";
+    msg = `Você acertou ${acertos} questões (${pct}%)! Revise os temas de Zonas Climáticas e Oceanos para melhorar! 🌡️🌊`;
+  } else {
+    titulo = "📚 Continue Estudando!"; trofeu = "🌱";
+    msg = `Você acertou ${acertos} questões. Não desanime! Revise os continentes, oceanos e zonas climáticas com a Capivara Geógrafa! 🦦`;
+  }
+
+  document.getElementById('res-titulo').textContent = titulo;
+  document.getElementById('trofeu').textContent = trofeu;
+  document.getElementById('mensagem-resultado').textContent = msg;
+
+  if (pct >= 70) lancarConfetes();
+}
+
+function reiniciar() {
+  document.getElementById('tela-resultado').style.display = 'none';
+  document.getElementById('tela-inicio').style.display = 'flex';
+}
+
+function lancarConfetes() {
+  const cores = ['#f9c12e','#2ec27e','#4fc3f7','#f76d2b','#e63946','#a855f7'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.top = '-20px';
+      c.style.background = cores[Math.floor(Math.random() * cores.length)];
+      c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      c.style.animationDelay = Math.random() * 2 + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      c.style.width = (Math.random() * 8 + 6) + 'px';
+      c.style.height = (Math.random() * 8 + 6) + 'px';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>
