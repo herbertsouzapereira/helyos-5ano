@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Os Movimentos da Terra</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1CB0F6;
+    --primary-dark: #0891CC;
+    --success: #58CC02;
+    --success-dark: #46A302;
+    --error: #FF4B4B;
+    --error-dark: #EA2B2B;
+    --warning: #FF9600;
+    --purple: #CE82FF;
+    --bg: #EBF6FF;
+    --card: #FFFFFF;
+    --text: #1C1E21;
+    --text-light: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 4px 0 rgba(0,0,0,0.12);
+    --shadow-hover: 0 6px 0 rgba(0,0,0,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #c3e4ff 1.5px, transparent 1.5px);
+    background-size: 32px 32px;
+    z-index: 0;
+    opacity: 0.45;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: none; animation: fadeSlideIn 0.4s ease; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HEADER ===== */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 16px;
+    gap: 12px;
+  }
+
+  .btn-close {
+    width: 40px; height: 40px;
+    border: none; background: none;
+    cursor: pointer; color: var(--text-light);
+    font-size: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .btn-close:hover { background: var(--border); }
+
+  /* ===== PROGRESS ===== */
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-bar {
+    height: 16px;
+    background: #dde8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success) 0%, #7FE200 100%);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+
+  @keyframes shimmer { to { left: 100%; } }
+
+  .progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+
+  .lives { display: flex; gap: 4px; font-size: 20px; }
+
+  /* ===== TIMER ===== */
+  .timer-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 10px;
+  }
+
+  .timer-circle {
+    width: 64px; height: 64px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timer-circle svg {
+    position: absolute;
+    top: 0; left: 0;
+    transform: rotate(-90deg);
+  }
+
+  .timer-circle svg circle {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s;
+  }
+
+  .timer-circle svg .bg-circle { stroke: #E5E7EB; }
+  .timer-circle svg .fg-circle {
+    stroke-dasharray: 163;
+    stroke-dashoffset: 0;
+  }
+
+  .timer-number {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    z-index: 1;
+    transition: color 0.5s;
+  }
+
+  /* ===== MASCOT ===== */
+  .mascot-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 8px;
+    position: relative;
+  }
+
+  .mascot-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+    transition: transform 0.3s;
+  }
+
+  .mascot-img.bounce { animation: mascotBounce 0.6s cubic-bezier(.34,1.56,.64,1); }
+  .mascot-img.shake  { animation: mascotShake 0.5s ease; }
+
+  @keyframes mascotBounce {
+    0%   { transform: scale(1) rotate(0); }
+    40%  { transform: scale(1.25) rotate(-5deg); }
+    70%  { transform: scale(0.95) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  @keyframes mascotShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-3deg); }
+    40% { transform: translateX(8px) rotate(3deg); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .speech-bubble {
+    position: absolute;
+    top: -8px;
+    right: calc(50% - 160px);
+    background: white;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.5);
+    transform-origin: bottom left;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+    z-index: 10;
+    max-width: 200px;
+    white-space: normal;
+    text-align: left;
+  }
+  .speech-bubble.show { opacity: 1; transform: scale(1); }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 20px;
+    border: 8px solid transparent;
+    border-top-color: var(--primary);
+    border-bottom: none;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .question-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .question-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-radius: 999px;
+    padding: 3px 12px;
+    margin-bottom: 10px;
+  }
+  .badge-mc { background: #EEF2FF; color: #6366F1; }
+  .badge-fill { background: #FFF3E0; color: #E65100; }
+
+  .question-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  /* ===== MC OPTIONS ===== */
+  .options-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+
+  .option-btn:not(:disabled):hover {
+    border-color: var(--primary);
+    background: #EBF9FF;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .option-btn .opt-letter {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    font-weight: 900;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .option-btn.correct {
+    border-color: var(--success);
+    background: #F0FDF4;
+    box-shadow: 0 3px 0 var(--success-dark);
+  }
+  .option-btn.correct .opt-letter {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--error);
+    background: #FFF1F1;
+    box-shadow: 0 3px 0 var(--error-dark);
+  }
+  .option-btn.wrong .opt-letter {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+  }
+
+  .option-btn:disabled { cursor: not-allowed; opacity: 0.75; }
+
+  /* ===== FILL BLANK ===== */
+  .fill-sentence {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 2;
+    color: var(--text);
+    margin: 6px 0 14px;
+  }
+
+  .fill-blank {
+    display: inline-block;
+    min-width: 130px;
+    border-bottom: 3px solid var(--primary);
+    padding: 0 8px;
+    text-align: center;
+    color: var(--primary-dark);
+    font-weight: 900;
+    transition: border-color 0.3s, color 0.3s;
+    cursor: default;
+  }
+  .fill-blank.correct-blank { border-color: var(--success); color: var(--success-dark); }
+  .fill-blank.wrong-blank   { border-color: var(--error); color: var(--error-dark); }
+
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .word-chip {
+    background: #EBF6FF;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 0 var(--primary-dark);
+  }
+  .word-chip:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+  }
+  .word-chip:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .word-chip.used { opacity: 0; pointer-events: none; }
+
+  /* ===== FEEDBACK PANEL ===== */
+  .feedback-panel {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: none;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.55;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  .feedback-panel.show { display: block; }
+  .feedback-panel.correct-fb {
+    background: #F0FDF4;
+    border: 2px solid var(--success);
+    color: #166534;
+  }
+  .feedback-panel.wrong-fb {
+    background: #FFF1F1;
+    border: 2px solid var(--error);
+    color: #7F1D1D;
+  }
+  .feedback-header {
+    font-size: 17px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .feedback-correct-ans {
+    font-size: 13px;
+    margin-top: 6px;
+    color: #15803D;
+    font-weight: 800;
+  }
+  .feedback-explanation {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+
+  /* ===== COMBO ===== */
+  .combo-wrap {
+    display: flex;
+    justify-content: center;
+    min-height: 36px;
+    margin-bottom: 4px;
+  }
+
+  .combo-badge {
+    background: linear-gradient(135deg, #FF9600, #FF4B4B);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    padding: 4px 20px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(255,75,75,0.4);
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .combo-badge.show { transform: scale(1); }
+
+  /* ===== NEXT BUTTON ===== */
+  .btn-next {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--primary-dark);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: auto;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--primary-dark); }
+  .btn-next:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--primary-dark); }
+  .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ===== HOME SCREEN ===== */
+  .home-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  .home-mascot { width: 160px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2)); }
+
+  .home-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(26px, 5vw, 36px);
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .home-title span { color: var(--primary); }
+
+  .home-subtitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-light);
+    max-width: 380px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-chip {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-start {
+    width: 100%;
+    max-width: 360px;
+    padding: 18px;
+    background: var(--success);
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--success-dark);
+    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 0 var(--success-dark); }
+  .btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--success-dark); }
+
+  .btn-retry-errors {
+    width: 100%;
+    max-width: 360px;
+    padding: 14px;
+    background: var(--warning);
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #cc7700;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-retry-errors:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #cc7700; }
+
+  /* ===== RESULT SCREEN ===== */
+  .result-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    text-align: center;
+  }
+
+  .result-mascot { width: 130px; }
+
+  .result-score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(var(--success) calc(var(--pct) * 1%), #E5E7EB 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .result-score-circle::before {
+    content: '';
+    position: absolute;
+    width: 88px; height: 88px;
+    background: white;
+    border-radius: 50%;
+  }
+  .result-score-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--text);
+    z-index: 1;
+  }
+
+  .result-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  .result-stat-box {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+  }
+  .result-stat-box .val {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+  }
+  .result-stat-box .lbl {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Error tags */
+  .error-tags-section { width: 100%; text-align: left; }
+  .error-tags-title {
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .error-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .error-tag {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #FFF3E0;
+    border: 2px solid #FF9600;
+    color: #7C3500;
+  }
+  .error-tag.theme-rotation { background: #EDE9FE; border-color: #8B5CF6; color: #4C1D95; }
+  .error-tag.theme-translation { background: #FEF3C7; border-color: #F59E0B; color: #78350F; }
+  .error-tag.theme-seasons { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+  .error-tag.theme-daynight { background: #DBEAFE; border-color: #3B82F6; color: #1E3A8A; }
+
+  /* Ranking */
+  .ranking-section { width: 100%; }
+  .ranking-title {
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .ranking-list { display: flex; flex-direction: column; gap: 6px; }
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .ranking-item.current { border-color: var(--primary); background: #EBF9FF; }
+  .rank-pos {
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    width: 28px;
+    text-align: center;
+    color: var(--text-light);
+  }
+  .rank-pos.gold   { color: #F59E0B; }
+  .rank-pos.silver { color: #9CA3AF; }
+  .rank-pos.bronze { color: #D97706; }
+  .rank-score { margin-left: auto; font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--primary); }
+
+  /* ===== TIMEOUT SCREEN ===== */
+  .timeout-screen { text-align: center; padding: 48px 24px; }
+  .timeout-screen h2 { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--error); margin: 16px 0 8px; }
+
+  /* ===== CONFETTI ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    overflow: hidden;
+    height: 100vh;
+    z-index: 9999;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+  }
+
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== GAME OVER ===== */
+  .gameover-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    gap: 16px;
+    padding: 32px 0;
+  }
+  .gameover-screen h2 { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--error); }
+  .gameover-screen p { font-size: 16px; font-weight: 700; color: var(--text-light); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 480px) {
+    .speech-bubble { right: calc(50% - 140px); font-size: 11px; max-width: 170px; }
+    .result-stats { grid-template-columns: repeat(3, 1fr); }
+    .option-btn { font-size: 14px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="home-hero">
+      <img src="https://raw.githubusercontent.com/user-attachments/assets/capivaraAcerto.png"
+           onerror="this.src='capivaraAcerto.png'" class="home-mascot" id="home-mascot" alt="Capivara">
+      <div class="home-title">Partiu Revisão:<br><span>Os Movimentos da Terra</span></div>
+      <div class="home-subtitle">30 perguntas sobre Rotação, Translação e as Estações do Ano. Você consegue zerar? 🌍</div>
+      <div class="stats-row">
+        <div class="stat-chip">❓ 30 perguntas</div>
+        <div class="stat-chip">❤️ 5 vidas</div>
+        <div class="stat-chip">⏱️ 30s por questão</div>
+      </div>
+      <button class="btn-start" onclick="startGame(false)">🚀 Começar!</button>
+      <button class="btn-retry-errors" id="btn-retry-home" onclick="startGame(true)" style="display:none">🔥 Refazer Erros</button>
+    </div>
+    <div class="ranking-section" id="home-ranking" style="display:none">
+      <div class="ranking-title">🏆 Melhores Pontuações</div>
+      <div class="ranking-list" id="home-ranking-list"></div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen">
+
+    <div class="game-header">
+      <button class="btn-close" onclick="confirmQuit()">✕</button>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Pergunta 1 de 30</div>
+      </div>
+      <div class="lives" id="lives-display"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-circle">
+        <svg width="64" height="64">
+          <circle class="bg-circle" cx="32" cy="32" r="26"/>
+          <circle class="fg-circle" id="timer-fg" cx="32" cy="32" r="26"
+                  stroke="#1CB0F6" stroke-dasharray="163" stroke-dashoffset="0"/>
+        </svg>
+        <span class="timer-number" id="timer-number">30</span>
+      </div>
+    </div>
+
+    <div class="combo-wrap">
+      <div class="combo-badge" id="combo-badge">🔥 COMBO x<span id="combo-count">2</span></div>
+    </div>
+
+    <div class="mascot-wrap">
+      <div class="speech-bubble" id="speech-bubble">Vamos lá!</div>
+      <img src="capivaraAcerto.png" class="mascot-img" id="mascot" alt="Capivara">
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-type-badge badge-mc" id="q-type-badge">Múltipla Escolha</div>
+      <div class="question-text" id="q-text"></div>
+
+      <!-- MC -->
+      <div class="options-grid" id="mc-options"></div>
+
+      <!-- Fill blank -->
+      <div id="fill-area" style="display:none">
+        <div class="fill-sentence" id="fill-sentence"></div>
+        <div class="word-bank" id="word-bank"></div>
+      </div>
+    </div>
+
+    <div class="feedback-panel" id="feedback-panel">
+      <div class="feedback-header" id="fb-header"></div>
+      <div id="fb-correct-ans" class="feedback-correct-ans" style="display:none"></div>
+      <div class="feedback-explanation" id="fb-explanation"></div>
+    </div>
+
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()" disabled>Próxima →</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screen-result" class="screen">
+    <div class="result-hero">
+      <img src="capivaraAcerto.png" class="result-mascot" id="result-mascot" alt="Capivara">
+      <div class="result-title" id="result-title">Incrível! 🎉</div>
+      <div class="result-score-circle" id="result-circle">
+        <span class="result-score-text" id="result-pct">0%</span>
+      </div>
+      <div class="result-stats">
+        <div class="result-stat-box">
+          <div class="val" id="res-correct" style="color:var(--success)">0</div>
+          <div class="lbl">Acertos</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="val" id="res-wrong" style="color:var(--error)">0</div>
+          <div class="lbl">Erros</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="val" id="res-combo" style="color:var(--warning)">0</div>
+          <div class="lbl">Melhor Combo</div>
+        </div>
+      </div>
+
+      <div class="error-tags-section" id="error-tags-section" style="display:none">
+        <div class="error-tags-title">⚠️ Temas para revisar:</div>
+        <div class="error-tags" id="error-tags"></div>
+      </div>
+
+      <div class="ranking-section">
+        <div class="ranking-title">🏆 Ranking</div>
+        <div class="ranking-list" id="result-ranking-list"></div>
+      </div>
+
+      <button class="btn-start" onclick="startGame(false)" style="max-width:100%">🔄 Jogar Novamente</button>
+      <button class="btn-retry-errors" id="btn-retry-result" onclick="startGame(true)" style="display:none;max-width:100%">🔥 Refazer só os Erros</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="screen-gameover" class="screen">
+    <div class="gameover-screen">
+      <img src="capivaraErro.png" style="width:130px;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.2))" alt="Capivara triste">
+      <h2>💔 Sem Vidas!</h2>
+      <p>Não desanima! Cada erro é um aprendizado.</p>
+      <button class="btn-start" onclick="startGame(false)">🔄 Tentar de Novo</button>
+      <button class="btn-retry-errors" id="btn-retry-gameover" onclick="startGame(true)" style="display:none">🔥 Refazer os Erros</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+// ===== QUESTION BANK =====
+const ALL_QUESTIONS = [
+  {id:1, text:"Por que temos a impressão de que o Sol se move no céu durante o dia?", options:["Porque o Sol gira em torno da Terra","Porque a Terra gira em torno de seu eixo","Porque a Lua reflete a luz solar","Porque as nuvens se movem"], correct:1, theme:"rotation", explanation:"A Terra realiza o movimento de rotação em torno de seu próprio eixo, o que cria a ilusão de que o Sol se desloca pelo céu."},
+  {id:2, text:"O movimento da Terra ao redor de seu próprio eixo é chamado de:", options:["Translação","Rotação","Precessão","Revolução lunar"], correct:1, theme:"rotation", explanation:"Rotação é o movimento que a Terra faz girando sobre si mesma, em torno de seu eixo imaginário."},
+  {id:3, text:"Quanto tempo aproximadamente a Terra leva para completar uma rotação?", options:["12 horas","24 horas","30 dias","365 dias"], correct:1, theme:"rotation", explanation:"A Terra completa uma rotação em aproximadamente 24 horas — isso define a duração de um dia."},
+  {id:4, text:"O eixo de rotação da Terra é descrito como:", options:["Real e visível","Imaginário","Metálico","Paralelo ao Sol"], correct:1, theme:"rotation", explanation:"O eixo de rotação da Terra é imaginário — uma linha conceitual que passa pelos dois polos."},
+  {id:5, text:"Em qual direção ocorre o movimento de rotação da Terra?", options:["De norte para sul","De leste para oeste","De oeste para leste","De sul para norte"], correct:2, theme:"rotation", explanation:"A Terra gira de oeste para leste, o que faz o Sol 'nascer' no leste e 'se pôr' no oeste."},
+  {id:6, text:"O fenômeno de alternância entre dia e noite ocorre principalmente devido:", options:["À rotação da Terra","À translação da Terra","À inclinação da Lua","À órbita de Marte"], correct:0, theme:"daynight", explanation:"A rotação terrestre expõe diferentes regiões à luz solar, criando o ciclo de dia e noite."},
+  {id:7, text:"Quando uma região da Terra está iluminada pelo Sol, dizemos que nela é:", options:["Noite","Aurora","Dia","Eclipse"], correct:2, theme:"daynight", explanation:"Regiões iluminadas pelo Sol experienciam o período diurno (dia)."},
+  {id:8, text:"Qual parte da Terra permanece sem iluminação solar em determinado momento?", options:["Metade do planeta","Todo o planeta","Apenas os polos","Apenas os oceanos"], correct:0, theme:"daynight", explanation:"Em cada instante, metade da Terra está iluminada (dia) e a outra metade está na sombra (noite)."},
+  {id:9, text:"O movimento que a Terra realiza ao redor do Sol recebe o nome de:", options:["Rotação","Translação","Precessão","Oscilação"], correct:1, theme:"translation", explanation:"Translação é o movimento orbital da Terra ao redor do Sol, completado em cerca de 365 dias."},
+  {id:10, text:"Quanto tempo dura aproximadamente uma volta completa da Terra ao redor do Sol?", options:["24 horas","30 dias","365 dias","10 anos"], correct:2, theme:"translation", explanation:"A translação terrestre dura ~365 dias (um ano), base para o calendário que usamos."},
+  {id:11, text:"Qual fenômeno natural está diretamente ligado ao movimento de translação?", options:["Fases da Lua","Estações do ano","Eclipses solares diários","Marés oceânicas"], correct:1, theme:"seasons", explanation:"As estações do ano ocorrem pois a inclinação do eixo terrestre faz a luz solar chegar de formas diferentes ao longo da translação."},
+  {id:12, text:"Cada estação do ano dura aproximadamente:", options:["1 mês","2 meses","3 meses","6 meses"], correct:2, theme:"seasons", explanation:"Como há 4 estações em 12 meses, cada uma dura aproximadamente 3 meses."},
+  {id:13, text:"A mudança na incidência de luz solar ao longo do ano ocorre porque:", options:["O Sol muda de posição","A Terra se move ao redor do Sol","A Lua bloqueia a luz","As estrelas giram"], correct:1, theme:"translation", explanation:"Durante a translação, a posição relativa da Terra em relação ao Sol muda, alterando o ângulo de incidência da luz."},
+  {id:14, text:"Qual das alternativas representa uma consequência direta da rotação?", options:["Primavera","Verão","Dia e noite","Estações do ano"], correct:2, theme:"rotation", explanation:"A rotação produz o ciclo diário de dia e noite, ao girar a superfície terrestre frente ao Sol."},
+  {id:15, text:"Qual das alternativas representa consequência da translação?", options:["Dia e noite","Estações do ano","Eclipses diários","Marés"], correct:1, theme:"seasons", explanation:"As estações do ano são resultado direto do movimento de translação combinado à inclinação do eixo terrestre."},
+  {id:16, text:"Durante a rotação da Terra, o observador na superfície:", options:["Permanece na mesma posição em relação ao Sol","Muda continuamente de posição em relação ao Sol","Move o Sol no céu","Interrompe o movimento terrestre"], correct:1, theme:"rotation", explanation:"Como a Terra gira, um observador na superfície continuamente muda sua posição em relação ao Sol."},
+  {id:17, text:"Quando o Sol nasce no horizonte, ele aparece no:", options:["Oeste","Norte","Sul","Leste"], correct:3, theme:"rotation", explanation:"O Sol nasce (aparece) no leste porque a Terra gira de oeste para leste."},
+  {id:18, text:"Quando o Sol se põe, ele desaparece no:", options:["Leste","Oeste","Norte","Sul"], correct:1, theme:"rotation", explanation:"O Sol se põe no oeste, resultado do sentido de rotação da Terra de oeste para leste."},
+  {id:19, text:"Se a Terra parasse de girar, qual fenômeno deixaria de existir como conhecemos?", options:["Estações do ano","Dia e noite","Movimento da Lua","Órbita do Sol"], correct:1, theme:"daynight", explanation:"Sem a rotação, não haveria alternância de dia e noite — um lado ficaria sempre iluminado e o outro sempre escuro."},
+  {id:20, text:"Qual fator determina principalmente se um lugar recebe mais ou menos calor solar?", options:["A distância da Lua","A quantidade de nuvens","A forma como a luz solar chega à superfície","O tamanho do planeta"], correct:2, theme:"seasons", explanation:"O ângulo de incidência da luz solar (que muda com as estações) determina a quantidade de energia térmica recebida."},
+  {id:21, text:"Qual movimento está relacionado com a duração aproximada de um ano?", options:["Rotação","Translação","Movimento das marés","Movimento da Lua"], correct:1, theme:"translation", explanation:"Um ano é o tempo que a Terra leva para completar uma translação completa ao redor do Sol."},
+  {id:22, text:"Nas ilustrações sobre a Terra, as áreas escuras representam:", options:["Regiões frias","Noite","Oceanos","Polos"], correct:1, theme:"daynight", explanation:"As áreas escuras nas ilustrações representam as regiões que não recebem luz solar — a noite."},
+  {id:23, text:"A linha que divide aproximadamente o dia e a noite em um momento específico representa:", options:["A linha do equador","A linha do horizonte solar","A divisão entre áreas iluminadas e escuras","A órbita da Terra"], correct:2, theme:"daynight", explanation:"Essa linha imaginária (círculo de iluminação) separa a metade iluminada da metade na sombra."},
+  {id:24, text:"Por que as estações do ano não ocorrem todas ao mesmo tempo em todo o planeta?", options:["Porque o Sol muda de tamanho","Porque a Terra gira rapidamente","Porque a luz solar atinge as regiões de forma diferente ao longo do ano","Porque a Lua interfere"], correct:2, theme:"seasons", explanation:"A inclinação do eixo terrestre faz com que cada hemisfério receba mais ou menos luz em diferentes épocas do ano."},
+  {id:25, text:"Durante o movimento de translação, a Terra mantém:", options:["Sempre a mesma posição em relação ao Sol","Uma órbita ao redor do Sol","O Sol girando ao redor dela","Uma órbita ao redor da Lua"], correct:1, theme:"translation", explanation:"A translação é exatamente o percurso orbital que a Terra faz ao redor do Sol."},
+  {id:26, text:"O movimento aparente do Sol no céu é chamado de 'aparente' porque:", options:["É uma ilusão causada pela rotação da Terra","O Sol realmente não existe","A Terra não se move","As estrelas se movem mais rápido"], correct:0, theme:"rotation", explanation:"O Sol não se move: é a rotação terrestre que cria a impressão de que ele percorre o céu ao longo do dia."},
+  {id:27, text:"Qual movimento está mais relacionado com mudanças de temperatura ao longo do ano?", options:["Rotação","Translação","Movimento das marés","Movimento lunar"], correct:1, theme:"seasons", explanation:"A translação, combinada à inclinação do eixo, causa variações na incidência solar ao longo do ano — produzindo as estações e mudanças de temperatura."},
+  {id:28, text:"Se um lugar da Terra recebe menos luz solar durante parte do ano, isso pode indicar:", options:["Mudança de estação","Mudança de planeta","Fim da rotação","Parada do Sol"], correct:0, theme:"seasons", explanation:"A redução de luz solar em determinada região é característica das estações — especialmente do outono/inverno."},
+  {id:29, text:"Qual fenômeno ocorre porque a Terra gira continuamente expondo diferentes regiões ao Sol?", options:["Marés","Dia e noite","Estações","Eclipses"], correct:1, theme:"daynight", explanation:"A rotação expõe continuamente diferentes regiões à luz do Sol, criando o ciclo de dia e noite."},
+  {id:30, text:"A combinação dos movimentos de rotação e translação contribui para:", options:["Organização do tempo em dias e anos","Desaparecimento do Sol","Movimento da Lua","Mudança da gravidade"], correct:0, theme:"translation", explanation:"A rotação define o dia (24h) e a translação define o ano (365 dias) — juntos organizam nossa percepção do tempo."},
+];
+
+// Fill-blank versions for ~half the questions (pick specific ones)
+const FILL_QUESTIONS = new Set([2,4,6,9,11,14,15,17,18,21,22,26,29,30]);
+
+// Theme labels
+const THEME_LABELS = {
+  rotation: "Rotação",
+  translation: "Translação",
+  seasons: "Estações do Ano",
+  daynight: "Dia e Noite"
+};
+
+// ===== STATE =====
+let currentQuestions = [];
+let currentIndex = 0;
+let lives = 5;
+let combo = 0;
+let bestCombo = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let wrongIds = [];
+let answered = false;
+let timerInterval = null;
+let timeLeft = 30;
+let isRetryMode = false;
+
+const MESSAGES_OK = ["Arrasou! 🌟","Isso aí! 🔥","Perfeito! ✨","Mandou bem! 🎉","Sabidão! 🧠","Que isso! 🚀"];
+const MESSAGES_ERR = ["Quase lá...","Vai lá! 💪","Não desiste!","Estuda mais! 📚","Próxima você acerta!"];
+const MESSAGES_IDLE = ["Vamos lá!","Pensa bem...","Você consegue!","Concentra! 🧠"];
+
+// ===== UTILS =====
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function randMsg(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ===== RANKING =====
+function loadRanking() {
+  try { return JSON.parse(localStorage.getItem('terra_ranking') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveRanking(entry) {
+  let r = loadRanking();
+  r.push(entry);
+  r.sort((a,b) => b.score - a.score);
+  r = r.slice(0, 10);
+  localStorage.setItem('terra_ranking', JSON.stringify(r));
+  return r;
+}
+
+function renderRanking(listEl, currentScore) {
+  const r = loadRanking();
+  if (!r.length) { listEl.innerHTML = '<div style="color:var(--text-light);font-size:14px;font-weight:700;padding:8px">Nenhuma pontuação ainda.</div>'; return; }
+  const medals = ['🥇','🥈','🥉'];
+  listEl.innerHTML = r.map((item, i) => `
+    <div class="ranking-item ${item.score === currentScore && i < 3 ? 'current' : ''}">
+      <span class="rank-pos ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${medals[i] || (i+1)}</span>
+      <span>${item.date}</span>
+      <span class="rank-score">${item.score}pts</span>
+    </div>
+  `).join('');
+}
+
+// ===== LIVES =====
+function renderLives() {
+  const el = document.getElementById('lives-display');
+  el.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const span = document.createElement('span');
+    span.textContent = i < lives ? '❤️' : '🖤';
+    if (i >= lives) span.style.opacity = '0.35';
+    el.appendChild(span);
+  }
+}
+
+// ===== TIMER =====
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 30;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const numEl = document.getElementById('timer-number');
+  const fgEl = document.getElementById('timer-fg');
+  numEl.textContent = timeLeft;
+  const pct = timeLeft / 30;
+  const circumference = 163;
+  fgEl.style.strokeDashoffset = circumference * (1 - pct);
+  if (pct > 0.5) {
+    fgEl.style.stroke = '#1CB0F6';
+    numEl.style.color = '#1C1E21';
+  } else if (pct > 0.25) {
+    fgEl.style.stroke = '#FF9600';
+    numEl.style.color = '#FF9600';
+  } else {
+    fgEl.style.stroke = '#FF4B4B';
+    numEl.style.color = '#FF4B4B';
+  }
+}
+
+function handleTimeout() {
+  if (answered) return;
+  answered = true;
+  lives--;
+  combo = 0;
+  renderLives();
+  updateCombo();
+  disableAllOptions();
+  const q = currentQuestions[currentIndex];
+  showFeedback(false, q, true);
+  mascotReact(false);
+  showSpeech(randMsg(MESSAGES_ERR));
+  if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  document.getElementById('btn-next').disabled = false;
+  if (lives <= 0) {
+    setTimeout(() => endGameOver(), 1800);
+  }
+}
+
+// ===== MASCOT =====
+function mascotReact(correct) {
+  const el = document.getElementById('mascot');
+  el.classList.remove('bounce', 'shake');
+  el.src = correct ? 'capivaraAcerto.png' : 'capivaraErro.png';
+  void el.offsetWidth;
+  el.classList.add(correct ? 'bounce' : 'shake');
+}
+
+function showSpeech(msg) {
+  const el = document.getElementById('speech-bubble');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ===== COMBO =====
+function updateCombo() {
+  const badge = document.getElementById('combo-badge');
+  const countEl = document.getElementById('combo-count');
+  if (combo >= 2) {
+    countEl.textContent = combo;
+    badge.classList.add('show');
+    if (combo >= 3) spawnConfetti(6);
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+// ===== CONFETTI =====
+function spawnConfetti(count = 20) {
+  const container = document.getElementById('confetti-container');
+  const colors = ['#FF4B4B','#58CC02','#1CB0F6','#FF9600','#CE82FF','#FFCC00'];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    piece.style.width = piece.style.height = (8 + Math.random() * 8) + 'px';
+    if (Math.random() > 0.5) piece.style.borderRadius = '50%';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ===== BUILD QUESTION =====
+function buildQuestion(q) {
+  const isFill = FILL_QUESTIONS.has(q.id);
+
+  document.getElementById('q-type-badge').textContent = isFill ? 'Complete a Lacuna' : 'Múltipla Escolha';
+  document.getElementById('q-type-badge').className = 'question-type-badge ' + (isFill ? 'badge-fill' : 'badge-mc');
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('mc-options').innerHTML = '';
+  document.getElementById('fill-area').style.display = 'none';
+  document.getElementById('feedback-panel').className = 'feedback-panel';
+  document.getElementById('feedback-panel').style.display = 'none';
+  document.getElementById('btn-next').disabled = true;
+
+  if (isFill) {
+    buildFillQuestion(q);
+  } else {
+    buildMCQuestion(q);
+  }
+
+  // Progress
+  const pct = (currentIndex / currentQuestions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Pergunta ${currentIndex + 1} de ${currentQuestions.length}`;
+
+  renderLives();
+  startTimer();
+  mascotReact(true); // neutral — use acerto image at start
+  document.getElementById('mascot').src = 'capivaraAcerto.png';
+  document.getElementById('mascot').classList.remove('bounce','shake');
+  showSpeech(randMsg(MESSAGES_IDLE));
+}
+
+function buildMCQuestion(q) {
+  document.getElementById('mc-options').style.display = 'flex';
+  document.getElementById('fill-area').style.display = 'none';
+
+  // Shuffle options but keep track of correct
+  const indices = shuffle([0,1,2,3]);
+  const correctShuffledIdx = indices.indexOf(q.correct);
+
+  indices.forEach((origIdx, displayIdx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.orig = origIdx;
+    const letters = ['A','B','C','D'];
+    btn.innerHTML = `<span class="opt-letter">${letters[displayIdx]}</span><span>${q.options[origIdx]}</span>`;
+    btn.addEventListener('click', () => handleMCAnswer(btn, origIdx, q));
+    document.getElementById('mc-options').appendChild(btn);
+  });
+}
+
+function buildFillQuestion(q) {
+  document.getElementById('fill-area').style.display = 'block';
+  document.getElementById('mc-options').style.display = 'none';
+
+  const correctText = q.options[q.correct];
+
+  // Build sentence with blank
+  const sentenceEl = document.getElementById('fill-sentence');
+  sentenceEl.innerHTML = `${q.text} <span class="fill-blank" id="fill-blank">___________</span>`;
+
+  // Word bank: correct + 2 distractors (other options shuffled)
+  const distractors = q.options.filter((_, i) => i !== q.correct);
+  const bankWords = shuffle([correctText, ...shuffle(distractors).slice(0,2)]);
+
+  const bankEl = document.getElementById('word-bank');
+  bankEl.innerHTML = '';
+  bankWords.forEach(word => {
+    const chip = document.createElement('button');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.addEventListener('click', () => handleFillAnswer(chip, word, correctText, q));
+    bankEl.appendChild(chip);
+  });
+}
+
+// ===== ANSWER HANDLERS =====
+function handleMCAnswer(btn, origIdx, q) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const isCorrect = origIdx === q.correct;
+  const allBtns = document.querySelectorAll('.option-btn');
+
+  allBtns.forEach(b => {
+    b.disabled = true;
+    const bOrig = parseInt(b.dataset.orig);
+    if (bOrig === q.correct) b.classList.add('correct');
+    else if (b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+function handleFillAnswer(chip, word, correctText, q) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const isCorrect = word === correctText;
+  const blankEl = document.getElementById('fill-blank');
+  blankEl.textContent = word;
+  blankEl.classList.add(isCorrect ? 'correct-blank' : 'wrong-blank');
+
+  // Disable all chips
+  document.querySelectorAll('.word-chip').forEach(c => { c.disabled = true; });
+
+  processAnswer(isCorrect, q);
+}
+
+function processAnswer(isCorrect, q) {
+  if (isCorrect) {
+    correctCount++;
+    score += 10 + (combo >= 2 ? combo * 2 : 0) + Math.max(0, timeLeft);
+    combo++;
+    if (combo > bestCombo) bestCombo = combo;
+  } else {
+    wrongCount++;
+    lives--;
+    combo = 0;
+    if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  }
+
+  renderLives();
+  updateCombo();
+  showFeedback(isCorrect, q, false);
+  mascotReact(isCorrect);
+  showSpeech(randMsg(isCorrect ? MESSAGES_OK : MESSAGES_ERR));
+  if (isCorrect && combo >= 3) spawnConfetti(12);
+
+  document.getElementById('btn-next').disabled = false;
+
+  if (!isCorrect && lives <= 0) {
+    setTimeout(() => endGameOver(), 1800);
+  }
+}
+
+function disableAllOptions() {
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.word-chip').forEach(c => c.disabled = true);
+}
+
+// ===== FEEDBACK =====
+function showFeedback(isCorrect, q, isTimeout) {
+  const panel = document.getElementById('feedback-panel');
+  const header = document.getElementById('fb-header');
+  const correctAnsEl = document.getElementById('fb-correct-ans');
+  const expEl = document.getElementById('fb-explanation');
+
+  panel.style.display = 'block';
+
+  if (isTimeout) {
+    panel.className = 'feedback-panel wrong-fb show';
+    header.textContent = '⏰ Tempo esgotado!';
+    // Safe: only show correct answer if options exist
+    const correctText = q.options ? q.options[q.correct] : q.correctText || '';
+    correctAnsEl.style.display = 'block';
+    correctAnsEl.textContent = '✅ Resposta correta: ' + correctText;
+  } else if (isCorrect) {
+    panel.className = 'feedback-panel correct-fb show';
+    header.textContent = '🎉 Correto!';
+    correctAnsEl.style.display = 'none';
+  } else {
+    panel.className = 'feedback-panel wrong-fb show';
+    header.textContent = '❌ Errado!';
+    const correctText = q.options ? q.options[q.correct] : q.correctText || '';
+    correctAnsEl.style.display = 'block';
+    correctAnsEl.textContent = '✅ Resposta correta: ' + correctText;
+  }
+
+  expEl.textContent = q.explanation || '';
+}
+
+// ===== NEXT QUESTION =====
+function nextQuestion() {
+  if (lives <= 0) return;
+  currentIndex++;
+  answered = false;
+  if (currentIndex >= currentQuestions.length) {
+    endGame();
+  } else {
+    buildQuestion(currentQuestions[currentIndex]);
+  }
+}
+
+// ===== START GAME =====
+function startGame(retryOnly) {
+  lives = 5;
+  combo = 0;
+  bestCombo = 0;
+  score = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answered = false;
+  currentIndex = 0;
+  isRetryMode = retryOnly;
+
+  if (retryOnly && wrongIds.length > 0) {
+    currentQuestions = shuffle(ALL_QUESTIONS.filter(q => wrongIds.includes(q.id)));
+  } else {
+    wrongIds = [];
+    currentQuestions = shuffle([...ALL_QUESTIONS]);
+  }
+
+  showScreen('game');
+  buildQuestion(currentQuestions[0]);
+}
+
+// ===== END GAME =====
+function endGame() {
+  clearInterval(timerInterval);
+  const pct = Math.round((correctCount / currentQuestions.length) * 100);
+  const today = new Date().toLocaleDateString('pt-BR');
+  const entry = { score, date: today, correct: correctCount, total: currentQuestions.length };
+  const ranking = saveRanking(entry);
+
+  document.getElementById('result-title').textContent = pct >= 80 ? 'Incrível! 🎉' : pct >= 50 ? 'Bom trabalho! 💪' : 'Continue estudando! 📚';
+  document.getElementById('result-pct').textContent = pct + '%';
+  document.getElementById('result-circle').style.setProperty('--pct', pct);
+  document.getElementById('res-correct').textContent = correctCount;
+  document.getElementById('res-wrong').textContent = wrongCount;
+  document.getElementById('res-combo').textContent = bestCombo;
+  document.getElementById('result-mascot').src = pct >= 50 ? 'capivaraAcerto.png' : 'capivaraErro.png';
+
+  // Error tags
+  const errorSection = document.getElementById('error-tags-section');
+  const errorTagsEl = document.getElementById('error-tags');
+  const errorThemes = [...new Set(ALL_QUESTIONS.filter(q => wrongIds.includes(q.id)).map(q => q.theme))];
+  if (errorThemes.length > 0) {
+    errorSection.style.display = 'block';
+    errorTagsEl.innerHTML = errorThemes.map(t =>
+      `<span class="error-tag theme-${t}">${THEME_LABELS[t]}</span>`
+    ).join('');
+  } else {
+    errorSection.style.display = 'none';
+  }
+
+  // Retry button
+  const retryBtn = document.getElementById('btn-retry-result');
+  retryBtn.style.display = wrongIds.length > 0 ? 'block' : 'none';
+
+  renderRanking(document.getElementById('result-ranking-list'), score);
+  showScreen('result');
+  if (pct >= 80) spawnConfetti(40);
+}
+
+function endGameOver() {
+  clearInterval(timerInterval);
+  const retryBtn = document.getElementById('btn-retry-gameover');
+  retryBtn.style.display = wrongIds.length > 0 ? 'block' : 'none';
+  showScreen('gameover');
+}
+
+// ===== HOME =====
+function initHome() {
+  const r = loadRanking();
+  const homeRanking = document.getElementById('home-ranking');
+  const retryBtn = document.getElementById('btn-retry-home');
+
+  if (r.length > 0) {
+    homeRanking.style.display = 'block';
+    renderRanking(document.getElementById('home-ranking-list'), null);
+  }
+
+  if (wrongIds.length > 0) {
+    retryBtn.style.display = 'block';
+  }
+}
+
+function confirmQuit() {
+  if (confirm('Deseja sair do quiz? Seu progresso será perdido.')) {
+    clearInterval(timerInterval);
+    showScreen('home');
+    initHome();
+  }
+}
+
+// ===== INIT =====
+initHome();
+</script>
+</body>
+</html>
