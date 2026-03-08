@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Ilhas e Continentes da Terra</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1CB0F6;
+    --primary-dark: #0891CC;
+    --success: #58CC02;
+    --success-dark: #46A302;
+    --error: #FF4B4B;
+    --error-dark: #EA2B2B;
+    --warning: #FF9600;
+    --purple: #CE82FF;
+    --bg: #EBF6FF;
+    --card: #FFFFFF;
+    --text: #1C1E21;
+    --text-light: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 4px 0 rgba(0,0,0,0.12);
+    --shadow-hover: 0 6px 0 rgba(0,0,0,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #c3e4ff 1.5px, transparent 1.5px);
+    background-size: 32px 32px;
+    z-index: 0;
+    opacity: 0.45;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: none; animation: fadeSlideIn 0.4s ease; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 16px;
+    gap: 12px;
+  }
+
+  .game-header .logo-mini {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .btn-close {
+    width: 40px; height: 40px;
+    border: none; background: none;
+    cursor: pointer; color: var(--text-light);
+    font-size: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .btn-close:hover { background: var(--border); }
+
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-bar {
+    height: 16px;
+    background: #dde8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success) 0%, #7FE200 100%);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+
+  @keyframes shimmer { to { left: 100%; } }
+
+  .progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+
+  .lives { display: flex; gap: 4px; font-size: 20px; }
+
+  .timer-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 10px;
+  }
+
+  .timer-circle {
+    width: 64px; height: 64px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timer-circle svg {
+    position: absolute;
+    top: 0; left: 0;
+    transform: rotate(-90deg);
+  }
+
+  .timer-circle svg circle {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s;
+  }
+
+  .timer-circle svg .bg-circle { stroke: #E5E7EB; }
+  .timer-circle svg .fg-circle {
+    stroke-dasharray: 163;
+    stroke-dashoffset: 0;
+  }
+
+  .timer-number {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    z-index: 1;
+    transition: color 0.5s;
+  }
+
+  .mascot-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 8px;
+    position: relative;
+  }
+
+  .mascot-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+    transition: transform 0.3s;
+  }
+
+  .mascot-img.bounce { animation: mascotBounce 0.6s cubic-bezier(.34,1.56,.64,1); }
+  .mascot-img.shake  { animation: mascotShake 0.5s ease; }
+
+  @keyframes mascotBounce {
+    0%   { transform: scale(1) rotate(0); }
+    40%  { transform: scale(1.25) rotate(-5deg); }
+    70%  { transform: scale(0.95) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  @keyframes mascotShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-3deg); }
+    40% { transform: translateX(8px) rotate(3deg); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .speech-bubble {
+    position: absolute;
+    top: -8px;
+    right: calc(50% - 160px);
+    background: white;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    white-space: nowrap;
+    opacity: 0;
+    transform: scale(0.5);
+    transform-origin: bottom left;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+    z-index: 10;
+    max-width: 200px;
+    white-space: normal;
+    text-align: left;
+  }
+  .speech-bubble.show { opacity: 1; transform: scale(1); }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 20px;
+    border: 8px solid transparent;
+    border-top-color: var(--primary);
+    border-bottom: none;
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .question-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-radius: 999px;
+    padding: 3px 12px;
+    margin-bottom: 10px;
+  }
+  .badge-mc { background: #EEF2FF; color: #6366F1; }
+  .badge-fill { background: #FFF3E0; color: #E65100; }
+
+  .question-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  .options-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+
+  .option-btn:not(:disabled):hover {
+    border-color: var(--primary);
+    background: #EBF9FF;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .option-btn .opt-letter {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    font-weight: 900;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .option-btn.correct {
+    border-color: var(--success);
+    background: #F0FDF4;
+    box-shadow: 0 3px 0 var(--success-dark);
+  }
+  .option-btn.correct .opt-letter {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--error);
+    background: #FFF1F1;
+    box-shadow: 0 3px 0 var(--error-dark);
+  }
+  .option-btn.wrong .opt-letter {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+  }
+
+  .option-btn:disabled { cursor: not-allowed; opacity: 0.75; }
+
+  .fill-sentence {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 2;
+    color: var(--text);
+    margin: 6px 0 14px;
+  }
+
+  .fill-blank {
+    display: inline-block;
+    min-width: 130px;
+    border-bottom: 3px solid var(--primary);
+    padding: 0 8px;
+    text-align: center;
+    color: var(--primary-dark);
+    font-weight: 900;
+    transition: border-color 0.3s, color 0.3s;
+    cursor: default;
+  }
+  .fill-blank.correct-blank { border-color: var(--success); color: var(--success-dark); }
+  .fill-blank.wrong-blank   { border-color: var(--error); color: var(--error-dark); }
+
+  .word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .word-chip {
+    background: #EBF6FF;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 3px 0 var(--primary-dark);
+  }
+  .word-chip:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+  }
+  .word-chip:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .word-chip.used { opacity: 0; pointer-events: none; }
+
+  .feedback-panel {
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: none;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.55;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  .feedback-panel.show { display: block; }
+  .feedback-panel.correct-fb {
+    background: #F0FDF4;
+    border: 2px solid var(--success);
+    color: #166534;
+  }
+  .feedback-panel.wrong-fb {
+    background: #FFF1F1;
+    border: 2px solid var(--error);
+    color: #7F1D1D;
+  }
+  .feedback-header {
+    font-size: 17px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .feedback-correct-ans {
+    font-size: 13px;
+    margin-top: 6px;
+    color: #15803D;
+    font-weight: 800;
+  }
+  .feedback-explanation {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+
+  .combo-wrap {
+    display: flex;
+    justify-content: center;
+    min-height: 36px;
+    margin-bottom: 4px;
+  }
+
+  .combo-badge {
+    background: linear-gradient(135deg, #FF9600, #FF4B4B);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    padding: 4px 20px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(255,75,75,0.4);
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .combo-badge.show { transform: scale(1); }
+
+  .btn-next {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--primary-dark);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: auto;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--primary-dark); }
+  .btn-next:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--primary-dark); }
+  .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .home-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+    padding: 32px 0;
+    text-align: center;
+  }
+
+  .home-logo {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .home-mascot { width: 120px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2)); }
+
+  .home-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(22px, 5vw, 32px);
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .home-title span { color: var(--primary); }
+
+  .home-subtitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-light);
+    max-width: 380px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-chip {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-start {
+    width: 100%;
+    max-width: 360px;
+    padding: 18px;
+    background: var(--success);
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--success-dark);
+    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 0 var(--success-dark); }
+  .btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--success-dark); }
+
+  .btn-retry-errors {
+    width: 100%;
+    max-width: 360px;
+    padding: 14px;
+    background: var(--warning);
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #cc7700;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-retry-errors:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #cc7700; }
+
+  .result-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    text-align: center;
+  }
+
+  .result-mascot { width: 130px; }
+
+  .result-score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(var(--success) calc(var(--pct) * 1%), #E5E7EB 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .result-score-circle::before {
+    content: '';
+    position: absolute;
+    width: 88px; height: 88px;
+    background: white;
+    border-radius: 50%;
+  }
+  .result-score-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--text);
+    z-index: 1;
+  }
+
+  .result-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  .result-stat-box {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+  }
+  .result-stat-box .val { font-family: 'Fredoka One', cursive; font-size: 28px; }
+  .result-stat-box .lbl {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .error-tags-section { width: 100%; text-align: left; }
+  .error-tags-title {
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .error-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .error-tag {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #FFF3E0;
+    border: 2px solid #FF9600;
+    color: #7C3500;
+  }
+  .error-tag.theme-continentes { background: #DBEAFE; border-color: #3B82F6; color: #1E3A8A; }
+  .error-tag.theme-ilhas { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+  .error-tag.theme-oceanos { background: #E0F2FE; border-color: #0EA5E9; color: #0C4A6E; }
+  .error-tag.theme-terras-emersas { background: #EDE9FE; border-color: #8B5CF6; color: #4C1D95; }
+  .error-tag.theme-imagem-planeta { background: #FEF3C7; border-color: #F59E0B; color: #78350F; }
+  .error-tag.theme-movimentos { background: #FCE7F3; border-color: #EC4899; color: #831843; }
+  .error-tag.theme-poluicao { background: #FEE2E2; border-color: #EF4444; color: #7F1D1D; }
+  .error-tag.theme-poema { background: #F3E8FF; border-color: #A855F7; color: #581C87; }
+  .error-tag.theme-preservacao { background: #CCFBF1; border-color: #14B8A6; color: #134E4A; }
+
+  .ranking-section { width: 100%; }
+  .ranking-title {
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .ranking-list { display: flex; flex-direction: column; gap: 6px; }
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .ranking-item.current { border-color: var(--primary); background: #EBF9FF; }
+  .rank-pos {
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    width: 28px;
+    text-align: center;
+    color: var(--text-light);
+  }
+  .rank-pos.gold   { color: #F59E0B; }
+  .rank-pos.silver { color: #9CA3AF; }
+  .rank-pos.bronze { color: #D97706; }
+  .rank-score { margin-left: auto; font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--primary); }
+
+  .timeout-screen { text-align: center; padding: 48px 24px; }
+  .timeout-screen h2 { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--error); margin: 16px 0 8px; }
+
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    overflow: hidden;
+    height: 100vh;
+    z-index: 9999;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+  }
+
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .gameover-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    gap: 16px;
+    padding: 32px 0;
+  }
+  .gameover-screen h2 { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--error); }
+  .gameover-screen p { font-size: 16px; font-weight: 700; color: var(--text-light); }
+
+  @media (max-width: 480px) {
+    .speech-bubble { right: calc(50% - 140px); font-size: 11px; max-width: 170px; }
+    .result-stats { grid-template-columns: repeat(3, 1fr); }
+    .option-btn { font-size: 14px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="screen-home" class="screen active">
+    <div class="home-hero">
+      <img src="logo.png" class="home-logo" id="home-logo" alt="Partiu Revisão" onerror="this.style.display='none'">
+      <img src="capivaraAcerto.png" class="home-mascot" id="home-mascot" alt="Capivara" onerror="this.src='capivaraAcerto.png'">
+      <div class="home-title">Partiu Revisão:<br><span>Ilhas e Continentes da Terra</span></div>
+      <div class="home-subtitle">30 perguntas sobre continentes, ilhas, oceanos e o nosso planeta. Você consegue zerar? 🌍</div>
+      <div class="stats-row">
+        <div class="stat-chip">❓ 30 perguntas</div>
+        <div class="stat-chip">❤️ 5 vidas</div>
+        <div class="stat-chip">⏱️ 30s por questão</div>
+      </div>
+      <button class="btn-start" onclick="startGame(false)">🚀 Começar!</button>
+      <button class="btn-retry-errors" id="btn-retry-home" onclick="startGame(true)" style="display:none">🔥 Refazer apenas os erros</button>
+    </div>
+    <div class="ranking-section" id="home-ranking" style="display:none">
+      <div class="ranking-title">🏆 Melhores Pontuações</div>
+      <div class="ranking-list" id="home-ranking-list"></div>
+    </div>
+  </div>
+
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <button class="btn-close" onclick="confirmQuit()">✕</button>
+      <img src="logo.png" class="logo-mini" alt="" onerror="this.style.display='none'">
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Pergunta 1 de 30</div>
+      </div>
+      <div class="lives" id="lives-display"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-circle">
+        <svg width="64" height="64">
+          <circle class="bg-circle" cx="32" cy="32" r="26"/>
+          <circle class="fg-circle" id="timer-fg" cx="32" cy="32" r="26"
+                  stroke="#1CB0F6" stroke-dasharray="163" stroke-dashoffset="0"/>
+        </svg>
+        <span class="timer-number" id="timer-number">30</span>
+      </div>
+    </div>
+
+    <div class="combo-wrap">
+      <div class="combo-badge" id="combo-badge">🔥 COMBO x<span id="combo-count">2</span></div>
+    </div>
+
+    <div class="mascot-wrap">
+      <div class="speech-bubble" id="speech-bubble">Vamos lá!</div>
+      <img src="capivaraAcerto.png" class="mascot-img" id="mascot" alt="Capivara">
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-type-badge badge-mc" id="q-type-badge">Múltipla Escolha</div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options-grid" id="mc-options"></div>
+      <div id="fill-area" style="display:none">
+        <div class="fill-sentence" id="fill-sentence"></div>
+        <div class="word-bank" id="word-bank"></div>
+      </div>
+    </div>
+
+    <div class="feedback-panel" id="feedback-panel">
+      <div class="feedback-header" id="fb-header"></div>
+      <div id="fb-correct-ans" class="feedback-correct-ans" style="display:none"></div>
+      <div class="feedback-explanation" id="fb-explanation"></div>
+    </div>
+
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()" disabled>Próxima →</button>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="result-hero">
+      <img src="capivaraAcerto.png" class="result-mascot" id="result-mascot" alt="Capivara">
+      <div class="result-title" id="result-title">Incrível! 🎉</div>
+      <div class="result-score-circle" id="result-circle">
+        <span class="result-score-text" id="result-pct">0%</span>
+      </div>
+      <div class="result-stats">
+        <div class="result-stat-box">
+          <div class="val" id="res-correct" style="color:var(--success)">0</div>
+          <div class="lbl">Acertos</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="val" id="res-wrong" style="color:var(--error)">0</div>
+          <div class="lbl">Erros</div>
+        </div>
+        <div class="result-stat-box">
+          <div class="val" id="res-combo" style="color:var(--warning)">0</div>
+          <div class="lbl">Melhor Combo</div>
+        </div>
+      </div>
+
+      <div class="error-tags-section" id="error-tags-section" style="display:none">
+        <div class="error-tags-title">⚠️ Temas para revisar:</div>
+        <div class="error-tags" id="error-tags"></div>
+      </div>
+
+      <div class="ranking-section">
+        <div class="ranking-title">🏆 Ranking</div>
+        <div class="ranking-list" id="result-ranking-list"></div>
+      </div>
+
+      <button class="btn-start" onclick="startGame(false)" style="max-width:100%">🔄 Jogar Novamente</button>
+      <button class="btn-retry-errors" id="btn-retry-result" onclick="startGame(true)" style="display:none;max-width:100%">🔥 Refazer só os erros</button>
+    </div>
+  </div>
+
+  <div id="screen-gameover" class="screen">
+    <div class="gameover-screen">
+      <img src="capivaraErro.png" style="width:130px;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.2))" alt="Capivara triste">
+      <h2>💔 Sem Vidas!</h2>
+      <p>Não desanima! Cada erro é um aprendizado.</p>
+      <button class="btn-start" onclick="startGame(false)">🔄 Tentar de Novo</button>
+      <button class="btn-retry-errors" id="btn-retry-gameover" onclick="startGame(true)" style="display:none">🔥 Refazer apenas os erros</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+// ===== QUESTION BANK (from CSV quiz_ilhas_continentes_terra.csv) =====
+const ALL_QUESTIONS = [
+  {id:1, text:"O que são continentes?", options:["Grandes porções de terra cercadas por água","Pequenas ilhas no oceano","Montanhas muito altas","Partes do céu"], correct:0, theme:"continentes", explanation:"Continentes são grandes massas de terra emersa, cercadas por oceanos. Exemplos: América, África, Ásia, Europa, Oceania e Antártida."},
+  {id:2, text:"O que são ilhas?", options:["Grandes massas continentais","Porções de terra cercadas por água e menores que continentes","Oceanos rasos","Partes congeladas do planeta"], correct:1, theme:"ilhas", explanation:"Ilhas são porções de terra emersa cercadas por água e geralmente menores que os continentes. Podem ser isoladas ou formar arquipélagos."},
+  {id:3, text:"De modo geral, as ilhas são:", options:["Maiores que os continentes","Menores que os continentes","Do mesmo tamanho que os continentes","Sempre cobertas de gelo"], correct:1, theme:"ilhas", explanation:"As ilhas são, em geral, menores que os continentes. Continentes são as maiores porções de terra; ilhas são porções menores também cercadas por água."},
+  {id:4, text:"Os continentes são caracterizados por serem:", options:["Porções pequenas de terra","Grandes extensões de terra","Partes do oceano","Somente montanhas"], correct:1, theme:"continentes", explanation:"Os continentes são grandes extensões de terra emersa. Eles abrigam países, cidades, florestas, rios e diversas formas de vida."},
+  {id:5, text:"As terras emersas são aquelas que:", options:["Estão abaixo da água","Estão acima do nível do mar","Estão dentro dos rios","Estão no fundo do oceano"], correct:1, theme:"terras-emersas", explanation:"Terras emersas são as porções de terra que ficam acima do nível do mar — ou seja, continentes e ilhas, em oposição aos oceanos e mares."},
+  {id:6, text:"Na imagem da superfície terrestre, os oceanos aparecem principalmente na cor:", options:["Verde","Amarela","Azul-escuro","Branca"], correct:2, theme:"imagem-planeta", explanation:"Nas imagens do planeta (visto do espaço), os oceanos aparecem em tons de azul, pois a água absorve e reflete a luz de forma que vemos o azul."},
+  {id:7, text:"As áreas brancas na imagem do planeta indicam principalmente:", options:["Desertos","Áreas com gelo","Florestas","Oceanos"], correct:1, theme:"imagem-planeta", explanation:"As áreas brancas nas imagens da Terra representam principalmente regiões cobertas por gelo e neve, como os polos e algumas montanhas altas."},
+  {id:8, text:"Qual elemento natural cerca ilhas e continentes?", options:["Areia","Água","Vento","Pedra"], correct:1, theme:"oceanos", explanation:"Tanto ilhas quanto continentes são cercados por água — oceanos e mares. A água é o elemento que separa e delimita essas porções de terra."},
+  {id:9, text:"A Terra gira ao redor do Sol em um movimento chamado:", options:["Rotação","Translação","Inclinação","Oscilação"], correct:1, theme:"movimentos", explanation:"O movimento da Terra em órbita ao redor do Sol é chamado de translação. Ele dura aproximadamente 365 dias e está ligado às estações do ano."},
+  {id:10, text:"O movimento que a Terra faz ao redor de seu próprio eixo é chamado de:", options:["Translação","Rotação","Orbitação","Revolução"], correct:1, theme:"movimentos", explanation:"Rotação é o movimento que a Terra faz girando em torno do seu próprio eixo imaginário. Esse movimento dura cerca de 24 horas e está ligado ao dia e à noite."},
+  {id:11, text:"No globo terrestre, o movimento que podemos simular ao girá-lo é:", options:["Translação","Rotação","Eclipse","Inclinação"], correct:1, theme:"movimentos", explanation:"Quando giramos um globo terrestre com a mão, estamos simulando o movimento de rotação da Terra em torno do seu próprio eixo."},
+  {id:12, text:"Na imagem do globo com as letras A e B, a área B representa:", options:["Terra firme","Área de oceano","Montanhas","Deserto"], correct:1, theme:"imagem-planeta", explanation:"Em representações do globo, as áreas em azul geralmente indicam oceanos e mares; as áreas em tons de marrom/verde representam terra firme."},
+  {id:13, text:"Na mesma imagem, a área A representa:", options:["Terra firme ou continente","Somente gelo","O fundo do oceano","Nuvens"], correct:0, theme:"imagem-planeta", explanation:"A área A, em contraste com o oceano (B), representa terra firme — continentes ou ilhas, onde há solo e formas de vida terrestre."},
+  {id:14, text:"Os oceanos são importantes porque:", options:["Abrigam muitas formas de vida marinha","São feitos apenas de gelo","Não possuem vida","São desertos"], correct:0, theme:"oceanos", explanation:"Os oceanos abrigam uma enorme diversidade de vida: peixes, mamíferos marinhos, corais, plantas aquáticas e muitos outros seres que dependem da água salgada."},
+  {id:15, text:"Os continentes são locais onde:", options:["Vivem seres humanos e existem florestas, rios e cidades","Só existem oceanos","Não há vida","Só existem montanhas"], correct:0, theme:"continentes", explanation:"Nos continentes vivem seres humanos e há florestas, rios, lagos, cidades, desertos e montanhas — ou seja, grande parte da vida e da atividade humana."},
+  {id:16, text:"Quantos continentes são considerados no texto?", options:["Cinco","Seis","Sete","Quatro"], correct:1, theme:"continentes", explanation:"Geralmente consideramos seis continentes: América, Europa, Ásia, África, Oceania e Antártida. (Alguns modelos consideram sete, separando as Américas.)"},
+  {id:17, text:"A Antártida é conhecida por:", options:["Ser um grande deserto quente","Ser uma região coberta por gelo","Ser o maior oceano","Ser um arquipélago tropical"], correct:1, theme:"continentes", explanation:"A Antártida é o continente mais frio do planeta, coberto por uma enorme camada de gelo. É um dos polos da Terra e abriga poucos habitantes permanentes."},
+  {id:18, text:"As terras emersas incluem:", options:["Somente montanhas","Continentes e ilhas","Somente planícies","Somente desertos"], correct:1, theme:"terras-emersas", explanation:"Terras emersas são todas as porções de terra acima do nível do mar: continentes e ilhas, com suas montanhas, planícies, desertos e florestas."},
+  {id:19, text:"Os oceanos são habitat principalmente de:", options:["Animais marinhos e peixes","Apenas plantas terrestres","Apenas humanos","Somente aves"], correct:0, theme:"oceanos", explanation:"Os oceanos são o habitat de peixes, baleias, golfinhos, tubarões, corais, algas e muitas outras formas de vida que dependem da água salgada."},
+  {id:20, text:"A poluição dos oceanos pode prejudicar:", options:["Somente os peixes","A vida marinha e o meio ambiente","Somente as praias","Somente os navios"], correct:1, theme:"poluicao", explanation:"A poluição dos oceanos afeta toda a vida marinha, o equilíbrio dos ecossistemas, as praias e, indiretamente, os seres humanos que dependem do mar."},
+  {id:21, text:"Uma causa comum da poluição dos mares é:", options:["Descarte de lixo e resíduos","Chuva natural","Vento forte","Ondas do mar"], correct:0, theme:"poluicao", explanation:"O descarte incorreto de lixo, plásticos e resíduos industriais nos rios e mares é uma das principais causas da poluição marinha."},
+  {id:22, text:"Um efeito da poluição marinha é:", options:["Aumento da vida marinha","Morte de animais marinhos","Formação de novas ilhas","Diminuição das ondas"], correct:1, theme:"poluicao", explanation:"A poluição pode causar morte de peixes e outros animais marinhos, destruição de corais e desequilíbrio nos ecossistemas oceânicos."},
+  {id:23, text:"Uma forma de reduzir a poluição dos oceanos é:", options:["Jogar lixo no mar","Reduzir e reciclar resíduos","Ignorar o problema","Despejar mais plástico"], correct:1, theme:"poluicao", explanation:"Reduzir o consumo de plástico, reciclar e descartar o lixo corretamente ajudam a diminuir a quantidade de resíduos que chegam aos oceanos."},
+  {id:24, text:"Segundo o poema, a Terra vista de longe parece:", options:["Verde","Azul","Amarela","Preta"], correct:1, theme:"poema", explanation:"No poema, a Terra vista de longe é descrita como azul, pois os oceanos ocupam grande parte da superfície e refletem essa cor no espaço."},
+  {id:25, text:"Segundo o poema, a Terra vista de perto parece:", options:["Pequena","Enorme","Transparente","Quadrada"], correct:1, theme:"poema", explanation:"Vista de perto, a Terra nos parece enorme: com seus continentes, oceanos, montanhas e florestas, o planeta é imenso para quem está na superfície."},
+  {id:26, text:"No poema, a Lua é descrita como algo que:", options:["Se afasta da Terra","Vigia e acompanha a Terra","Desaparece sempre","Cai na Terra"], correct:1, theme:"poema", explanation:"Em versos poéticos, a Lua muitas vezes é retratada como uma companheira que vigia ou acompanha a Terra no céu."},
+  {id:27, text:"A expressão 'Minha Terra é azul' está relacionada principalmente:", options:["À grande quantidade de água no planeta","À presença de montanhas","À areia dos desertos","À cor do céu"], correct:0, theme:"poema", explanation:"A Terra é chamada de 'azul' porque a maior parte da superfície visível do espaço é coberta por oceanos e mares, que refletem a luz em tons de azul."},
+  {id:28, text:"O poema menciona que na Terra existem:", options:["Somente desertos","Água e continentes cheios de vida","Apenas gelo","Somente oceanos"], correct:1, theme:"poema", explanation:"O planeta Terra tem tanto água (oceanos, rios, lagos) quanto continentes onde há vida, cidades, florestas e diversidade."},
+  {id:29, text:"Quando observamos o planeta do espaço, percebemos que:", options:["A água cobre grande parte da superfície","A Terra é totalmente seca","Só existem continentes","Não existem oceanos"], correct:0, theme:"imagem-planeta", explanation:"Vista do espaço, a Terra mostra que a água (oceanos e mares) cobre a maior parte da superfície — por isso o planeta é chamado de 'planeta azul'."},
+  {id:30, text:"Preservar os oceanos é importante porque:", options:["Eles não têm importância","Mantêm o equilíbrio da vida no planeta","Servem apenas para navegação","Não possuem seres vivos"], correct:1, theme:"preservacao", explanation:"Os oceanos regulam o clima, produzem oxigênio, abrigam biodiversidade e são fonte de alimento — preservá-los é essencial para a vida na Terra."},
+];
+
+// Metade múltipla escolha, metade complete a lacuna (word bank)
+const FILL_QUESTIONS = new Set([2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]);
+
+const THEME_LABELS = {
+  "continentes": "Continentes",
+  "ilhas": "Ilhas",
+  "oceanos": "Oceanos",
+  "terras-emersas": "Terras Emersas",
+  "imagem-planeta": "Imagem do Planeta",
+  "movimentos": "Movimentos da Terra",
+  "poluicao": "Poluição Marinha",
+  "poema": "Terra no Poema",
+  "preservacao": "Preservação"
+};
+
+// ===== STATE =====
+let currentQuestions = [];
+let currentIndex = 0;
+let lives = 5;
+let combo = 0;
+let bestCombo = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let wrongIds = [];
+let answered = false;
+let timerInterval = null;
+let timeLeft = 30;
+let isRetryMode = false;
+
+const MESSAGES_OK = ["Arrasou! 🌟","Isso aí! 🔥","Perfeito! ✨","Mandou bem! 🎉","Sabidão! 🧠","Que isso! 🚀"];
+const MESSAGES_ERR = ["Quase lá...","Vai lá! 💪","Não desiste!","Estuda mais! 📚","Próxima você acerta!"];
+const MESSAGES_IDLE = ["Vamos lá!","Pensa bem...","Você consegue!","Concentra! 🧠"];
+
+// ===== UTILS =====
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+}
+
+function randMsg(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ===== RANKING =====
+const RANKING_KEY = 'ilhas_continentes_ranking';
+
+function loadRanking() {
+  try { return JSON.parse(localStorage.getItem(RANKING_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveRanking(entry) {
+  let r = loadRanking();
+  r.push(entry);
+  r.sort((a,b) => b.score - a.score);
+  r = r.slice(0, 10);
+  localStorage.setItem(RANKING_KEY, JSON.stringify(r));
+  return r;
+}
+
+function renderRanking(listEl, currentScore) {
+  const r = loadRanking();
+  if (!listEl) return;
+  if (!r.length) { listEl.innerHTML = '<div style="color:var(--text-light);font-size:14px;font-weight:700;padding:8px">Nenhuma pontuação ainda.</div>'; return; }
+  const medals = ['🥇','🥈','🥉'];
+  listEl.innerHTML = r.map((item, i) => `
+    <div class="ranking-item ${item.score === currentScore && i < 3 ? 'current' : ''}">
+      <span class="rank-pos ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${medals[i] || (i+1)}</span>
+      <span>${item.date}</span>
+      <span class="rank-score">${item.score}pts</span>
+    </div>
+  `).join('');
+}
+
+// ===== LIVES =====
+function renderLives() {
+  const el = document.getElementById('lives-display');
+  if (!el) return;
+  el.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const span = document.createElement('span');
+    span.textContent = i < lives ? '❤️' : '🖤';
+    if (i >= lives) span.style.opacity = '0.35';
+    el.appendChild(span);
+  }
+}
+
+// ===== TIMER =====
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 30;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const numEl = document.getElementById('timer-number');
+  const fgEl = document.getElementById('timer-fg');
+  if (!numEl || !fgEl) return;
+  numEl.textContent = timeLeft;
+  const pct = timeLeft / 30;
+  const circumference = 163;
+  fgEl.style.strokeDashoffset = circumference * (1 - pct);
+  if (pct > 0.5) {
+    fgEl.style.stroke = '#1CB0F6';
+    numEl.style.color = '#1C1E21';
+  } else if (pct > 0.25) {
+    fgEl.style.stroke = '#FF9600';
+    numEl.style.color = '#FF9600';
+  } else {
+    fgEl.style.stroke = '#FF4B4B';
+    numEl.style.color = '#FF4B4B';
+  }
+}
+
+function handleTimeout() {
+  if (answered) return;
+  answered = true;
+  lives--;
+  combo = 0;
+  renderLives();
+  updateCombo();
+  disableAllOptions();
+  const q = currentQuestions[currentIndex];
+  showFeedback(false, q, true);
+  mascotReact(false);
+  showSpeech(randMsg(MESSAGES_ERR));
+  if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  const btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.disabled = false;
+  if (lives <= 0) {
+    setTimeout(() => endGameOver(), 1800);
+  }
+}
+
+// ===== MASCOT =====
+function mascotReact(correct) {
+  const el = document.getElementById('mascot');
+  if (!el) return;
+  el.classList.remove('bounce', 'shake');
+  el.src = correct ? 'capivaraAcerto.png' : 'capivaraErro.png';
+  void el.offsetWidth;
+  el.classList.add(correct ? 'bounce' : 'shake');
+}
+
+function showSpeech(msg) {
+  const el = document.getElementById('speech-bubble');
+  if (el) {
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+}
+
+// ===== COMBO =====
+function updateCombo() {
+  const badge = document.getElementById('combo-badge');
+  const countEl = document.getElementById('combo-count');
+  if (!badge || !countEl) return;
+  if (combo >= 2) {
+    countEl.textContent = combo;
+    badge.classList.add('show');
+    if (combo >= 3) spawnConfetti(6);
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+// ===== CONFETTI =====
+function spawnConfetti(count = 20) {
+  const container = document.getElementById('confetti-container');
+  if (!container) return;
+  const colors = ['#FF4B4B','#58CC02','#1CB0F6','#FF9600','#CE82FF','#FFCC00'];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    piece.style.width = piece.style.height = (8 + Math.random() * 8) + 'px';
+    if (Math.random() > 0.5) piece.style.borderRadius = '50%';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ===== BUILD QUESTION =====
+function buildQuestion(q) {
+  const isFill = FILL_QUESTIONS.has(q.id);
+
+  const typeBadge = document.getElementById('q-type-badge');
+  const qText = document.getElementById('q-text');
+  const mcOptions = document.getElementById('mc-options');
+  const fillArea = document.getElementById('fill-area');
+  const feedbackPanel = document.getElementById('feedback-panel');
+  const btnNext = document.getElementById('btn-next');
+
+  if (typeBadge) {
+    typeBadge.textContent = isFill ? 'Complete a Lacuna' : 'Múltipla Escolha';
+    typeBadge.className = 'question-type-badge ' + (isFill ? 'badge-fill' : 'badge-mc');
+  }
+  if (qText) qText.textContent = isFill ? '' : q.text;
+  if (mcOptions) mcOptions.innerHTML = '';
+  if (fillArea) fillArea.style.display = 'none';
+  if (feedbackPanel) {
+    feedbackPanel.className = 'feedback-panel';
+    feedbackPanel.style.display = 'none';
+  }
+  if (btnNext) btnNext.disabled = true;
+
+  if (isFill) {
+    buildFillQuestion(q);
+  } else {
+    buildMCQuestion(q);
+  }
+
+  const pct = (currentIndex / currentQuestions.length) * 100;
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  if (progressFill) progressFill.style.width = pct + '%';
+  if (progressLabel) progressLabel.textContent = `Pergunta ${currentIndex + 1} de ${currentQuestions.length}`;
+
+  renderLives();
+  startTimer();
+  mascotReact(true);
+  const mascot = document.getElementById('mascot');
+  if (mascot) {
+    mascot.src = 'capivaraAcerto.png';
+    mascot.classList.remove('bounce','shake');
+  }
+  showSpeech(randMsg(MESSAGES_IDLE));
+}
+
+function buildMCQuestion(q) {
+  const mcOptions = document.getElementById('mc-options');
+  const fillArea = document.getElementById('fill-area');
+  if (mcOptions) mcOptions.style.display = 'flex';
+  if (fillArea) fillArea.style.display = 'none';
+
+  if (!q.options || q.options.length < 4) return;
+
+  const indices = shuffle([0,1,2,3]);
+  const letters = ['A','B','C','D'];
+
+  indices.forEach((origIdx, displayIdx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.orig = origIdx;
+    btn.innerHTML = `<span class="opt-letter">${letters[displayIdx]}</span><span>${q.options[origIdx]}</span>`;
+    btn.addEventListener('click', () => handleMCAnswer(btn, origIdx, q));
+    mcOptions.appendChild(btn);
+  });
+}
+
+function buildFillQuestion(q) {
+  const fillArea = document.getElementById('fill-area');
+  const mcOptions = document.getElementById('mc-options');
+  const sentenceEl = document.getElementById('fill-sentence');
+  const bankEl = document.getElementById('word-bank');
+
+  if (fillArea) fillArea.style.display = 'block';
+  if (mcOptions) mcOptions.style.display = 'none';
+
+  if (!q.options || q.options.length === 0) return;
+
+  const correctText = q.options[q.correct];
+
+  if (sentenceEl) {
+    sentenceEl.innerHTML = `${q.text} <span class="fill-blank" id="fill-blank">___________</span>`;
+  }
+
+  const distractors = q.options.filter((_, i) => i !== q.correct);
+  const bankWords = shuffle([correctText, ...shuffle(distractors).slice(0, 2)]);
+
+  if (bankEl) {
+    bankEl.innerHTML = '';
+    bankWords.forEach(word => {
+      const chip = document.createElement('button');
+      chip.className = 'word-chip';
+      chip.textContent = word;
+      chip.addEventListener('click', () => handleFillAnswer(chip, word, correctText, q));
+      bankEl.appendChild(chip);
+    });
+  }
+}
+
+// ===== ANSWER HANDLERS =====
+function handleMCAnswer(btn, origIdx, q) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const isCorrect = origIdx === q.correct;
+  const allBtns = document.querySelectorAll('.option-btn');
+
+  allBtns.forEach(b => {
+    b.disabled = true;
+    const bOrig = parseInt(b.dataset.orig, 10);
+    if (bOrig === q.correct) b.classList.add('correct');
+    else if (b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+function handleFillAnswer(chip, word, correctText, q) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const isCorrect = word === correctText;
+  const blankEl = document.getElementById('fill-blank');
+  if (blankEl) {
+    blankEl.textContent = word;
+    blankEl.classList.add(isCorrect ? 'correct-blank' : 'wrong-blank');
+  }
+
+  document.querySelectorAll('.word-chip').forEach(c => { c.disabled = true; });
+
+  processAnswer(isCorrect, q);
+}
+
+function processAnswer(isCorrect, q) {
+  if (isCorrect) {
+    correctCount++;
+    score += 10 + (combo >= 2 ? combo * 2 : 0) + Math.max(0, timeLeft);
+    combo++;
+    if (combo > bestCombo) bestCombo = combo;
+  } else {
+    wrongCount++;
+    lives--;
+    combo = 0;
+    if (!wrongIds.includes(q.id)) wrongIds.push(q.id);
+  }
+
+  renderLives();
+  updateCombo();
+  showFeedback(isCorrect, q, false);
+  mascotReact(isCorrect);
+  showSpeech(randMsg(isCorrect ? MESSAGES_OK : MESSAGES_ERR));
+  if (isCorrect && combo >= 3) spawnConfetti(12);
+
+  const btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.disabled = false;
+
+  if (!isCorrect && lives <= 0) {
+    setTimeout(() => endGameOver(), 1800);
+  }
+}
+
+function disableAllOptions() {
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.word-chip').forEach(c => c.disabled = true);
+}
+
+// ===== FEEDBACK (safe for fill: q.options may be missing in some flows) =====
+function getCorrectAnswerText(q) {
+  if (q.options && q.correct >= 0 && q.options[q.correct] !== undefined) {
+    return q.options[q.correct];
+  }
+  return q.correctText || '';
+}
+
+function showFeedback(isCorrect, q, isTimeout) {
+  const panel = document.getElementById('feedback-panel');
+  const header = document.getElementById('fb-header');
+  const correctAnsEl = document.getElementById('fb-correct-ans');
+  const expEl = document.getElementById('fb-explanation');
+
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  if (isTimeout) {
+    panel.className = 'feedback-panel wrong-fb show';
+    if (header) header.textContent = '⏰ Tempo esgotado!';
+    const correctText = getCorrectAnswerText(q);
+    if (correctAnsEl) {
+      correctAnsEl.style.display = 'block';
+      correctAnsEl.textContent = correctText ? ('✅ Resposta correta: ' + correctText) : '';
+    }
+  } else if (isCorrect) {
+    panel.className = 'feedback-panel correct-fb show';
+    if (header) header.textContent = '🎉 Correto!';
+    if (correctAnsEl) correctAnsEl.style.display = 'none';
+  } else {
+    panel.className = 'feedback-panel wrong-fb show';
+    if (header) header.textContent = '❌ Errado!';
+    const correctText = getCorrectAnswerText(q);
+    if (correctAnsEl) {
+      correctAnsEl.style.display = 'block';
+      correctAnsEl.textContent = correctText ? ('✅ Resposta correta: ' + correctText) : '';
+    }
+  }
+
+  if (expEl) expEl.textContent = q.explanation || '';
+}
+
+// ===== NEXT QUESTION =====
+function nextQuestion() {
+  if (lives <= 0) return;
+  currentIndex++;
+  answered = false;
+  if (currentIndex >= currentQuestions.length) {
+    endGame();
+  } else {
+    buildQuestion(currentQuestions[currentIndex]);
+  }
+}
+
+// ===== START GAME =====
+function startGame(retryOnly) {
+  lives = 5;
+  combo = 0;
+  bestCombo = 0;
+  score = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answered = false;
+  currentIndex = 0;
+  isRetryMode = retryOnly;
+
+  if (retryOnly && wrongIds.length > 0) {
+    currentQuestions = shuffle(ALL_QUESTIONS.filter(q => wrongIds.includes(q.id)));
+  } else {
+    wrongIds = [];
+    currentQuestions = shuffle([...ALL_QUESTIONS]);
+  }
+
+  showScreen('game');
+  buildQuestion(currentQuestions[0]);
+}
+
+// ===== END GAME =====
+function endGame() {
+  clearInterval(timerInterval);
+  const pct = currentQuestions.length ? Math.round((correctCount / currentQuestions.length) * 100) : 0;
+  const today = new Date().toLocaleDateString('pt-BR');
+  const entry = { score, date: today, correct: correctCount, total: currentQuestions.length };
+  saveRanking(entry);
+
+  const resultTitle = document.getElementById('result-title');
+  if (resultTitle) resultTitle.textContent = pct >= 80 ? 'Incrível! 🎉' : pct >= 50 ? 'Bom trabalho! 💪' : 'Continue estudando! 📚';
+
+  const resultPct = document.getElementById('result-pct');
+  if (resultPct) resultPct.textContent = pct + '%';
+
+  const resultCircle = document.getElementById('result-circle');
+  if (resultCircle) resultCircle.style.setProperty('--pct', pct);
+
+  document.getElementById('res-correct').textContent = correctCount;
+  document.getElementById('res-wrong').textContent = wrongCount;
+  document.getElementById('res-combo').textContent = bestCombo;
+
+  const resultMascot = document.getElementById('result-mascot');
+  if (resultMascot) resultMascot.src = pct >= 50 ? 'capivaraAcerto.png' : 'capivaraErro.png';
+
+  const errorSection = document.getElementById('error-tags-section');
+  const errorTagsEl = document.getElementById('error-tags');
+  const errorThemes = [...new Set(ALL_QUESTIONS.filter(q => wrongIds.includes(q.id)).map(q => q.theme))];
+  if (errorThemes.length > 0 && errorSection && errorTagsEl) {
+    errorSection.style.display = 'block';
+    errorTagsEl.innerHTML = errorThemes.map(t =>
+      `<span class="error-tag theme-${t}">${THEME_LABELS[t] || t}</span>`
+    ).join('');
+  } else if (errorSection) {
+    errorSection.style.display = 'none';
+  }
+
+  const retryBtn = document.getElementById('btn-retry-result');
+  if (retryBtn) retryBtn.style.display = wrongIds.length > 0 ? 'block' : 'none';
+
+  renderRanking(document.getElementById('result-ranking-list'), score);
+  showScreen('result');
+  if (pct >= 80) spawnConfetti(40);
+}
+
+function endGameOver() {
+  clearInterval(timerInterval);
+  const retryBtn = document.getElementById('btn-retry-gameover');
+  if (retryBtn) retryBtn.style.display = wrongIds.length > 0 ? 'block' : 'none';
+  showScreen('gameover');
+}
+
+// ===== HOME =====
+function initHome() {
+  const r = loadRanking();
+  const homeRanking = document.getElementById('home-ranking');
+  const retryBtn = document.getElementById('btn-retry-home');
+
+  if (r.length > 0 && homeRanking) {
+    homeRanking.style.display = 'block';
+    renderRanking(document.getElementById('home-ranking-list'), null);
+  }
+
+  if (wrongIds.length > 0 && retryBtn) {
+    retryBtn.style.display = 'block';
+  }
+}
+
+function confirmQuit() {
+  if (confirm('Deseja sair do quiz? Seu progresso será perdido.')) {
+    clearInterval(timerInterval);
+    showScreen('home');
+    initHome();
+  }
+}
+
+// ===== INIT =====
+initHome();
+</script>
+</body>
+</html>
