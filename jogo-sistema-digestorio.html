@@ -1,0 +1,797 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas do Sistema Digestório</title>
+<style>
+  :root {
+    --paper: #f3eedf;
+    --paper-2: #eae1c8;
+    --paper-3: #e2d7ba;
+    --ink: #26313f;
+    --ink-soft: #5b6472;
+    --rule: #c9bea0;
+    --skin: #e7cca9;
+    --skin-line: #b98f5f;
+    --accent: #8e3b2e;
+    --accent-soft: #b96f5c;
+    --success: #3f6b52;
+    --success-soft: #dce8de;
+    --success-ink: #1f3b2c;
+    --organ-liver: #8e4a3e;
+    --organ-stomach: #d98770;
+    --organ-gall: #7c8a4a;
+    --organ-pancreas: #c9a24b;
+    --organ-small: #e0a487;
+    --organ-large: #b08098;
+    --shadow: 0 10px 30px -14px rgba(38, 49, 63, 0.35);
+    --backdrop: rgba(20, 16, 8, 0.5);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #12161c; --paper-2: #1a212a; --paper-3: #212a35;
+      --ink: #e8e2ce; --ink-soft: #a3aab3; --rule: #38414d;
+      --skin: #6b5236; --skin-line: #a9855a;
+      --accent: #d98a72; --accent-soft: #a45c48;
+      --success: #7fb595; --success-soft: #223129; --success-ink: #cdead9;
+      --shadow: 0 10px 34px -12px rgba(0, 0, 0, 0.55);
+      --backdrop: rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12161c; --paper-2: #1a212a; --paper-3: #212a35;
+    --ink: #e8e2ce; --ink-soft: #a3aab3; --rule: #38414d;
+    --skin: #6b5236; --skin-line: #a9855a;
+    --accent: #d98a72; --accent-soft: #a45c48;
+    --success: #7fb595; --success-soft: #223129; --success-ink: #cdead9;
+    --shadow: 0 10px 34px -12px rgba(0, 0, 0, 0.55);
+    --backdrop: rgba(0, 0, 0, 0.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #f3eedf; --paper-2: #eae1c8; --paper-3: #e2d7ba;
+    --ink: #26313f; --ink-soft: #5b6472; --rule: #c9bea0;
+    --skin: #e7cca9; --skin-line: #b98f5f;
+    --accent: #8e3b2e; --accent-soft: #b96f5c;
+    --success: #3f6b52; --success-soft: #dce8de; --success-ink: #1f3b2c;
+    --shadow: 0 10px 30px -14px rgba(38, 49, 63, 0.35);
+    --backdrop: rgba(20, 16, 8, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ---- app shell: fills the screen, no page scroll on mobile ---- */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .app-header {
+    flex: 0 0 auto;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 4px;
+  }
+  h1 {
+    font-family: Georgia, "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+    font-weight: 700;
+    font-size: clamp(19px, 5vw, 28px);
+    line-height: 1.15;
+    margin: 0 0 3px;
+    text-wrap: balance;
+  }
+  .subtitle {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .app-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    position: relative;
+  }
+  @media (min-width: 860px) {
+    .app-body { padding: 18px; gap: 22px; }
+  }
+
+  .stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+  }
+
+  .stage-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .plate-frame {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: var(--shadow);
+    max-width: 100%;
+    max-height: calc(100% - 16px);
+    aspect-ratio: 400 / 640;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .plate-frame svg { display: block; width: 100%; height: 100%; }
+
+  .plate-caption {
+    flex: 0 0 auto;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .pin { cursor: pointer; touch-action: manipulation; }
+  .pin .pin-hit { fill: transparent; pointer-events: all; }
+  .pin .pin-circle { transition: fill 0.15s ease, stroke 0.15s ease; }
+  .pin:hover .pin-circle, .pin:focus-visible .pin-circle { stroke-width: 2.5; }
+  .pin:focus-visible { outline: none; }
+  .pin:focus-visible .pin-circle { filter: drop-shadow(0 0 0 2px var(--accent)); }
+  .pin.solved { cursor: default; }
+  .pin.open .pin-circle { fill: var(--paper-3); }
+
+  /* ---- legend panel: off-canvas drawer on mobile, static sidebar on desktop ---- */
+  .legend-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: flex-end;
+    visibility: hidden;
+  }
+  .legend-panel.open { visibility: visible; }
+  .legend-panel-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--backdrop);
+    opacity: 0;
+  }
+  .legend-panel.open .legend-panel-backdrop { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .legend-panel-backdrop { transition: opacity 0.2s ease; }
+  }
+
+  .legend-panel-card {
+    position: relative;
+    width: min(340px, 86vw);
+    height: 100%;
+    background: var(--paper-2);
+    border-left: 1px solid var(--rule);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+  }
+  .legend-panel.open .legend-panel-card { transform: translateX(0); }
+  @media (prefers-reduced-motion: no-preference) {
+    .legend-panel-card { transition: transform 0.22s ease; }
+  }
+
+  .legend-head {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .legend-head h2 {
+    font-family: Georgia, "Iowan Old Style", Palatino, serif;
+    font-size: 18px;
+    margin: 0;
+  }
+  #progress {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  #progress b { color: var(--accent); }
+
+  .legend-panel-close {
+    background: none; border: none;
+    color: var(--ink-soft);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .legend-panel-close:hover { color: var(--accent); }
+
+  .legend-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 18px 18px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .row-num {
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .slot {
+    width: 100%;
+    text-align: left;
+    min-height: 42px;
+    border: 1.5px dashed var(--rule);
+    border-radius: 3px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 11px;
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .slot:hover, .slot:focus-visible { border-color: var(--accent-soft); background: var(--paper-3); }
+  .slot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .slot.solved {
+    border-style: solid;
+    border-color: var(--success);
+    background: var(--success-soft);
+    color: var(--success-ink);
+    font-weight: 600;
+    cursor: default;
+  }
+  .slot .check {
+    flex: 0 0 auto;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--success);
+    color: var(--paper);
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  @media (min-width: 860px) {
+    .legend-panel {
+      position: static;
+      visibility: visible;
+      display: block;
+      width: 320px;
+      flex: 0 0 auto;
+    }
+    .legend-panel-backdrop { display: none; }
+    .legend-panel-card {
+      transform: none;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      width: 100%;
+    }
+    .legend-panel-close { display: none; }
+  }
+
+  /* ---- footer bar ---- */
+  .app-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  .footer-progress {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .footer-progress b { color: var(--accent); }
+  .footer-actions { display: flex; gap: 8px; }
+
+  button.ghost-btn {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  button.ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+  @media (min-width: 860px) {
+    .legend-toggle { display: none; }
+  }
+
+  /* ---- choice sheet ---- */
+  .sheet-backdrop {
+    position: fixed; inset: 0;
+    background: var(--backdrop);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 50;
+  }
+  .sheet-backdrop.show { display: flex; }
+  .sheet {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -12px 34px -10px rgba(0,0,0,0.4);
+    transform: translateY(100%);
+  }
+  .sheet-backdrop.show .sheet { transform: translateY(0); }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet { transition: transform 0.24s cubic-bezier(.2,.8,.3,1); }
+  }
+  @media (min-width: 640px) {
+    .sheet-backdrop { align-items: center; }
+    .sheet { border-radius: 8px; border-bottom: 1px solid var(--rule); max-height: 70vh; }
+  }
+  .sheet-handle { width: 36px; height: 4px; background: var(--rule); border-radius: 2px; margin: 10px auto 2px; }
+  @media (min-width: 640px) { .sheet-handle { display: none; } }
+  .sheet-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 20px 12px; border-bottom: 1px solid var(--rule);
+  }
+  .sheet-head h3 { font-family: Georgia, "Iowan Old Style", Palatino, serif; font-size: 17px; margin: 0; }
+  .sheet-close { background: none; border: none; color: var(--ink-soft); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; }
+  .sheet-close:hover { color: var(--accent); }
+  .sheet-list { overflow-y: auto; padding: 10px 14px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    width: 100%; text-align: left; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 13px 14px; cursor: pointer;
+  }
+  .option:hover, .option:focus-visible { border-color: var(--accent-soft); background: var(--paper-3); }
+  .option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .option.wrong { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--paper)); }
+  @media (prefers-reduced-motion: no-preference) {
+    .option.wrong { animation: shake 0.32s ease; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* ---- completion overlay ---- */
+  .complete-overlay {
+    position: fixed; inset: 0; z-index: 60;
+    display: none;
+    align-items: center; justify-content: center;
+    background: var(--backdrop);
+    padding: 20px;
+  }
+  .complete-overlay.show { display: flex; }
+  .complete-card {
+    background: var(--paper-2);
+    border: 1px solid var(--success);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    max-width: 360px;
+    width: 100%;
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  .stamp {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    border: 2.5px solid var(--success);
+    color: var(--success);
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-weight: 700; font-size: 12px;
+    text-align: center; line-height: 1.15;
+    transform: rotate(-9deg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .complete-overlay.show .stamp { animation: stampIn 0.4s cubic-bezier(.2,.8,.3,1.4); }
+  }
+  @keyframes stampIn {
+    from { transform: rotate(-9deg) scale(2); opacity: 0; }
+    to { transform: rotate(-9deg) scale(1); opacity: 1; }
+  }
+  .complete-card p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+  .complete-card strong { font-family: Georgia, serif; font-size: 18px; }
+  .complete-card button { margin-top: 6px; }
+</style>
+
+<div class="app">
+  <header class="app-header">
+    <p class="eyebrow">Ciências · Prancha anatômica interativa</p>
+    <h1>Atlas do Sistema Digestório</h1>
+    <p class="subtitle">Toque nos números da prancha e escolha o nome certo.</p>
+  </header>
+
+  <div class="app-body">
+    <main class="stage">
+      <div class="stage-inner">
+        <div class="plate-frame">
+          <svg viewBox="0 0 400 640" xmlns="http://www.w3.org/2000/svg" aria-label="Ilustração do corpo humano com o sistema digestório numerado" id="plate-svg">
+            <path d="M160,118 C148,118 130,138 126,175 L118,338 C116,364 121,386 135,402 L166,402 L166,338 L234,338 L234,402 L265,402 C279,386 284,364 282,338 L274,175 C270,138 252,118 240,118 Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+            <ellipse cx="200" cy="70" rx="38" ry="44" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+            <rect x="186" y="102" width="28" height="24" rx="6" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+            <path d="M128,180 C110,210 98,260 92,330 C90,350 92,368 100,382" fill="none" stroke="var(--skin-line)" stroke-width="16" stroke-linecap="round"/>
+            <path d="M272,180 C290,210 302,260 308,330 C310,350 308,368 300,382" fill="none" stroke="var(--skin-line)" stroke-width="16" stroke-linecap="round"/>
+            <path d="M150,398 L146,600" fill="none" stroke="var(--skin-line)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M250,398 L254,600" fill="none" stroke="var(--skin-line)" stroke-width="22" stroke-linecap="round"/>
+
+            <ellipse cx="200" cy="90" rx="12" ry="5" fill="var(--ink)" opacity="0.75"/>
+            <ellipse cx="170" cy="96" rx="9" ry="11" fill="var(--organ-pancreas)" stroke="var(--ink)" stroke-width="1"/>
+            <ellipse cx="230" cy="96" rx="9" ry="11" fill="var(--organ-pancreas)" stroke="var(--ink)" stroke-width="1"/>
+            <circle cx="200" cy="118" r="3.5" fill="var(--accent)"/>
+            <path d="M200,120 C198,138 195,158 194,180" fill="none" stroke="var(--organ-stomach)" stroke-width="7" stroke-linecap="round"/>
+
+            <path d="M140,178 C138,169 156,166 176,168 C196,171 207,180 203,201 C200,220 184,230 164,227 C147,225 138,209 140,178 Z" fill="var(--organ-liver)" stroke="var(--ink)" stroke-width="1"/>
+            <ellipse cx="152" cy="222" rx="7" ry="10" fill="var(--organ-gall)" stroke="var(--ink)" stroke-width="1"/>
+            <path d="M215,185 C240,181 254,196 251,217 C248,237 224,247 207,239 C197,234 195,222 203,213 C209,206 213,201 215,185 Z" fill="var(--organ-stomach)" stroke="var(--ink)" stroke-width="1"/>
+            <path d="M180,240 C197,235 217,238 231,249 C220,256 199,257 183,253 C177,251 176,244 180,240 Z" fill="var(--organ-pancreas)" stroke="var(--ink)" stroke-width="1"/>
+
+            <path d="M158,338 L158,272 C158,251 171,243 191,243 L219,243 C239,243 252,251 252,272 L252,338 C252,352 244,364 231,368 L196,368 C182,368 165,362 158,338 Z" fill="none" stroke="var(--organ-large)" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+            <g fill="var(--organ-small)" stroke="var(--ink)" stroke-width="0.75" opacity="0.95">
+              <circle cx="180" cy="270" r="15"/>
+              <circle cx="212" cy="266" r="14"/>
+              <circle cx="196" cy="292" r="15"/>
+              <circle cx="168" cy="300" r="13"/>
+              <circle cx="222" cy="296" r="13"/>
+              <circle cx="190" cy="318" r="14"/>
+              <circle cx="215" cy="322" r="11"/>
+            </g>
+            <path d="M196,368 L196,384" fill="none" stroke="var(--organ-large)" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="196" cy="390" r="4.5" fill="var(--ink)"/>
+
+            <g id="pins" font-family="SFMono-Regular, Consolas, monospace" font-weight="700" font-size="13">
+              <path d="M65,96 L172,98" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M65,152 L192,155" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M65,196 L152,196" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M65,225 L145,222" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M65,298 L166,296" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M65,392 L191,390" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M335,92 L211,102" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M335,128 L204,120" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M335,206 L249,208" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M335,248 L229,248" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+              <path d="M335,286 L253,284" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>
+
+              <g class="pin" data-id="2" tabindex="0" role="button" aria-label="Estrutura 2">
+                <circle class="pin-hit" cx="55" cy="96" r="24"/>
+                <circle class="pin-circle" cx="55" cy="96" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="100" text-anchor="middle" fill="var(--accent)">2</text>
+              </g>
+              <g class="pin" data-id="4" tabindex="0" role="button" aria-label="Estrutura 4">
+                <circle class="pin-hit" cx="55" cy="152" r="24"/>
+                <circle class="pin-circle" cx="55" cy="152" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="156" text-anchor="middle" fill="var(--accent)">4</text>
+              </g>
+              <g class="pin" data-id="5" tabindex="0" role="button" aria-label="Estrutura 5">
+                <circle class="pin-hit" cx="55" cy="196" r="24"/>
+                <circle class="pin-circle" cx="55" cy="196" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="200" text-anchor="middle" fill="var(--accent)">5</text>
+              </g>
+              <g class="pin" data-id="6" tabindex="0" role="button" aria-label="Estrutura 6">
+                <circle class="pin-hit" cx="55" cy="225" r="24"/>
+                <circle class="pin-circle" cx="55" cy="225" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="229" text-anchor="middle" fill="var(--accent)">6</text>
+              </g>
+              <g class="pin" data-id="9" tabindex="0" role="button" aria-label="Estrutura 9">
+                <circle class="pin-hit" cx="55" cy="298" r="24"/>
+                <circle class="pin-circle" cx="55" cy="298" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="302" text-anchor="middle" fill="var(--accent)">9</text>
+              </g>
+              <g class="pin" data-id="11" tabindex="0" role="button" aria-label="Estrutura 11">
+                <circle class="pin-hit" cx="55" cy="392" r="24"/>
+                <circle class="pin-circle" cx="55" cy="392" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="55" y="396" text-anchor="middle" fill="var(--accent)">11</text>
+              </g>
+              <g class="pin" data-id="1" tabindex="0" role="button" aria-label="Estrutura 1">
+                <circle class="pin-hit" cx="345" cy="92" r="24"/>
+                <circle class="pin-circle" cx="345" cy="92" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="345" y="96" text-anchor="middle" fill="var(--accent)">1</text>
+              </g>
+              <g class="pin" data-id="3" tabindex="0" role="button" aria-label="Estrutura 3">
+                <circle class="pin-hit" cx="345" cy="128" r="24"/>
+                <circle class="pin-circle" cx="345" cy="128" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="345" y="132" text-anchor="middle" fill="var(--accent)">3</text>
+              </g>
+              <g class="pin" data-id="7" tabindex="0" role="button" aria-label="Estrutura 7">
+                <circle class="pin-hit" cx="345" cy="206" r="24"/>
+                <circle class="pin-circle" cx="345" cy="206" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="345" y="210" text-anchor="middle" fill="var(--accent)">7</text>
+              </g>
+              <g class="pin" data-id="8" tabindex="0" role="button" aria-label="Estrutura 8">
+                <circle class="pin-hit" cx="345" cy="248" r="24"/>
+                <circle class="pin-circle" cx="345" cy="248" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="345" y="252" text-anchor="middle" fill="var(--accent)">8</text>
+              </g>
+              <g class="pin" data-id="10" tabindex="0" role="button" aria-label="Estrutura 10">
+                <circle class="pin-hit" cx="345" cy="286" r="24"/>
+                <circle class="pin-circle" cx="345" cy="286" r="13" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.5"/>
+                <text class="pin-text" x="345" y="290" text-anchor="middle" fill="var(--accent)">10</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="plate-caption">Prancha I — vista anterior</div>
+      </div>
+    </main>
+
+    <div class="legend-panel" id="legend-panel">
+      <div class="legend-panel-backdrop" id="legend-panel-backdrop"></div>
+      <div class="legend-panel-card">
+        <div class="legend-head">
+          <h2>Legenda</h2>
+          <button class="legend-panel-close" id="legend-panel-close" type="button" aria-label="Fechar legenda">&times;</button>
+        </div>
+        <div class="legend-list" id="legend-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <span class="footer-progress"><b id="progress-count">0</b> / 11 identificados</span>
+    <div class="footer-actions">
+      <button class="ghost-btn legend-toggle" id="legend-toggle" type="button">Legenda</button>
+      <button class="ghost-btn" id="reset-btn" type="button">Reiniciar</button>
+    </div>
+  </footer>
+</div>
+
+<div class="sheet-backdrop" id="sheet-backdrop">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h3 id="sheet-title">Estrutura nº —</h3>
+      <button class="sheet-close" id="sheet-close" type="button" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="sheet-list" id="sheet-list"></div>
+  </div>
+</div>
+
+<div class="complete-overlay" id="complete-overlay">
+  <div class="complete-card">
+    <div class="stamp">PRANCHA<br/>COMPLETA</div>
+    <p><strong>Muito bem!</strong></p>
+    <p>Você identificou corretamente todas as estruturas do sistema digestório.</p>
+    <button class="ghost-btn" id="complete-reset-btn" type="button">Jogar de novo</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var terms = [
+    { id: 1, label: "Abertura da boca" },
+    { id: 2, label: "Glândulas salivares" },
+    { id: 3, label: "Faringe" },
+    { id: 4, label: "Esôfago" },
+    { id: 5, label: "Fígado" },
+    { id: 6, label: "Vesícula biliar" },
+    { id: 7, label: "Estômago" },
+    { id: 8, label: "Pâncreas" },
+    { id: 9, label: "Intestino delgado" },
+    { id: 10, label: "Intestino grosso" },
+    { id: 11, label: "Ânus" }
+  ];
+  var byId = {};
+  terms.forEach(function (t) { byId[t.id] = t; });
+
+  var legendList = document.getElementById("legend-list");
+  var progressCount = document.getElementById("progress-count");
+  var completeOverlay = document.getElementById("complete-overlay");
+  var resetBtn = document.getElementById("reset-btn");
+  var completeResetBtn = document.getElementById("complete-reset-btn");
+  var backdrop = document.getElementById("sheet-backdrop");
+  var sheetTitle = document.getElementById("sheet-title");
+  var sheetList = document.getElementById("sheet-list");
+  var sheetClose = document.getElementById("sheet-close");
+  var legendPanel = document.getElementById("legend-panel");
+  var legendToggle = document.getElementById("legend-toggle");
+  var legendPanelClose = document.getElementById("legend-panel-close");
+  var legendPanelBackdrop = document.getElementById("legend-panel-backdrop");
+
+  var solved = {};
+  var currentId = null;
+  var lastFocused = null;
+
+  function shuffled(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function buildLegend() {
+    legendList.innerHTML = "";
+    terms.forEach(function (t) {
+      var row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = '<span class="row-num">' + t.id + '</span>';
+      var slot = document.createElement("button");
+      slot.type = "button";
+      slot.className = "slot";
+      slot.dataset.id = t.id;
+      slot.textContent = "Toque para identificar";
+      slot.addEventListener("click", function () { openSheet(t.id); });
+      row.appendChild(slot);
+      legendList.appendChild(row);
+    });
+  }
+
+  function pinEl(id) { return document.querySelector('.pin[data-id="' + id + '"]'); }
+  function slotEl(id) { return document.querySelector('.slot[data-id="' + id + '"]'); }
+
+  function openLegendPanel() { legendPanel.classList.add("open"); }
+  function closeLegendPanel() { legendPanel.classList.remove("open"); }
+
+  function openSheet(id) {
+    if (solved[id]) return;
+    currentId = id;
+    lastFocused = document.activeElement;
+    sheetTitle.textContent = "Estrutura nº " + id;
+    var p = pinEl(id);
+    if (p) p.classList.add("open");
+
+    var remaining = terms.filter(function (t) { return !solved[t.id]; });
+    sheetList.innerHTML = "";
+    shuffled(remaining).forEach(function (t) {
+      var opt = document.createElement("button");
+      opt.type = "button";
+      opt.className = "option";
+      opt.textContent = t.label;
+      opt.addEventListener("click", function () { chooseOption(t.id, opt); });
+      sheetList.appendChild(opt);
+    });
+
+    backdrop.classList.add("show");
+    document.addEventListener("keydown", onKeydown);
+  }
+
+  function closeSheet() {
+    var p = currentId != null ? pinEl(currentId) : null;
+    if (p) p.classList.remove("open");
+    backdrop.classList.remove("show");
+    document.removeEventListener("keydown", onKeydown);
+    currentId = null;
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  function onKeydown(e) {
+    if (e.key === "Escape") closeSheet();
+  }
+
+  function chooseOption(chosenId, optEl) {
+    if (chosenId === currentId) {
+      markSolved(currentId);
+      closeSheet();
+    } else {
+      optEl.classList.add("wrong");
+      setTimeout(function () { optEl.classList.remove("wrong"); }, 340);
+    }
+  }
+
+  function markSolved(id) {
+    solved[id] = true;
+    var t = byId[id];
+
+    var p = pinEl(id);
+    if (p) {
+      p.classList.add("solved");
+      p.classList.remove("open");
+      p.querySelector(".pin-circle").setAttribute("fill", "var(--success)");
+      p.querySelector(".pin-circle").setAttribute("stroke", "var(--success)");
+      p.querySelector(".pin-text").setAttribute("fill", "var(--paper)");
+      p.querySelector(".pin-text").textContent = "✓";
+    }
+
+    var s = slotEl(id);
+    if (s) {
+      s.classList.add("solved");
+      s.innerHTML = '<span class="check">✓</span>' + t.label;
+    }
+
+    var count = Object.keys(solved).length;
+    progressCount.textContent = String(count);
+    if (count === terms.length) {
+      completeOverlay.classList.add("show");
+    }
+  }
+
+  function attachPins() {
+    document.querySelectorAll(".pin").forEach(function (p) {
+      var id = Number(p.dataset.id);
+      p.addEventListener("click", function () { openSheet(id); });
+      p.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSheet(id); }
+      });
+    });
+  }
+
+  function reset() {
+    solved = {};
+    progressCount.textContent = "0";
+    completeOverlay.classList.remove("show");
+    closeSheet();
+    closeLegendPanel();
+    document.querySelectorAll(".pin").forEach(function (p) {
+      p.classList.remove("solved", "open");
+      p.querySelector(".pin-circle").setAttribute("fill", "var(--paper)");
+      p.querySelector(".pin-circle").setAttribute("stroke", "var(--accent)");
+      p.querySelector(".pin-text").setAttribute("fill", "var(--accent)");
+      p.querySelector(".pin-text").textContent = p.dataset.id;
+    });
+    buildLegend();
+  }
+
+  sheetClose.addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", function (e) {
+    if (e.target === backdrop) closeSheet();
+  });
+  legendToggle.addEventListener("click", openLegendPanel);
+  legendPanelClose.addEventListener("click", closeLegendPanel);
+  legendPanelBackdrop.addEventListener("click", closeLegendPanel);
+  resetBtn.addEventListener("click", reset);
+  completeResetBtn.addEventListener("click", reset);
+
+  buildLegend();
+  attachPins();
+})();
+</script>
