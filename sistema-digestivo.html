@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partiu Revisão: Sistema Digestivo 🦠</title>
+<style>
+body{margin:0;font-family:Arial, sans-serif;background:linear-gradient(to bottom,#0b1d3a,#1b263b);color:white;display:flex;justify-content:center}
+.container{width:95%;max-width:900px;margin:20px 0;background:rgba(0,0,0,0.85);padding:20px;border-radius:15px}
+h1{text-align:center}
+.trilha{display:flex;justify-content:space-between;gap:4px;margin:15px 0;overflow-x:auto}
+.parada{flex:1;min-width:60px;text-align:center}
+.bolinha{width:26px;height:26px;line-height:26px;border-radius:50%;background:#444;margin:0 auto 4px;font-size:12px;font-weight:bold;transition:0.3s}
+.parada.feita .bolinha{background:#2ecc71}
+.parada.ativa .bolinha{background:#f1c40f;color:black}
+.parada span{font-size:10px;color:#ccc;display:block}
+.progress-bar{width:100%;height:12px;background:#444;border-radius:10px;overflow:hidden;margin:15px 0}
+.progress{height:100%;width:0;background:#2ecc71;transition:0.3s}
+.question{font-size:16px;margin:15px 0}
+button{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;font-size:14px;cursor:pointer}
+.neutral{background:#3498db;color:white}
+.correct{background:#2ecc71;color:white}
+.wrong{background:#e74c3c;color:white}
+.next{background:#f1c40f;color:black}
+.retry{background:#9b59b6;color:white}
+.feedback,.summary,.ranking,.history{margin-top:10px;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;font-size:13px}
+.feedbackImg{display:block;max-width:90px;margin:0 auto 8px}
+.cadastro label{display:block;font-size:13px;margin:10px 0 4px;color:#ccc}
+.cadastro input{width:100%;padding:9px;border-radius:8px;border:none;font-size:14px;box-sizing:border-box}
+.envio-status{margin-top:10px;padding:10px;border-radius:8px;font-size:13px;background:rgba(255,255,255,0.1)}
+@media(min-width:768px){.question{font-size:18px}button{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div style="text-align:center;margin-bottom:15px;">
+<img src="CapivaraNerdGenioIA_fundo_transparente.png" alt="Logotipo Capivara Nerd" style="max-width:180px;width:60%;height:auto;">
+</div>
+<h1>🦠 Partiu Revisão: Sistema Digestivo</h1>
+
+<div id="telaCadastro" class="cadastro">
+  <label>Nome completo do aluno</label>
+  <input type="text" id="inpAluno" placeholder="Ex: Maria Fernanda Menezes Souza">
+  <label>Turma</label>
+  <input type="text" id="inpTurma" placeholder="Ex: 5º Ano E.F. - Turma A">
+  <label>Nome completo do responsável</label>
+  <input type="text" id="inpRespNome" placeholder="Ex: Herbert Souza Pereira">
+  <label>E-mail do responsável</label>
+  <input type="email" id="inpRespEmail" placeholder="Ex: responsavel@email.com">
+  <button class="next" style="margin-top:16px" onclick="iniciarJogo()">Começar a jogar →</button>
+  <div class="envio-status" id="cadastroErro" style="display:none;background:rgba(231,76,60,0.3)"></div>
+</div>
+
+<div id="telaJogo" style="display:none">
+  <div class="trilha" id="trilha"></div>
+  <div class="progress-bar"><div class="progress" id="progress"></div></div>
+  <div class="question" id="question"></div>
+  <img class="feedbackImg" id="feedbackImg" style="display:none">
+  <div id="answers"></div>
+  <div class="feedback" id="feedback"></div>
+  <div id="nextContainer"></div>
+  <div id="result"></div>
+  <div class="summary" id="summary"></div>
+  <div id="envioStatus" class="envio-status" style="display:none"></div>
+  <div id="retryContainer"></div>
+  <div class="history" id="history"></div>
+  <div class="ranking" id="ranking"></div>
+</div>
+
+</div>
+<script>
+// Cole aqui a URL da sua implantação do Apps Script (termina em /exec)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqAgPfArmmHNklQDsASBgpm53b1F-NxenvdOzQcMvAf_NT2WwuAV1c5IA6_CAb28Qo/exec";
+const NOME_DO_JOGO = "Sistema Digestivo";
+
+let aluno = "", turma = "", responsavelNome = "", responsavelEmail = "";
+
+// Preenche automaticamente se já jogou neste navegador antes
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("inpAluno").value = localStorage.getItem("aluno") || "";
+  document.getElementById("inpTurma").value = localStorage.getItem("turma") || "";
+  document.getElementById("inpRespNome").value = localStorage.getItem("respNome") || "";
+  document.getElementById("inpRespEmail").value = localStorage.getItem("respEmail") || "";
+});
+
+function iniciarJogo(){
+  aluno = document.getElementById("inpAluno").value.trim();
+  turma = document.getElementById("inpTurma").value.trim();
+  responsavelNome = document.getElementById("inpRespNome").value.trim();
+  responsavelEmail = document.getElementById("inpRespEmail").value.trim();
+
+  const erroEl = document.getElementById("cadastroErro");
+  if(!aluno || !turma || !responsavelNome || !responsavelEmail){
+    erroEl.style.display="block";
+    erroEl.textContent = "Preencha todos os campos antes de começar.";
+    return;
+  }
+  if(!responsavelEmail.includes("@")){
+    erroEl.style.display="block";
+    erroEl.textContent = "Digite um e-mail válido para o responsável.";
+    return;
+  }
+  erroEl.style.display="none";
+
+  localStorage.setItem("aluno", aluno);
+  localStorage.setItem("turma", turma);
+  localStorage.setItem("respNome", responsavelNome);
+  localStorage.setItem("respEmail", responsavelEmail);
+
+  document.getElementById("telaCadastro").style.display="none";
+  document.getElementById("telaJogo").style.display="block";
+  iniciarTentativa(bancoQuestoes);
+}
+function shuffleArray(array){
+for(let i=array.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+return array;
+}
+
+const orgaos=["Boca","Esôfago","Estômago","Int. delgado","Int. grosso","Ânus","Saúde"];
+
+const bancoQuestoes=[
+{tema:"Boca",orgao:0,q:"Que substância é produzida pelas glândulas salivares e ajuda a formar o bolo alimentar?",a:["Bile","Saliva","Suco gástrico"],c:1,e:"A saliva umedece o alimento e ajuda a formar o bolo alimentar."},
+{tema:"Boca",orgao:0,q:"Quais dentes são responsáveis por CORTAR os alimentos na frente da boca?",a:["Molares","Caninos","Incisivos"],c:2,e:"Os incisivos ficam na frente e cortam. Os caninos rasgam, os molares trituram."},
+{tema:"Boca",orgao:0,q:"Os molares e pré-molares trituram os alimentos. Essa afirmação é:",a:["Verdadeira","Falsa"],c:0,e:"Eles ficam nas laterais e no fundo da boca, achatados para triturar."},
+{tema:"Esôfago",orgao:1,q:"Como o bolo alimentar se move pelo esôfago até o estômago?",a:["Só pela gravidade","Por contração e relaxamento dos músculos","Ele simplesmente cai"],c:1,e:"Os músculos do esôfago empurram o bolo alimentar, mesmo sem a gente perceber."},
+{tema:"Esôfago",orgao:1,q:"O tubo digestório de um adulto tem cerca de quantos metros de comprimento?",a:["1 metro","7 metros","20 metros"],c:1,e:"Cerca de 7 metros, por isso fica todo dobrado dentro do corpo."},
+{tema:"Estômago",orgao:2,q:"No estômago, o que acontece com o bolo alimentar?",a:["É totalmente absorvido ali","É misturado com substâncias digestivas e fica parcialmente digerido","Já vira fezes"],c:1,e:"O bolo alimentar sai do estômago parcialmente digerido, não pronto."},
+{tema:"Intestino delgado",orgao:3,q:"Quais dois órgãos produzem substâncias digestivas lançadas no intestino delgado?",a:["Coração e pulmão","Fígado e pâncreas","Rim e bexiga"],c:1,e:"O fígado e o pâncreas ajudam na digestão, mas não fazem parte do tubo digestório."},
+{tema:"Intestino delgado",orgao:3,q:"No intestino delgado, o que acontece com os nutrientes do alimento?",a:["São eliminados nas fezes","Atravessam as paredes do intestino e chegam ao sangue","Viram saliva"],c:1,e:"É ali que o corpo absorve os nutrientes, que passam para o sangue."},
+{tema:"Intestino delgado",orgao:3,q:"O fígado e o pâncreas fazem parte do tubo digestório. Essa afirmação é:",a:["Verdadeira","Falsa"],c:1,e:"Falsa — eles produzem substâncias que ajudam, mas o tubo digestório é o caminho: boca, faringe, esôfago, estômago, intestinos e ânus."},
+{tema:"Intestino grosso",orgao:4,q:"O que acontece no intestino grosso com a água dos restos alimentares?",a:["É toda eliminada na hora","Grande parte é absorvida pelo corpo","Vira saliva"],c:1,e:"O intestino grosso absorve boa parte da água, por isso as fezes ficam mais sólidas."},
+{tema:"Intestino grosso",orgao:4,q:"O que se forma a partir dos restos de alimento não absorvidos?",a:["Bolo alimentar","Fezes","Bile"],c:1,e:"O que não foi aproveitado forma as fezes."},
+{tema:"Ânus",orgao:5,q:"Por onde as fezes são eliminadas do corpo?",a:["Estômago","Ânus","Esôfago"],c:1,e:"O ânus é a saída final do tubo digestório."},
+{tema:"Saúde",orgao:6,q:"Maus hábitos alimentares podem provocar quais problemas de saúde?",a:["Obesidade e subnutrição","Apenas gripes","Nenhum problema"],c:0,e:"Comer mal, para mais ou para menos do que o corpo precisa, causa obesidade ou subnutrição."},
+{tema:"Saúde",orgao:6,q:"A cólera é transmitida principalmente por:",a:["Ar contaminado","Água ou alimentos contaminados","Picada de inseto"],c:1,e:"A cólera se espalha por água ou comida contaminada — daí a importância do saneamento básico."},
+{tema:"Saúde",orgao:6,q:"Qual atitude NÃO ajuda a prevenir doenças relacionadas à alimentação?",a:["Lavar as mãos antes de comer","Beber água tratada, filtrada ou fervida","Comer carne crua sem cozinhar"],c:2,e:"Cozinhar bem as carnes é justamente um dos cuidados recomendados no livro."}
+];
+
+let questoesAtuais=[];
+let current=0;
+let score=0;
+let errosPorTema={};
+let questoesErradas=[];
+let tentativa=1;
+let historicoTentativas=[];
+
+function iniciarTentativa(lista){
+questoesAtuais=shuffleArray([...lista]);
+current=0;
+score=0;
+errosPorTema={};
+questoesErradas=[];
+document.getElementById("result").innerHTML="";
+document.getElementById("summary").innerHTML="";
+document.getElementById("retryContainer").innerHTML="";
+loadQuestion();
+}
+
+const qEl=document.getElementById("question");
+const aEl=document.getElementById("answers");
+const fEl=document.getElementById("feedback");
+const progress=document.getElementById("progress");
+const nextContainer=document.getElementById("nextContainer");
+const result=document.getElementById("result");
+const ranking=document.getElementById("ranking");
+const summary=document.getElementById("summary");
+const retryContainer=document.getElementById("retryContainer");
+const historyEl=document.getElementById("history");
+const trilhaEl=document.getElementById("trilha");
+const feedbackImg=document.getElementById("feedbackImg");
+
+function renderTrilha(orgaoAtivo){
+trilhaEl.innerHTML="";
+orgaos.forEach((nome,i)=>{
+const div=document.createElement("div");
+div.className="parada"+(i<orgaoAtivo?" feita":"")+(i===orgaoAtivo?" ativa":"");
+div.innerHTML=`<div class="bolinha">${i<orgaoAtivo?"✓":i+1}</div><span>${nome}</span>`;
+trilhaEl.appendChild(div);
+});
+}
+
+function loadQuestion(){
+const q=questoesAtuais[current];
+renderTrilha(q.orgao);
+feedbackImg.style.display="none";
+qEl.textContent=`Tentativa ${tentativa} — (${current+1}/${questoesAtuais.length}) ${q.q}`;
+aEl.innerHTML="";
+fEl.innerHTML="";
+nextContainer.innerHTML="";
+progress.style.width=(current/questoesAtuais.length*100)+"%";
+q.a.forEach((opt,i)=>{
+const btn=document.createElement("button");
+btn.textContent=opt;
+btn.className="neutral";
+btn.onclick=()=>checkAnswer(i);
+aEl.appendChild(btn);
+});
+}
+
+function checkAnswer(i){
+const buttons=document.querySelectorAll("#answers button");
+buttons.forEach(b=>b.disabled=true);
+const q=questoesAtuais[current];
+if(i===q.c){
+buttons[i].className="correct";
+score++;
+feedbackImg.src="capivaraAcerto.png";
+feedbackImg.style.display="block";
+fEl.innerHTML="✅ Resposta correta!";
+}else{
+buttons[i].className="wrong";
+buttons[q.c].className="correct";
+feedbackImg.src="capivaraErro.png";
+feedbackImg.style.display="block";
+fEl.innerHTML=`❌ Resposta incorreta.<br><strong>Resposta:</strong> ${q.a[q.c]}<br><strong>Explicação:</strong> ${q.e}`;
+errosPorTema[q.tema]=(errosPorTema[q.tema]||0)+1;
+questoesErradas.push(q);
+}
+const nextBtn=document.createElement("button");
+nextBtn.textContent="Próxima pergunta";
+nextBtn.className="next";
+nextBtn.onclick=nextQuestion;
+nextContainer.appendChild(nextBtn);
+}
+
+function nextQuestion(){
+current++;
+if(current<questoesAtuais.length){loadQuestion()}else{finalizarTentativa()}
+}
+
+function finalizarTentativa(){
+progress.style.width="100%";
+renderTrilha(orgaos.length);
+qEl.textContent="🎯 Tentativa Finalizada";
+aEl.innerHTML="";
+fEl.innerHTML="";
+nextContainer.innerHTML="";
+feedbackImg.style.display="none";
+historicoTentativas.push({tentativa,score,total:questoesAtuais.length});
+result.innerHTML=`<h3>Pontuação: ${score}/${questoesAtuais.length}</h3>`;
+gerarResumo();
+mostrarHistorico();
+saveRanking(score);
+showRanking();
+enviarRelatorio();
+if(questoesErradas.length>0){criarBotaoRetry();}
+}
+
+function enviarRelatorio(){
+  const statusEl = document.getElementById("envioStatus");
+  statusEl.style.display = "block";
+
+  if(APPS_SCRIPT_URL.includes("COLE_AQUI")){
+    statusEl.textContent = "⚠️ Relatório não enviado — configure a URL do Apps Script no código.";
+    return;
+  }
+
+  statusEl.textContent = "Enviando relatório para o responsável...";
+
+  const temasParaRevisar = Object.keys(errosPorTema);
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"}, // evita preflight CORS no Apps Script
+    body: JSON.stringify({
+      aluno, turma, responsavelNome, responsavelEmail,
+      jogo: NOME_DO_JOGO,
+      pontuacao: score,
+      totalPerguntas: questoesAtuais.length,
+      temasParaRevisar
+    })
+  })
+  .then(r => r.json())
+  .then(resp => {
+    statusEl.textContent = resp.sucesso
+      ? "✅ Relatório enviado para " + responsavelEmail
+      : "⚠️ Não foi possível enviar o relatório agora.";
+  })
+  .catch(() => {
+    statusEl.textContent = "⚠️ Não foi possível enviar o relatório agora (verifique a conexão).";
+  });
+}
+
+function gerarResumo(){
+if(Object.keys(errosPorTema).length===0){summary.innerHTML="👏 Excelente! Nenhum erro!";return}
+summary.innerHTML="<strong>📚 Temas para revisar:</strong><br>";
+for(let tema in errosPorTema){summary.innerHTML+=`- ${tema} (erros: ${errosPorTema[tema]})<br>`}
+}
+
+function criarBotaoRetry(){
+const retryBtn=document.createElement("button");
+retryBtn.textContent="🔁 Refazer apenas questões erradas";
+retryBtn.className="retry";
+retryBtn.onclick=()=>{tentativa++; iniciarTentativa(questoesErradas)};
+retryContainer.innerHTML="";
+retryContainer.appendChild(retryBtn);
+}
+
+function mostrarHistorico(){
+historyEl.innerHTML="<strong>📊 Histórico de Tentativas:</strong><br>";
+historicoTentativas.forEach(h=>{historyEl.innerHTML+=`Tentativa ${h.tentativa}: ${h.score}/${h.total}<br>`});
+}
+
+function saveRanking(s){
+let r=JSON.parse(localStorage.getItem("rankingDigestivo"))||[];
+r.push(s);
+r.sort((a,b)=>b-a);
+r=r.slice(0,5);
+localStorage.setItem("rankingDigestivo",JSON.stringify(r));
+}
+
+function showRanking(){
+let r=JSON.parse(localStorage.getItem("rankingDigestivo"))||[];
+ranking.innerHTML="<strong>🏆 Ranking Top 5 (neste navegador):</strong><br>";
+r.forEach((s,i)=>ranking.innerHTML+=`${i+1}º - ${s} pontos<br>`);
+}
+
+iniciarTentativa(bancoQuestoes);
+</script>
+</body>
+</html>
