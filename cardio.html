@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7b1f3a">
+<title>A Parceria entre Pulmões e Coração</title>
+<style>
+:root{
+  --bg1:#1a0f2e; --bg2:#3a1245;
+  --heart:#e63950; --heart-dark:#b71f3a;
+  --artery:#e0433f; --vein:#3b7dd8;
+  --lung:#f4a6c1; --lung-dark:#e77fa8;
+  --skin:#ffcf9e; --skin-dark:#f5b877;
+  --panel:#ffffff; --ink:#241436;
+  --accent:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  --radius:22px;
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+html,body{height:100%; margin:0; overscroll-behavior:none; touch-action:manipulation;}
+body{
+  background:radial-gradient(ellipse at top, var(--bg2), var(--bg1));
+  color:var(--ink);
+  min-height:100dvh;
+  overflow:hidden;
+}
+#app{position:relative; width:100%; height:100dvh;}
+.screen{
+  position:absolute; inset:0; display:none; flex-direction:column;
+  align-items:center; overflow:hidden;
+}
+.screen.active{display:flex;}
+
+/* ---------- shared bits ---------- */
+.btn{
+  border:none; border-radius:16px; padding:14px 22px; font-size:clamp(15px,4vw,19px);
+  font-weight:700; cursor:pointer; box-shadow:0 6px 0 rgba(0,0,0,.2); color:#fff;
+  display:flex; align-items:center; gap:10px; justify-content:center;
+  transition:transform .08s ease, box-shadow .08s ease; min-height:52px;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.2);}
+.btn.primary{background:linear-gradient(180deg,#ff5d7a,var(--heart-dark));}
+.btn.blue{background:linear-gradient(180deg,#5aa0ff,#2456b8);}
+.btn.green{background:linear-gradient(180deg,#4ade80,#15803d);}
+.btn.ghost{background:linear-gradient(180deg,#7c5ea3,#4b2e6e);}
+.btn.small{padding:10px 16px; font-size:14px; box-shadow:0 4px 0 rgba(0,0,0,.2);}
+.btn:disabled{opacity:.5; pointer-events:none;}
+.icon-btn{
+  width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);
+  color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.topbar{
+  position:absolute; top:0; left:0; right:0; padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between; z-index:5;
+  padding-top:calc(10px + env(safe-area-inset-top));
+}
+h1,h2,h3,p{margin:0;}
+
+/* ---------- MENU ---------- */
+#screen-menu{justify-content:center; gap:18px; padding:20px; text-align:center;}
+.title-wrap{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.big-emoji-combo{font-size:clamp(48px,16vw,80px); line-height:1; filter:drop-shadow(0 6px 10px rgba(0,0,0,.4));}
+.title{color:#fff; font-size:clamp(22px,7vw,34px); font-weight:800; text-shadow:0 3px 0 rgba(0,0,0,.3);}
+.subtitle{color:#ffd6e4; font-size:clamp(13px,4vw,17px); font-weight:600; max-width:340px;}
+.menu-buttons{display:flex; flex-direction:column; gap:14px; width:min(88vw,360px); margin-top:8px;}
+.menu-btn-desc{font-size:12px; font-weight:500; opacity:.85; display:block;}
+.footer-credit{position:absolute; bottom:calc(8px + env(safe-area-inset-bottom)); color:#c9a9d9; font-size:11px; text-align:center; padding:0 10px;}
+.pulse-heart{display:inline-block; animation:beat 1.1s ease-in-out infinite;}
+@keyframes beat{0%,100%{transform:scale(1);}25%{transform:scale(1.18);}40%{transform:scale(.95);}}
+
+/* ---------- LEARN ---------- */
+#screen-learn{justify-content:flex-start;}
+.learn-header{
+  width:100%; padding:calc(12px + env(safe-area-inset-top)) 14px 8px; display:flex; align-items:center; justify-content:space-between;
+  color:#fff;
+}
+.learn-title{font-size:clamp(14px,4.2vw,18px); font-weight:800;}
+.svg-wrap{flex:1; width:100%; display:flex; align-items:center; justify-content:center; min-height:0; position:relative;}
+#diagram{height:100%; max-height:100%; width:auto; max-width:100%;}
+.step-dot{transition:fill .55s ease;}
+.vessel{fill:none; stroke-linecap:round; opacity:.28; transition:opacity .35s ease, stroke-width .35s ease;}
+.vessel.active{opacity:1; stroke-width:9;}
+.pulseable{transform-box:fill-box; transform-origin:center;}
+.pulseable.beat{animation:heartbeat .55s ease;}
+@keyframes heartbeat{0%{transform:scale(1);}30%{transform:scale(1.22);}55%{transform:scale(.94);}100%{transform:scale(1);}}
+.gainlose{opacity:0; transition:opacity .4s ease, transform .4s ease; transform:translateY(6px);}
+.gainlose.show{opacity:1; transform:translateY(-10px);}
+.caption-panel{
+  width:100%; background:linear-gradient(180deg,#fff,#fdeef3); border-radius:24px 24px 0 0;
+  padding:16px 18px calc(14px + env(safe-area-inset-bottom)); box-shadow:0 -8px 24px rgba(0,0,0,.25);
+  display:flex; flex-direction:column; gap:10px; z-index:4;
+}
+.caption-top{display:flex; align-items:center; gap:10px;}
+.caption-emoji{font-size:30px;}
+.caption-text{font-size:clamp(13.5px,3.8vw,16px); font-weight:600; line-height:1.35; color:#3a1a2e;}
+.step-progress{display:flex; gap:5px; justify-content:center;}
+.step-progress span{width:8px;height:8px;border-radius:50%;background:#e6c3d3;}
+.step-progress span.on{background:var(--heart);}
+.learn-controls{display:flex; gap:8px; align-items:center; justify-content:space-between;}
+.learn-controls .mid{display:flex; gap:8px;}
+
+/* ---------- GAME ---------- */
+#screen-game{background:#7fc8e8;}
+#gameCanvas{width:100%; height:100%; display:block; touch-action:none;}
+.hud{
+  position:absolute; top:0; left:0; right:0; padding:calc(10px + env(safe-area-inset-top)) 12px 6px;
+  display:flex; justify-content:space-between; align-items:flex-start; z-index:6; pointer-events:none;
+}
+.hud > *{pointer-events:auto;}
+.hud-pill{background:rgba(20,10,30,.55); backdrop-filter:blur(4px); color:#fff; border-radius:14px; padding:6px 12px; font-weight:800; font-size:15px; display:flex; align-items:center; gap:6px;}
+.hud-zone{background:rgba(20,10,30,.55); color:#fff; border-radius:14px; padding:6px 14px; font-weight:700; font-size:13px; display:flex; gap:6px; align-items:center;}
+.lives{display:flex; gap:3px; font-size:19px;}
+.game-controls{
+  position:absolute; bottom:calc(10px + env(safe-area-inset-bottom)); left:0; right:0;
+  display:flex; justify-content:space-between; padding:0 18px; z-index:6;
+}
+.lane-btn{
+  width:64px;height:64px;border-radius:50%;border:none; font-size:26px; color:#fff;
+  background:rgba(20,10,30,.5); box-shadow:0 4px 0 rgba(0,0,0,.25);
+}
+.lane-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.25);}
+
+/* checkpoint overlay */
+.overlay{
+  position:absolute; inset:0; background:rgba(15,6,25,.72); display:none;
+  align-items:center; justify-content:center; z-index:20; padding:16px;
+}
+.overlay.show{display:flex;}
+.card{
+  background:var(--panel); border-radius:24px; padding:22px 20px; width:min(92vw,420px);
+  max-height:88dvh; overflow:auto; display:flex; flex-direction:column; gap:14px;
+  box-shadow:0 20px 40px rgba(0,0,0,.4);
+}
+.card-fact{background:#fff3f6; border-radius:14px; padding:12px 14px; font-size:14px; font-weight:600; color:#7a1c3a; display:flex; gap:10px; align-items:flex-start;}
+.card-title{font-size:19px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:8px;}
+.q-text{font-size:16px; font-weight:700; color:var(--ink);}
+.q-options{display:flex; flex-direction:column; gap:9px;}
+.q-opt{
+  text-align:left; border:2px solid #e7d9ee; background:#fbf7fd; border-radius:14px; padding:11px 14px;
+  font-size:14.5px; font-weight:600; color:var(--ink); cursor:pointer;
+}
+.q-opt.correct{background:#dcfce7; border-color:var(--accent); color:#166534;}
+.q-opt.wrong{background:#fee2e2; border-color:var(--bad); color:#991b1b;}
+.q-opt:disabled{opacity:.85;}
+
+/* ---------- QUIZ standalone ---------- */
+#screen-quiz{justify-content:flex-start; padding-top:env(safe-area-inset-top);}
+.quiz-wrap{width:min(92vw,440px); margin:0 auto; display:flex; flex-direction:column; gap:16px; padding:18px 0 30px; flex:1; overflow:auto;}
+.progress-bar{height:10px; background:rgba(255,255,255,.25); border-radius:10px; overflow:hidden;}
+.progress-fill{height:100%; background:linear-gradient(90deg,#ff8ba0,#ff4d6d); width:0%; transition:width .35s ease;}
+.quiz-card{background:#fff; border-radius:22px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 12px 26px rgba(0,0,0,.3);}
+.score-badge{color:#fff; font-weight:800; font-size:14px; text-align:center;}
+
+/* ---------- GAME OVER ---------- */
+#screen-gameover{justify-content:center; gap:16px; padding:24px; text-align:center;}
+.stars{font-size:44px;}
+.result-box{background:#fff; border-radius:22px; padding:22px; width:min(88vw,360px); display:flex; flex-direction:column; gap:10px; box-shadow:0 14px 30px rgba(0,0,0,.35);}
+
+.toast{
+  position:absolute; left:50%; top:18%; transform:translate(-50%,-10px); background:rgba(20,10,30,.85); color:#fff;
+  padding:9px 16px; border-radius:14px; font-size:13.5px; font-weight:700; opacity:0; transition:opacity .35s, transform .35s;
+  z-index:15; max-width:80vw; text-align:center; pointer-events:none;
+}
+.toast.show{opacity:1; transform:translate(-50%,0);}
+
+@media (min-height:700px){
+  .menu-buttons{margin-top:16px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= MENU ================= -->
+  <section id="screen-menu" class="screen active">
+    <div class="title-wrap">
+      <div class="big-emoji-combo">🫁<span class="pulse-heart">❤️</span>🫁</div>
+      <div class="title">Parceria Coração &amp; Pulmões</div>
+      <div class="subtitle">Descubra como o sistema cardiovascular leva oxigênio e nutrientes para todo o corpo!</div>
+    </div>
+    <div class="menu-buttons">
+      <button class="btn primary" id="btn-go-learn">🎬 Aprender <span style="font-weight:500;font-size:12px;opacity:.9">(animação)</span></button>
+      <button class="btn blue" id="btn-go-game">🎮 Jogar: Corrida da Hemácia</button>
+      <button class="btn green" id="btn-go-quiz">❓ Quiz Rápido</button>
+    </div>
+    <div class="footer-credit">Baseado no livro de Ciências, "A circulação" — pág. 118 e 119</div>
+  </section>
+
+  <!-- ================= LEARN (animated explainer) ================= -->
+  <section id="screen-learn" class="screen">
+    <div class="learn-header">
+      <button class="icon-btn" id="btn-learn-back">←</button>
+      <div class="learn-title">A parceria entre pulmões e coração</div>
+      <button class="icon-btn" id="btn-speak">🔊</button>
+    </div>
+    <div class="svg-wrap">
+      <svg id="diagram" viewBox="0 0 340 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gradDot" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#fff"/>
+            <stop offset="35%" stop-color="#ff8fa3"/>
+            <stop offset="100%" stop-color="#e0433f"/>
+          </radialGradient>
+        </defs>
+
+        <!-- torso silhouette -->
+        <path d="M100,40 Q170,10 240,40 L255,470 Q170,500 85,470 Z" fill="#2b1840" opacity="0.35"/>
+
+        <!-- lungs -->
+        <ellipse cx="95" cy="150" rx="30" ry="52" fill="var(--lung)" opacity="0.9"/>
+        <ellipse cx="245" cy="150" rx="30" ry="52" fill="var(--lung)" opacity="0.9"/>
+        <text x="170" y="72" text-anchor="middle" fill="#ffe6f0" font-size="15" font-weight="700">PULMÕES</text>
+
+        <!-- body/cells zone -->
+        <rect x="70" y="300" width="200" height="175" rx="34" fill="var(--skin)" opacity="0.9"/>
+        <g id="cellDots" fill="#e08a3b" opacity="0.6">
+          <circle cx="105" cy="345" r="6"/><circle cx="150" cy="365" r="6"/><circle cx="200" cy="340" r="6"/>
+          <circle cx="235" cy="370" r="6"/><circle cx="120" cy="410" r="6"/><circle cx="180" cy="430" r="6"/>
+          <circle cx="230" cy="420" r="6"/><circle cx="90" cy="450" r="6"/><circle cx="250" cy="450" r="6"/>
+        </g>
+        <text x="170" y="460" text-anchor="middle" fill="#7a3b0e" font-size="15" font-weight="700">CORPO (CÉLULAS)</text>
+
+        <!-- vessels (also motion guides) -->
+        <path id="p1" class="vessel" d="M170,172 C 205,120 225,105 242,138" stroke="var(--vein)" stroke-width="7"/>
+        <path id="p2" class="vessel" d="M242,138 C 225,175 195,180 170,172" stroke="var(--artery)" stroke-width="7"/>
+        <path id="p3" class="vessel" d="M170,172 C 110,210 90,270 140,320" stroke="var(--artery)" stroke-width="7"/>
+        <path id="p4" class="vessel" d="M140,320 C 190,270 210,200 170,172" stroke="var(--vein)" stroke-width="7"/>
+
+        <!-- heart -->
+        <g class="pulseable" id="heartGroup">
+          <path d="M170,196 C170,196 132,166 132,141 C132,122 151,110 170,130 C189,110 208,122 208,141 C208,166 170,196 170,196 Z" fill="var(--heart)" stroke="#7a1226" stroke-width="2"/>
+        </g>
+        <text x="170" y="112" text-anchor="middle" fill="#ffe6f0" font-size="15" font-weight="700">CORAÇÃO</text>
+
+        <!-- gain/lose bubbles -->
+        <g id="gl-lung" class="gainlose">
+          <text x="270" y="120" font-size="14" font-weight="800" fill="#c0143c">+O₂</text>
+          <text x="270" y="140" font-size="12" font-weight="800" fill="#666">−CO₂</text>
+        </g>
+        <g id="gl-body" class="gainlose">
+          <text x="188" y="335" font-size="14" font-weight="800" fill="#c0143c">−O₂</text>
+          <text x="188" y="352" font-size="12" font-weight="800" fill="#555">+CO₂</text>
+        </g>
+
+        <!-- blood dot -->
+        <circle id="dot" class="step-dot" cx="170" cy="172" r="11" fill="url(#gradDot)" stroke="#fff" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="caption-panel">
+      <div class="step-progress" id="stepProgress"></div>
+      <div class="caption-top">
+        <div class="caption-emoji" id="capEmoji">🫀</div>
+        <div class="caption-text" id="capText">Toque em Próximo para começar a jornada do sangue!</div>
+      </div>
+      <div class="learn-controls">
+        <button class="btn ghost small" id="btn-prev">◀ Anterior</button>
+        <div class="mid">
+          <button class="btn blue small" id="btn-auto">▶ Auto</button>
+        </div>
+        <button class="btn primary small" id="btn-next">Próximo ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="screen-game" class="screen">
+    <canvas id="gameCanvas"></canvas>
+    <div class="hud">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="icon-btn" id="btn-pause">⏸</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <div class="hud-zone" id="hudZone">🫀 Coração</div>
+        <div class="hud-pill">⭐ <span id="hudScore">0</span></div>
+        <div class="lives" id="hudLives">❤️❤️❤️</div>
+      </div>
+    </div>
+    <div class="game-controls">
+      <button class="lane-btn" id="btn-left">◀</button>
+      <button class="lane-btn" id="btn-right">▶</button>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <!-- checkpoint / pause overlay -->
+    <div class="overlay" id="checkOverlay">
+      <div class="card" id="checkCard"></div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ standalone ================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="learn-header">
+      <button class="icon-btn" id="btn-quiz-back">←</button>
+      <div class="learn-title">Quiz Rápido</div>
+      <div style="width:44px;"></div>
+    </div>
+    <div class="quiz-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="quizProgress"></div></div>
+      <div class="quiz-card" id="quizCard"></div>
+    </div>
+  </section>
+
+  <!-- ================= GAME OVER ================= -->
+  <section id="screen-gameover" class="screen">
+    <div class="stars" id="goStars">⭐⭐⭐</div>
+    <div class="result-box">
+      <h2 id="goTitle" style="color:var(--heart);">Muito bem!</h2>
+      <p id="goMsg" style="font-weight:600;">Você jogou muito bem!</p>
+      <p style="font-size:26px;font-weight:800;color:var(--ink);">Pontos: <span id="goScore">0</span></p>
+      <p id="goTip" style="font-size:13px;color:#555;font-weight:600;"></p>
+    </div>
+    <div class="menu-buttons" style="max-width:300px;">
+      <button class="btn primary" id="btn-retry">🔁 Jogar de novo</button>
+      <button class="btn ghost" id="btn-go-menu2">🏠 Menu</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- navigation ---------------- */
+const screens = ["menu","learn","game","quiz","gameover"];
+function show(name){
+  screens.forEach(s=>document.getElementById("screen-"+s).classList.toggle("active", s===name));
+  if(name==="learn") learnEnter();
+  if(name!=="learn") learnPauseAuto();
+  if(name==="game") gameEnter();
+  if(name!=="game") gamePause(true);
+  if(name==="quiz") quizStart();
+}
+document.getElementById("btn-go-learn").onclick=()=>show("learn");
+document.getElementById("btn-go-game").onclick=()=>show("game");
+document.getElementById("btn-go-quiz").onclick=()=>show("quiz");
+document.getElementById("btn-learn-back").onclick=()=>show("menu");
+document.getElementById("btn-quiz-back").onclick=()=>show("menu");
+document.getElementById("btn-go-menu2").onclick=()=>show("menu");
+
+/* ---------------- question bank ---------------- */
+const QUESTIONS = [
+ {q:"Qual líquido vermelho e viscoso circula por todo o nosso corpo?", opts:["Sangue","Suor","Saliva","Ar"], a:0},
+ {q:"Que órgão mantém o sangue circulando pelo corpo?", opts:["Pulmão","Coração","Fígado","Estômago"], a:1},
+ {q:"Onde fica localizado o coração?", opts:["No abdômen","Na cabeça","Na caixa torácica, entre os pulmões","Nas pernas"], a:2},
+ {q:"Como se chamam os vasos que levam sangue do coração para o corpo?", opts:["Veias","Nervos","Capilares","Artérias"], a:3},
+ {q:"Como se chamam os vasos que levam o sangue de volta ao coração?", opts:["Artérias","Veias","Tendões","Capilares"], a:1},
+ {q:"Qual é o vaso sanguíneo mais fino, podendo ser mais fino que um fio de cabelo?", opts:["Aorta","Artéria","Capilar","Veia"], a:2},
+ {q:"Onde o sangue pega o gás oxigênio?", opts:["No intestino","Nos pulmões (alvéolos)","No coração","Nos rins"], a:1},
+ {q:"Onde o sangue pega os nutrientes que vêm da alimentação?", opts:["No intestino","No pulmão","No coração","Na pele"], a:0},
+ {q:"Cerca de quantos litros de sangue circulam pelo corpo a cada minuto?", opts:["1 litro","50 litros","5 litros","20 litros"], a:2},
+ {q:"Qual aparelho mede a quantidade de gás oxigênio no sangue?", opts:["Termômetro","Oxímetro","Balança","Estetoscópio"], a:1},
+ {q:"Nas ilustrações do livro, as artérias costumam aparecer em qual cor?", opts:["Azul","Verde","Vermelho","Amarelo"], a:2},
+ {q:"E as veias, em qual cor costumam aparecer?", opts:["Azul","Vermelho","Verde","Roxo"], a:0},
+ {q:"O que forma o sistema cardiovascular?", opts:["Só o coração","Sangue, vasos sanguíneos e coração","Só o sangue","Ossos e músculos"], a:1},
+ {q:"Além de oxigênio e nutrientes, o que o sangue recolhe do corpo para eliminar?", opts:["Luz","Gás carbônico","Som","Só água"], a:1},
+ {q:"Uma pessoa saudável costuma ter quanto de oxigênio dissolvido no sangue?", opts:["Entre 95% e 99%","Entre 10% e 20%","Exatos 50%","100% sempre"], a:0},
+ {q:"Uma artéria de uma pessoa adulta pode ter até quantos cm de diâmetro?", opts:["Mais de 3 cm","30 cm","0,001 cm","1 metro"], a:0},
+];
+function shuffledIndices(n){
+  const arr=[...Array(n).keys()];
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+/* =========================================================
+   LEARN SCREEN
+========================================================= */
+const paths = {p1:document.getElementById("p1"),p2:document.getElementById("p2"),p3:document.getElementById("p3"),p4:document.getElementById("p4")};
+const dot = document.getElementById("dot");
+const heartGroup = document.getElementById("heartGroup");
+const glLung = document.getElementById("gl-lung");
+const glBody = document.getElementById("gl-body");
+const capText = document.getElementById("capText");
+const capEmoji = document.getElementById("capEmoji");
+const stepProgressEl = document.getElementById("stepProgress");
+
+const HEART_PT={x:170,y:172}, LUNG_PT={x:242,y:138}, BODY_PT={x:140,y:320};
+const COLOR_BLUE="#3b7dd8", COLOR_RED="#e0433f";
+
+const steps = [
+ {type:"transform", pt:HEART_PT, color:COLOR_BLUE, emoji:"🫀", text:"O coração bombeia o sangue sem oxigênio em direção aos pulmões.", pulse:true},
+ {type:"travel", path:"p1", color:COLOR_BLUE, emoji:"🩸", text:"O sangue viaja pelas artérias pulmonares até os pulmões."},
+ {type:"transform", pt:LUNG_PT, colorFrom:COLOR_BLUE, colorTo:COLOR_RED, emoji:"🫁", text:"Nos pulmões, o sangue pega gás oxigênio (O₂) e libera gás carbônico (CO₂). Ele fica vermelho vivo!", gl:"lung"},
+ {type:"travel", path:"p2", color:COLOR_RED, emoji:"🩸", text:"O sangue rico em oxigênio volta ao coração pelas veias pulmonares."},
+ {type:"transform", pt:HEART_PT, color:COLOR_RED, emoji:"🫀", text:"O coração bombeia esse sangue \"renovado\" para todo o corpo. Essa é a parceria entre pulmões e coração!", pulse:true},
+ {type:"travel", path:"p3", color:COLOR_RED, emoji:"🩸", text:"O sangue viaja pelas artérias, levando oxigênio e nutrientes a todo o corpo."},
+ {type:"transform", pt:BODY_PT, colorFrom:COLOR_RED, colorTo:COLOR_BLUE, emoji:"💪", text:"As células do corpo usam o oxigênio e os nutrientes, e soltam gás carbônico no sangue.", gl:"body"},
+ {type:"travel", path:"p4", color:COLOR_BLUE, emoji:"🩸", text:"O sangue volta ao coração pelas veias... e o ciclo recomeça, sem parar!"},
+];
+let stepIdx=0, learnAnimating=false, autoOn=false, autoTimer=null;
+
+function buildStepProgress(){
+  stepProgressEl.innerHTML="";
+  steps.forEach((_,i)=>{
+    const s=document.createElement("span"); s.dataset.i=i;
+    stepProgressEl.appendChild(s);
+  });
+}
+buildStepProgress();
+
+function clearVesselHighlight(){
+  Object.values(paths).forEach(p=>p.classList.remove("active"));
+}
+function updateProgressDots(){
+  [...stepProgressEl.children].forEach((el,i)=>el.classList.toggle("on", i===stepIdx));
+}
+
+function speak(text){
+  if(!speechEnabled) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="pt-BR"; u.rate=0.98; u.pitch=1.05;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function applyStep(i, animate){
+  const st = steps[i];
+  clearVesselHighlight();
+  glLung.classList.remove("show"); glBody.classList.remove("show");
+  capEmoji.textContent = st.emoji;
+  capText.textContent = st.text;
+  updateProgressDots();
+  speak(st.text);
+
+  if(st.type==="transform"){
+    dot.setAttribute("cx", st.pt.x); dot.setAttribute("cy", st.pt.y);
+    if(st.pulse){
+      heartGroup.classList.remove("beat"); void heartGroup.offsetWidth; heartGroup.classList.add("beat");
+      dot.style.fill = st.color;
+    } else if(animate){
+      dot.style.fill = st.colorFrom;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ dot.style.fill = st.colorTo; }));
+    } else {
+      dot.style.fill = st.colorTo || st.color;
+    }
+    if(st.gl){
+      const el = st.gl==="lung"?glLung:glBody;
+      setTimeout(()=>el.classList.add("show"), animate?250:0);
+    }
+  } else if(st.type==="travel"){
+    paths[st.path].classList.add("active");
+    dot.style.fill = st.color;
+    if(animate) travelAlong(paths[st.path], 1300);
+    else {
+      const len=paths[st.path].getTotalLength(); const p=paths[st.path].getPointAtLength(len);
+      dot.setAttribute("cx",p.x); dot.setAttribute("cy",p.y);
+    }
+  }
+}
+
+function travelAlong(pathEl, duration){
+  learnAnimating=true;
+  const len = pathEl.getTotalLength();
+  const t0 = performance.now();
+  function frame(now){
+    let t = Math.min(1,(now-t0)/duration);
+    const eased = t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+    const p = pathEl.getPointAtLength(eased*len);
+    dot.setAttribute("cx",p.x); dot.setAttribute("cy",p.y);
+    if(t<1){ requestAnimationFrame(frame); } else { learnAnimating=false; }
+  }
+  requestAnimationFrame(frame);
+}
+
+function goStep(delta){
+  if(learnAnimating) return;
+  stepIdx = (stepIdx + delta + steps.length) % steps.length;
+  applyStep(stepIdx, true);
+}
+document.getElementById("btn-next").onclick=()=>{ stopAuto(); goStep(1); };
+document.getElementById("btn-prev").onclick=()=>{ stopAuto(); goStep(-1); };
+
+let speechEnabled=false;
+document.getElementById("btn-speak").onclick=(e)=>{
+  speechEnabled=!speechEnabled;
+  e.target.style.opacity = speechEnabled? "1":"0.5";
+  e.target.textContent = speechEnabled? "🔊":"🔇";
+  if(speechEnabled) speak(steps[stepIdx].text);
+  else window.speechSynthesis.cancel();
+};
+
+function startAuto(){
+  autoOn=true;
+  document.getElementById("btn-auto").textContent="⏸ Pausar";
+  scheduleAuto();
+}
+function scheduleAuto(){
+  clearTimeout(autoTimer);
+  const dur = steps[stepIdx].type==="travel" ? 1900 : 2600;
+  autoTimer=setTimeout(()=>{
+    if(!autoOn) return;
+    stepIdx=(stepIdx+1)%steps.length;
+    applyStep(stepIdx,true);
+    scheduleAuto();
+  }, dur);
+}
+function stopAuto(){
+  autoOn=false; clearTimeout(autoTimer);
+  document.getElementById("btn-auto").textContent="▶ Auto";
+}
+function learnPauseAuto(){ stopAuto(); }
+document.getElementById("btn-auto").onclick=()=>{ autoOn? stopAuto() : startAuto(); };
+
+function learnEnter(){
+  stepIdx=0; applyStep(0,false);
+}
+
+/* =========================================================
+   GAME: Corrida da Hemácia
+========================================================= */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let W=0,H=0,DPR=1;
+function resizeCanvas(){
+  const rect = canvas.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio||1, 2.5);
+  W = rect.width; H = rect.height;
+  canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize", resizeCanvas);
+
+const ZONES = [
+  {key:"coracao", label:"🫀 Coração", top:"#ff8fa3", bottom:"#7a1226", fact:"O coração bombeia cerca de 5 litros de sangue por minuto! Uma artéria pode ter mais de 3 cm de diâmetro.", emoji:"🫀"},
+  {key:"pulmoes", label:"🫁 Pulmões", top:"#bfe9ff", bottom:"#3b7dd8", fact:"Nos pulmões, o sangue pega gás oxigênio pelos alvéolos e libera gás carbônico.", emoji:"🫁"},
+  {key:"corpo", label:"💪 Corpo", top:"#ffe1ad", bottom:"#e08a3b", fact:"As células do corpo usam oxigênio e nutrientes, e soltam gás carbônico no sangue — que os capilares (mais finos que um fio de cabelo!) recolhem.", emoji:"💪"},
+];
+
+let game;
+function freshGame(){
+  return {
+    running:false, paused:false, over:false,
+    lane:1, laneX:[0,0,0], playerX:0, playerY:0,
+    score:0, lives:3, speed:150, elapsed:0, lastT:0,
+    items:[], particles:[],
+    zoneIdx:0, sinceCheckpoint:0, checkpointEvery:16, // seconds
+    invuln:0, qQueue: shuffledIndices(QUESTIONS.length), qPos:0,
+    bob:0,
+  };
+}
+
+function laneXFor(i){ return W*[0.22,0.5,0.78][i]; }
+
+function gameEnter(){
+  resizeCanvas();
+  game = freshGame();
+  game.playerY = H*0.76;
+  for(let i=0;i<3;i++) game.laneX[i]=laneXFor(i);
+  game.playerX = game.laneX[1];
+  updateHud();
+  hideOverlay();
+  game.running=true; game.lastT=performance.now();
+  requestAnimationFrame(gameLoop);
+}
+
+function updateHud(){
+  document.getElementById("hudScore").textContent = game.score;
+  document.getElementById("hudLives").textContent = "❤️".repeat(Math.max(0,game.lives)) + "🖤".repeat(3-game.lives);
+  document.getElementById("hudZone").textContent = ZONES[game.zoneIdx].label;
+}
+
+function moveLane(delta){
+  if(!game || game.paused || game.over) return;
+  game.lane = Math.min(2, Math.max(0, game.lane+delta));
+}
+document.getElementById("btn-left").onclick=()=>moveLane(-1);
+document.getElementById("btn-right").onclick=()=>moveLane(1);
+canvas.addEventListener("pointerdown",(e)=>{
+  const rect=canvas.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  if(x < W/2.4) moveLane(-1); else if (x> W-W/2.4) moveLane(1);
+});
+
+document.getElementById("btn-pause").onclick=()=>{
+  if(!game || game.over) return;
+  game.paused = !game.paused;
+  if(game.paused) showPauseCard(); else { hideOverlay(); game.lastT=performance.now(); }
+};
+
+function gamePause(hard){ if(game){ game.running=false; } }
+
+function spawnItem(){
+  const lane = Math.floor(Math.random()*3);
+  const r = Math.random();
+  let type = r<0.68 ? "good" : (r<0.94 ? "bad" : "bonus");
+  game.items.push({lane, y:-30, type, r:16, wob:Math.random()*Math.PI*2});
+}
+
+let spawnTimer=0;
+function gameLoop(t){
+  if(!game || !game.running){ return; }
+  const dt = Math.min(0.045, (t-game.lastT)/1000);
+  game.lastT=t;
+  if(!game.paused && !game.over){
+    step(dt);
+  }
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+function step(dt){
+  game.elapsed += dt;
+  game.bob += dt*4;
+  game.speed = Math.min(360, 150 + game.elapsed*4.5);
+  if(game.invuln>0) game.invuln-=dt;
+
+  // smooth lane movement
+  const targetX = laneXFor(game.lane);
+  game.playerX += (targetX-game.playerX)*Math.min(1,dt*10);
+
+  // spawn
+  spawnTimer -= dt;
+  if(spawnTimer<=0){
+    spawnItem();
+    spawnTimer = Math.max(0.45, 1.1 - game.elapsed*0.01);
+  }
+
+  // update items
+  for(let i=game.items.length-1;i>=0;i--){
+    const it = game.items[i];
+    it.y += game.speed*dt;
+    it.wob += dt*3;
+    const ix = laneXFor(it.lane) + Math.sin(it.wob)*6;
+    if(Math.abs(it.y-game.playerY) < 26 && it.lane===game.lane){
+      resolveHit(it);
+      game.items.splice(i,1);
+      continue;
+    }
+    if(it.y > H+40) game.items.splice(i,1);
+  }
+
+  // particles
+  for(let i=game.particles.length-1;i>=0;i--){
+    const p=game.particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=200*dt;
+    if(p.life<=0) game.particles.splice(i,1);
+  }
+
+  // checkpoint timing
+  game.sinceCheckpoint += dt;
+  if(game.sinceCheckpoint >= game.checkpointEvery){
+    game.sinceCheckpoint = 0;
+    triggerCheckpoint();
+  }
+  updateHud();
+}
+
+function burst(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, sp=60+Math.random()*120;
+    game.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-40,life:0.6+Math.random()*0.3,color});
+  }
+}
+
+function resolveHit(it){
+  const px = laneXFor(it.lane);
+  if(it.type==="good"){
+    game.score += 10;
+    burst(px, game.playerY, "#ff5d7a", 12);
+    showToast(pick(["+10! Oxigênio coletado! 🫁","Nutrientes entregues! 🍎","Boa! O sangue continua sua jornada."]));
+  } else if(it.type==="bonus"){
+    game.score += 30;
+    burst(px, game.playerY, "#ffd23f", 16);
+    showToast("⭐ Bônus! +30 pontos!");
+  } else {
+    if(game.invuln>0) return;
+    game.lives -= 1; game.invuln = 1.0;
+    burst(px, game.playerY, "#888", 10);
+    showToast(pick(["Ops! Gás carbônico em excesso! 😵","Cuidado com as toxinas!","−1 vida"]));
+    if(game.lives<=0){ endGame(); }
+  }
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+let toastTimer=null;
+function showToast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("show"), 1300);
+}
+
+function draw(){
+  const zone = ZONES[game.zoneIdx];
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, zone.top); grad.addColorStop(1, zone.bottom);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+  // ambient decor
+  ctx.save(); ctx.globalAlpha=0.18;
+  for(let i=0;i<6;i++){
+    const cx = (W/6)*i + 30 + Math.sin(game.elapsed*0.5+i)*10;
+    const cy = 60 + (i%3)*70;
+    ctx.beginPath(); ctx.fillStyle="#fff"; ctx.arc(cx,cy,18,0,7); ctx.fill();
+  }
+  ctx.restore();
+
+  // lane guides
+  ctx.save(); ctx.globalAlpha=0.15; ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.setLineDash([10,12]);
+  for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(laneXFor(i),0); ctx.lineTo(laneXFor(i),H); ctx.stroke(); }
+  ctx.restore();
+
+  // items
+  game.items.forEach(it=>{
+    const x = laneXFor(it.lane)+Math.sin(it.wob)*6;
+    ctx.save();
+    ctx.translate(x,it.y);
+    if(it.type==="good"){
+      ctx.fillStyle="#ff5d7a"; ctx.beginPath(); ctx.arc(0,0,17,0,7); ctx.fill();
+      ctx.fillStyle="#fff"; ctx.font="bold 13px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("O₂", 0, 1);
+    } else if(it.type==="bonus"){
+      ctx.fillStyle="#ffd23f"; ctx.beginPath();
+      for(let s=0;s<5;s++){ const ang=-Math.PI/2+s*(2*Math.PI/5); const ang2=ang+Math.PI/5;
+        ctx.lineTo(Math.cos(ang)*17,Math.sin(ang)*17); ctx.lineTo(Math.cos(ang2)*7,Math.sin(ang2)*7);
+      }
+      ctx.closePath(); ctx.fill();
+    } else {
+      ctx.fillStyle="#7d8b8a"; ctx.beginPath(); ctx.arc(0,0,17,0,7); ctx.fill();
+      ctx.fillStyle="#fff"; ctx.font="bold 11px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("CO₂", 0, 1);
+    }
+    ctx.restore();
+  });
+
+  // particles
+  game.particles.forEach(p=>{
+    ctx.globalAlpha = Math.max(0,p.life);
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,7); ctx.fill();
+    ctx.globalAlpha=1;
+  });
+
+  // player (blood cell mascot)
+  const bob = Math.sin(game.bob)*4;
+  const flash = game.invuln>0 && Math.floor(game.elapsed*20)%2===0;
+  ctx.save();
+  ctx.translate(game.playerX, game.playerY+bob);
+  ctx.globalAlpha = flash? 0.4:1;
+  ctx.fillStyle="#e0433f";
+  ctx.beginPath(); ctx.arc(0,0,24,0,7); ctx.fill();
+  ctx.fillStyle="#ff9aa8"; ctx.beginPath(); ctx.ellipse(0,0,10,7,0,0,7); ctx.fill();
+  ctx.fillStyle="#2a0a12";
+  ctx.beginPath(); ctx.arc(-8,-4,2.6,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(8,-4,2.6,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(0,4,8,0.15*Math.PI,0.85*Math.PI); ctx.stroke();
+  ctx.strokeStyle="#2a0a12"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(0,3,7,0.1*Math.PI,0.9*Math.PI); ctx.stroke();
+  ctx.restore();
+}
+
+/* ---- checkpoints (quiz + facts) ---- */
+function triggerCheckpoint(){
+  game.paused = true;
+  const zone = ZONES[game.zoneIdx];
+  const overlay = document.getElementById("checkOverlay");
+  const card = document.getElementById("checkCard");
+
+  if(game.qPos >= game.qQueue.length){ game.qQueue = shuffledIndices(QUESTIONS.length); game.qPos=0; }
+  const q = QUESTIONS[game.qQueue[game.qPos++]];
+
+  card.innerHTML = `
+    <div class="card-title">${zone.emoji} Estação: ${zone.key==="coracao"?"Coração":zone.key==="pulmoes"?"Pulmões":"Corpo"}</div>
+    <div class="card-fact">💡 <span>${zone.fact}</span></div>
+    <div class="q-text">${q.q}</div>
+    <div class="q-options" id="qOpts"></div>
+  `;
+  const optsWrap = card.querySelector("#qOpts");
+  q.opts.forEach((opt,i)=>{
+    const b=document.createElement("button");
+    b.className="q-opt"; b.textContent=opt;
+    b.onclick=()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i===q.a){ b.classList.add("correct"); game.score+=20; updateHud(); }
+      else { b.classList.add("wrong"); optsWrap.children[q.a].classList.add("correct"); }
+      const cont=document.createElement("button");
+      cont.className="btn primary"; cont.style.marginTop="6px"; cont.textContent="Continuar ▶";
+      cont.onclick=()=>{
+        game.zoneIdx = (game.zoneIdx+1)%ZONES.length;
+        hideOverlay(); game.paused=false; game.lastT=performance.now(); updateHud();
+      };
+      card.appendChild(cont);
+    };
+    optsWrap.appendChild(b);
+  });
+  overlay.classList.add("show");
+}
+
+function showPauseCard(){
+  const overlay = document.getElementById("checkOverlay");
+  const card = document.getElementById("checkCard");
+  card.innerHTML = `
+    <div class="card-title">⏸ Pausado</div>
+    <p style="font-weight:600;color:#555;">Pontuação atual: <b>${game.score}</b></p>
+    <button class="btn primary" id="resumeBtn">▶ Continuar</button>
+    <button class="btn ghost" id="menuBtn">🏠 Sair para o menu</button>
+  `;
+  overlay.classList.add("show");
+  card.querySelector("#resumeBtn").onclick=()=>{ game.paused=false; hideOverlay(); game.lastT=performance.now(); };
+  card.querySelector("#menuBtn").onclick=()=>{ hideOverlay(); show("menu"); };
+}
+function hideOverlay(){ document.getElementById("checkOverlay").classList.remove("show"); }
+
+function endGame(){
+  game.over=true; game.running=false;
+  const s=game.score;
+  let stars="⭐", title="Bom começo!", tip="Cada corrida ajuda o sangue a levar oxigênio! Tente coletar mais O₂ e desviar do CO₂.";
+  if(s>=300){ stars="⭐⭐⭐"; title="Cardiologista Master!"; tip="Você entendeu muito bem a parceria entre o coração e os pulmões!"; }
+  else if(s>=150){ stars="⭐⭐"; title="Muito bem!"; tip="Lembre-se: as artérias (vermelhas) saem do coração e as veias (azuis) retornam a ele."; }
+  document.getElementById("goStars").textContent=stars;
+  document.getElementById("goTitle").textContent=title;
+  document.getElementById("goScore").textContent=s;
+  document.getElementById("goTip").textContent="Dica: "+tip;
+  setTimeout(()=>show("gameover"), 700);
+}
+document.getElementById("btn-retry").onclick=()=>show("game");
+
+/* =========================================================
+   QUIZ standalone
+========================================================= */
+let quizOrder=[], quizPos=0, quizCorrect=0, quizTotal=8;
+function quizStart(){
+  quizOrder = shuffledIndices(QUESTIONS.length).slice(0, quizTotal);
+  quizPos=0; quizCorrect=0;
+  renderQuiz();
+}
+function renderQuiz(){
+  const fill = document.getElementById("quizProgress");
+  fill.style.width = (quizPos/quizTotal*100)+"%";
+  const card = document.getElementById("quizCard");
+  if(quizPos>=quizTotal){
+    card.innerHTML = `
+      <div class="card-title">🎉 Resultado</div>
+      <p class="score-badge" style="color:var(--ink);font-size:20px;">Você acertou ${quizCorrect} de ${quizTotal}!</p>
+      <p style="font-weight:600;color:#555;">${quizCorrect>=quizTotal*0.8 ? "Excelente! Você manja de sistema cardiovascular! 🫀" : quizCorrect>=quizTotal*0.5 ? "Bom trabalho! Revise o vídeo e o livro para ficar craque." : "Bora estudar mais! Reveja a animação em Aprender."}</p>
+      <button class="btn primary" id="quizRetry">🔁 Tentar de novo</button>
+      <button class="btn ghost" id="quizMenu">🏠 Menu</button>
+    `;
+    card.querySelector("#quizRetry").onclick=quizStart;
+    card.querySelector("#quizMenu").onclick=()=>show("menu");
+    return;
+  }
+  const q = QUESTIONS[quizOrder[quizPos]];
+  card.innerHTML = `
+    <div class="card-title">Pergunta ${quizPos+1} de ${quizTotal}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="q-options" id="qOpts2"></div>
+  `;
+  const optsWrap = card.querySelector("#qOpts2");
+  q.opts.forEach((opt,i)=>{
+    const b=document.createElement("button");
+    b.className="q-opt"; b.textContent=opt;
+    b.onclick=()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i===q.a){ b.classList.add("correct"); quizCorrect++; }
+      else { b.classList.add("wrong"); optsWrap.children[q.a].classList.add("correct"); }
+      const cont=document.createElement("button");
+      cont.className="btn primary"; cont.style.marginTop="6px";
+      cont.textContent = quizPos+1<quizTotal ? "Próxima ▶" : "Ver resultado ▶";
+      cont.onclick=()=>{ quizPos++; renderQuiz(); };
+      card.appendChild(cont);
+    };
+    optsWrap.appendChild(b);
+  });
+}
+
+})();
+</script>
+</body>
+</html>
