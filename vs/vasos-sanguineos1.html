@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#6B3FA0">
+<title>Explorando os Vasos Sanguíneos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== HOME ===================== -->
+  <section class="screen" id="screen-home">
+    <div class="home-wrap">
+      <div class="floaty" aria-hidden="true">🫀</div>
+      <h1 class="game-title">Explorando os<br>Vasos Sanguíneos</h1>
+      <p class="game-subtitle">Baseado na página 119 do seu livro de Ciências</p>
+
+      <div class="home-buttons">
+        <button class="big-btn learn-btn" data-nav="screen-learn">
+          <span class="big-btn-icon">📖</span>
+          <span>Aprender</span>
+        </button>
+        <button class="big-btn play-btn" data-nav="screen-hub">
+          <span class="big-btn-icon">🎮</span>
+          <span>Jogar</span>
+        </button>
+      </div>
+
+      <p class="pencil-callout">✏️ Com as suas anotações do caderno!</p>
+    </div>
+  </section>
+
+  <!-- ===================== LEARN (slides) ===================== -->
+  <section class="screen" id="screen-learn">
+    <header class="topbar">
+      <button class="icon-btn back-btn" data-nav="screen-home">←</button>
+      <h2 id="learn-title">Aprender</h2>
+      <span class="topbar-spacer"></span>
+    </header>
+
+    <div class="slides-viewport" id="slides-viewport">
+      <div class="slides-track" id="slides-track">
+        <!-- slides injected by JS -->
+      </div>
+    </div>
+
+    <div class="slide-dots" id="slide-dots"></div>
+
+    <div class="slide-nav">
+      <button class="pill-btn" id="slide-prev">‹ Anterior</button>
+      <button class="pill-btn primary" id="slide-next">Próxima ›</button>
+    </div>
+  </section>
+
+  <!-- ===================== GAME HUB ===================== -->
+  <section class="screen" id="screen-hub">
+    <header class="topbar">
+      <button class="icon-btn back-btn" data-nav="screen-home">←</button>
+      <h2>Escolha um jogo</h2>
+      <span class="topbar-spacer"></span>
+    </header>
+
+    <div class="hub-grid">
+      <button class="hub-card" data-nav="screen-quiz" id="card-quiz">
+        <div class="hub-emoji">❓</div>
+        <div class="hub-text">
+          <div class="hub-name">Quiz Relâmpago</div>
+          <div class="hub-sub">10 perguntas sobre o sangue</div>
+        </div>
+        <div class="hub-best" data-best="quiz">Melhor: —</div>
+      </button>
+
+      <button class="hub-card" data-nav="screen-match" id="card-match">
+        <div class="hub-emoji">🎯</div>
+        <div class="hub-text">
+          <div class="hub-name">Classifique os Vasos</div>
+          <div class="hub-sub">Artéria, veia ou capilar?</div>
+        </div>
+        <div class="hub-best" data-best="match">Melhor: —</div>
+      </button>
+
+      <button class="hub-card" data-nav="screen-catch" id="card-catch">
+        <div class="hub-emoji">🫁</div>
+        <div class="hub-text">
+          <div class="hub-name">Caça-Oxigênio</div>
+          <div class="hub-sub">Ajude os alvéolos!</div>
+        </div>
+        <div class="hub-best" data-best="catch">Melhor: —</div>
+      </button>
+    </div>
+
+    <div class="hub-progress" id="hub-progress">
+      <div class="hub-progress-label">Suas estrelas ⭐</div>
+      <div class="hub-progress-stars" id="hub-total-stars">☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆</div>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ ===================== -->
+  <section class="screen" id="screen-quiz">
+    <header class="topbar">
+      <button class="icon-btn back-btn" data-nav="screen-hub">←</button>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="quiz-progress"></div></div>
+      <span class="quiz-score" id="quiz-score-live">0</span>
+    </header>
+
+    <div class="quiz-body">
+      <div class="quiz-card" id="quiz-card">
+        <p class="quiz-question" id="quiz-question">Pergunta</p>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <button class="pill-btn primary quiz-next-btn" id="quiz-next" style="display:none;">Próxima ›</button>
+  </section>
+
+  <!-- ===================== MATCH / CLASSIFY ===================== -->
+  <section class="screen" id="screen-match">
+    <header class="topbar">
+      <button class="icon-btn back-btn" data-nav="screen-hub">←</button>
+      <h2>Toque na dica, depois no vaso certo</h2>
+      <span class="quiz-score" id="match-score-live">0</span>
+    </header>
+
+    <div class="match-cards" id="match-cards"></div>
+
+    <div class="match-zones" id="match-zones">
+      <button class="zone-box artery-zone" data-zone="arteria">
+        <span class="zone-icon">🔴</span><span>Artéria</span>
+      </button>
+      <button class="zone-box vein-zone" data-zone="veia">
+        <span class="zone-icon">🔵</span><span>Veia</span>
+      </button>
+      <button class="zone-box capillary-zone" data-zone="capilar">
+        <span class="zone-icon">🟣</span><span>Capilar</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== CATCH O2 GAME ===================== -->
+  <section class="screen" id="screen-catch">
+    <header class="topbar">
+      <button class="icon-btn back-btn" id="catch-back-btn" data-nav="screen-hub">←</button>
+      <h2>Toque só no O₂!</h2>
+      <span class="quiz-score" id="catch-score-live">0</span>
+    </header>
+
+    <p class="catch-instructions">Os alvéolos precisam de oxigênio (O₂). Não deixe a fumaça poluída passar!</p>
+
+    <div class="catch-area" id="catch-area">
+      <div class="alveoli-line">🫁 Alvéolos</div>
+      <div class="catch-timer-wrap"><div class="catch-timer" id="catch-timer"></div></div>
+      <button class="pill-btn primary catch-start-btn" id="catch-start">Começar (30s)</button>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section class="screen" id="screen-results">
+    <div class="results-wrap">
+      <div class="results-medal" id="results-medal">🥉</div>
+      <h2 id="results-title">Resultado</h2>
+      <p class="results-detail" id="results-detail"></p>
+      <div class="results-stars" id="results-stars">⭐⭐⭐</div>
+      <div class="results-buttons">
+        <button class="pill-btn" id="results-retry">🔁 Jogar de novo</button>
+        <button class="pill-btn primary" id="results-hub">🏠 Menu de jogos</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
