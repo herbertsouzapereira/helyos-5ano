@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#58cc02">
+<title>Respira Quest · Sistema Respiratório</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+
+:root{
+  --green:#58cc02; --green-dark:#4aa002; --green-deep:#3d8b00;
+  --blue:#1cb0f6; --blue-dark:#1899d6;
+  --red:#ff4b4b; --red-dark:#e63e3e;
+  --gold:#ffc800; --gold-dark:#e6a800;
+  --purple:#ce82ff; --purple-dark:#a568cc;
+  --ink:#3c3c3c; --gray:#777; --gray-light:#e5e5e5; --bg:#fff;
+  --card-bg:#f7f7f7;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; font-family:'Nunito',Arial,sans-serif; color:var(--ink);
+  background:var(--bg); min-height:100svh;
+}
+button{font-family:inherit}
+.app{max-width:520px; margin:0 auto; min-height:100svh; display:flex; flex-direction:column; position:relative; padding-bottom:env(safe-area-inset-bottom)}
+.screen{display:none; flex:1; flex-direction:column}
+.screen.active{display:flex; animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0; transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  display:flex; align-items:center; gap:14px; padding:14px 16px; position:sticky; top:0; background:var(--bg); z-index:5;
+  border-bottom:2px solid var(--gray-light);
+}
+.topbar .x{
+  background:none; border:0; color:var(--gray); font-size:26px; font-weight:900; cursor:pointer; line-height:1; padding:4px;
+}
+.barwrap{flex:1; height:16px; background:var(--gray-light); border-radius:99px; overflow:hidden}
+.barfill{height:100%; background:var(--green); border-radius:99px; transition:width .35s ease; width:0%}
+.hearts{display:flex; align-items:center; gap:4px; font-weight:900; color:var(--red); font-size:16px; min-width:44px}
+.hearts .icon{font-size:19px}
+
+/* ---------- Home / map ---------- */
+.home-header{
+  display:flex; align-items:center; justify-content:space-between; padding:16px 18px; position:sticky; top:0; background:var(--bg); z-index:5; border-bottom:2px solid var(--gray-light);
+}
+.home-title{display:flex; align-items:center; gap:10px}
+.home-title .owl{font-size:30px}
+.home-title h1{font-size:17px; margin:0; letter-spacing:-.3px}
+.home-title small{display:block; font-size:11px; font-weight:800; color:var(--gray); letter-spacing:.4px}
+.stat{display:flex; align-items:center; gap:5px; font-weight:900; font-size:15px; background:var(--card-bg); padding:6px 10px; border-radius:99px}
+.stat.gold{color:#b98700}
+.stat.streak{color:#ff9600}
+.stats-row{display:flex; gap:8px}
+
+.map{flex:1; overflow-y:auto; padding:28px 10px 60px; position:relative}
+.map-title{text-align:center; font-weight:900; font-size:13px; letter-spacing:1px; color:var(--gray); text-transform:uppercase; margin:0 0 26px}
+.node-row{display:flex; justify-content:center; margin:6px 0; position:relative}
+.node-wrap{display:flex; flex-direction:column; align-items:center; position:relative}
+.node{
+  width:74px; height:74px; border-radius:50%; border:0; cursor:pointer; position:relative;
+  display:flex; align-items:center; justify-content:center; font-size:30px;
+  color:#fff; background:var(--gray-light); box-shadow:0 8px 0 #c5c5c5;
+}
+.node:active{transform:translateY(6px); box-shadow:0 2px 0 #c5c5c5}
+.node.unlocked{background:var(--green); box-shadow:0 8px 0 var(--green-deep)}
+.node.unlocked:active{box-shadow:0 2px 0 var(--green-deep)}
+.node.done{background:var(--gold); box-shadow:0 8px 0 var(--gold-dark)}
+.node.done:active{box-shadow:0 2px 0 var(--gold-dark)}
+.node.locked{cursor:default; color:#aaa}
+.node .star{position:absolute; top:-10px; right:-6px; font-size:20px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
+.node-label{margin-top:8px; font-weight:900; font-size:12.5px; text-align:center; max-width:120px; color:var(--ink)}
+.node-sub{font-size:10.5px; color:var(--gray); font-weight:800; text-align:center; max-width:130px}
+.node-row.off1 .node-wrap{transform:translateX(64px)}
+.node-row.off2 .node-wrap{transform:translateX(-64px)}
+.node-row.off0 .node-wrap{transform:translateX(0)}
+.bubble{
+  position:absolute; top:-14px; background:#fff; border:2px solid var(--gray-light); border-radius:14px; padding:8px 12px;
+  font-size:12px; font-weight:800; white-space:nowrap; box-shadow:0 4px 0 var(--gray-light); animation:bob 1.6s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ---------- Lesson ---------- */
+.lesson-body{flex:1; display:flex; flex-direction:column; padding:22px 20px 0; overflow-y:auto}
+.eyebrow{font-size:11.5px; font-weight:900; letter-spacing:1px; color:var(--gray); text-transform:uppercase; margin:0 0 8px}
+.question{font-size:22px; font-weight:900; line-height:1.28; margin:0 0 22px; letter-spacing:-.2px}
+.options{display:grid; gap:11px; margin-bottom:20px}
+.option{
+  border:2px solid var(--gray-light); background:#fff; border-radius:14px; padding:15px 16px; text-align:left;
+  font-size:15.5px; font-weight:800; color:var(--ink); cursor:pointer; box-shadow:0 3px 0 var(--gray-light);
+  transition:border-color .12s, background .12s;
+}
+.option:active{transform:translateY(2px); box-shadow:none}
+.option.selected{border-color:var(--blue); background:#ddf4ff; box-shadow:0 3px 0 var(--blue)}
+.option.correct{border-color:var(--green); background:#d7ffb8; box-shadow:0 3px 0 var(--green); color:var(--green-deep)}
+.option.wrong{border-color:var(--red); background:#ffdfe0; box-shadow:0 3px 0 var(--red); color:var(--red-dark)}
+.option:disabled{cursor:default}
+.option .badge{
+  display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+  border:2px solid var(--gray-light); font-size:12px; font-weight:900; margin-right:10px; color:var(--gray); flex:none;
+}
+.option.selected .badge{border-color:var(--blue); color:var(--blue); background:#fff}
+.option.correct .badge{border-color:var(--green); color:#fff; background:var(--green)}
+.option.wrong .badge{border-color:var(--red); color:#fff; background:var(--red)}
+
+.bottom-bar{
+  position:sticky; bottom:0; background:#fff; border-top:2px solid var(--gray-light); padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:12px;
+}
+.bottom-bar.feedback-correct{background:#d7ffb8; border-top-color:#b6e78a}
+.bottom-bar.feedback-wrong{background:#ffdfe0; border-top-color:#ffbcbe}
+.feedback-row{display:flex; align-items:flex-start; gap:10px}
+.feedback-icon{font-size:26px; line-height:1}
+.feedback-text{flex:1}
+.feedback-title{font-weight:900; font-size:16px; margin:0}
+.feedback-title.ok{color:var(--green-deep)}
+.feedback-title.bad{color:var(--red-dark)}
+.feedback-explain{font-size:13.5px; color:var(--ink); margin:3px 0 0; line-height:1.35; font-weight:700}
+.btn{
+  border:0; border-radius:14px; padding:15px 18px; font-weight:900; font-size:15px; color:#fff; cursor:pointer;
+  letter-spacing:.4px; text-transform:uppercase; box-shadow:0 5px 0 var(--green-deep); background:var(--green);
+}
+.btn:active{transform:translateY(4px); box-shadow:none}
+.btn[disabled]{background:var(--gray-light); box-shadow:0 5px 0 #cfcfcf; color:#aaa; cursor:default}
+.btn.blue{background:var(--blue); box-shadow:0 5px 0 var(--blue-dark)}
+.btn.red{background:var(--red); box-shadow:0 5px 0 var(--red-dark)}
+.btn.gold{background:var(--gold); box-shadow:0 5px 0 var(--gold-dark); color:#5c4200}
+
+/* ---------- Result / gameover screens ---------- */
+.center-screen{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 26px; text-align:center}
+.big-emoji{font-size:84px; margin-bottom:6px}
+.center-screen h2{font-size:24px; margin:6px 0 4px; font-weight:900}
+.center-screen p{color:var(--gray); font-weight:800; font-size:14px; margin:0 0 20px}
+.result-stats{display:flex; gap:14px; margin:10px 0 26px; width:100%; max-width:340px}
+.result-stat{flex:1; background:var(--card-bg); border-radius:16px; padding:14px 8px}
+.result-stat .n{font-size:22px; font-weight:900; display:block}
+.result-stat .l{font-size:11px; font-weight:800; color:var(--gray); text-transform:uppercase; letter-spacing:.4px}
+.result-stat.gold .n{color:#b98700}
+.result-stat.green .n{color:var(--green-deep)}
+.result-stat.blue .n{color:var(--blue-dark)}
+.wide-btn{width:100%; max-width:340px}
+
+/* confetti */
+.confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:50}
+.confetti i{position:absolute; top:-20px; font-size:20px; animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg); opacity:.9}}
+
+.hidden{display:none !important}
+::-webkit-scrollbar{width:0px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME / MAP ============ -->
+  <section id="screen-home" class="screen active">
+    <header class="home-header">
+      <div class="home-title"><span class="owl">🫁</span><div><h1>Respira Quest</h1><small>SISTEMA RESPIRATÓRIO</small></div></div>
+      <div class="stats-row">
+        <div class="stat streak">🔥 <span id="streak-count">0</span></div>
+        <div class="stat gold">🪙 <span id="xp-count">0</span></div>
+      </div>
+    </header>
+    <div class="map" id="map"></div>
+  </section>
+
+  <!-- ============ LESSON ============ -->
+  <section id="screen-lesson" class="screen">
+    <div class="topbar">
+      <button class="x" id="btn-exit">✕</button>
+      <div class="barwrap"><div class="barfill" id="lesson-bar"></div></div>
+      <div class="hearts"><span class="icon">❤️</span><span id="hearts-count">5</span></div>
+    </div>
+    <div class="lesson-body">
+      <p class="eyebrow" id="q-eyebrow">Questão 1 de 5</p>
+      <h2 class="question" id="q-stem">Carregando...</h2>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="bottom-bar" id="bottom-bar">
+      <button class="btn" id="btn-check" disabled>Verificar</button>
+    </div>
+  </section>
+
+  <!-- ============ LESSON RESULT ============ -->
+  <section id="screen-result" class="screen">
+    <div class="center-screen">
+      <div class="big-emoji" id="result-emoji">🎉</div>
+      <h2 id="result-title">Lição concluída!</h2>
+      <p id="result-sub">Mandou bem nos alvéolos!</p>
+      <div class="result-stats">
+        <div class="result-stat gold"><span class="n" id="result-xp">+00</span><span class="l">XP</span></div>
+        <div class="result-stat green"><span class="n" id="result-acc">0%</span><span class="l">Acerto</span></div>
+        <div class="result-stat blue"><span class="n" id="result-best-streak">0</span><span class="l">Sequência</span></div>
+      </div>
+      <button class="btn wide-btn" id="btn-continue-map">Continuar</button>
+    </div>
+  </section>
+
+  <!-- ============ OUT OF HEARTS ============ -->
+  <section id="screen-outofhearts" class="screen">
+    <div class="center-screen">
+      <div class="big-emoji">💔</div>
+      <h2>Você ficou sem corações!</h2>
+      <p>Sem problemas — respire fundo e tente essa lição de novo.</p>
+      <button class="btn red wide-btn" id="btn-retry">Tentar novamente</button>
+    </div>
+  </section>
+
+  <!-- ============ ALL LEVELS DONE ============ -->
+  <section id="screen-champion" class="screen">
+    <div class="center-screen">
+      <div class="big-emoji">🏆</div>
+      <h2>Você dominou o Sistema Respiratório!</h2>
+      <p>Todas as lições concluídas. Pode repetir qualquer uma delas no mapa para reforçar.</p>
+      <button class="btn gold wide-btn" id="btn-champion-map">Voltar ao mapa</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= DATA ================= */
+const LEVELS = [
+  {
+    id:0, title:'Função e Estrutura', sub:'Visão geral', icon:'🌬️',
+    questions:[
+      {stem:'Durante a respiração celular, as células do corpo consomem oxigênio e produzem um gás residual. Qual sistema garante a entrada desse oxigênio e a eliminação desse gás do organismo?',
+       options:['Sistema digestório','Sistema circulatório','Sistema respiratório','Sistema excretor'], correct:2,
+       explain:'O sistema respiratório garante a entrada de oxigênio e a eliminação do gás carbônico produzido pelas células.'},
+      {stem:'Além das trocas gasosas, o sistema respiratório está relacionado a duas outras funções importantes. Quais são elas?',
+       options:['Digestão e circulação','Olfato e fala','Excreção e digestão','Fala e circulação'], correct:1,
+       explain:'A área olfatória nas fossas nasais permite o olfato, e as pregas vocais na laringe permitem a fala.'},
+      {stem:'Assinale a alternativa que apresenta a sequência correta do trajeto do ar, da entrada até os pulmões:',
+       options:['Faringe → Fossas nasais → Laringe → Traqueia → Brônquios → Bronquíolos',
+                'Fossas nasais → Faringe → Laringe → Traqueia → Brônquios → Bronquíolos',
+                'Fossas nasais → Laringe → Faringe → Bronquíolos → Traqueia → Brônquios',
+                'Traqueia → Fossas nasais → Faringe → Laringe → Brônquios → Bronquíolos'], correct:1,
+       explain:'O ar percorre: fossas nasais → faringe → laringe → traqueia → brônquios → bronquíolos → alvéolos.'},
+      {stem:'Qual alternativa apresenta apenas órgãos do sistema respiratório?',
+       options:['Fossas nasais, esôfago, pulmões e traqueia','Boca, laringe, traqueia e pulmões',
+                'Fossas nasais, laringe, traqueia e pulmões','Faringe, estômago, brônquios e pulmões'], correct:2,
+       explain:'Esôfago, boca e estômago fazem parte do sistema digestório, não do respiratório.'},
+      {stem:'Ao entrar em uma padaria, uma pessoa sente imediatamente o cheiro de pão quente. Receptores responsáveis por essa percepção estão localizados em qual órgão?',
+       options:['Faringe','Fossas nasais','Laringe','Traqueia'], correct:1,
+       explain:'Na parte superior das fossas nasais fica a área olfatória, rica em receptores do olfato.'}
+    ]
+  },
+  {
+    id:1, title:'Vias Aéreas Superiores', sub:'Nariz, faringe e laringe', icon:'👃',
+    questions:[
+      {stem:'Em um dia frio e seco, o ar que entra pelo nariz chega aos pulmões aquecido, filtrado e umedecido. Essa função é realizada por qual órgão?',
+       options:['Faringe','Fossas nasais','Laringe','Traqueia'], correct:1,
+       explain:'Nas fossas nasais o ar é filtrado, aquecido e umedecido antes de seguir para os pulmões.'},
+      {stem:'Durante a deglutição de um alimento, uma estrutura se fecha para impedir que ele entre nas vias respiratórias. Essa estrutura é:',
+       options:['As pregas vocais','A epiglote','A nasofaringe','A pleura'], correct:1,
+       explain:'A epiglote funciona como uma "tampa" que impede a entrada de alimentos nas vias respiratórias durante a deglutição.'},
+      {stem:'Cantores costumam cuidar muito de um órgão específico, pois nele se localizam as estruturas responsáveis pela produção da voz. Esse órgão é:',
+       options:['A faringe','A traqueia','A laringe','Os brônquios'], correct:2,
+       explain:'As pregas vocais, responsáveis pela produção da voz, estão localizadas na laringe.'},
+      {stem:'A faringe é considerada um órgão comum a dois sistemas do corpo humano porque:',
+       options:['produz voz e também capta cheiros','conduz tanto o ar quanto os alimentos, fazendo parte dos sistemas respiratório e digestório',
+                'filtra o ar e também o alimento antes da digestão','é o local onde ocorre a hematose'], correct:1,
+       explain:'Pela faringe passam tanto o ar (sistema respiratório) quanto os alimentos (sistema digestório).'},
+      {stem:'Qual é o nome dado à parte da faringe relacionada especificamente ao sistema respiratório?',
+       options:['Orofaringe','Nasofaringe','Laringofaringe','Epiglote'], correct:1,
+       explain:'A parte da faringe relacionada ao sistema respiratório recebe o nome de nasofaringe.'}
+    ]
+  },
+  {
+    id:2, title:'Vias Aéreas Inferiores', sub:'Traqueia, brônquios e bronquíolos', icon:'🫧',
+    questions:[
+      {stem:'Um tubo sustentado por anéis de cartilagem mantém sua passagem sempre aberta, mesmo com os movimentos do pescoço. Esse órgão é:',
+       options:['A laringe','A traqueia','Os brônquios','O esôfago'], correct:1,
+       explain:'A traqueia é formada por anéis de cartilagem que mantêm sua passagem sempre aberta.'},
+      {stem:'Ao final da traqueia, o ar segue para dois ramos, um em direção a cada pulmão. Esses ramos são chamados de:',
+       options:['Bronquíolos','Alvéolos pulmonares','Brônquios principais','Pregas vocais'], correct:2,
+       explain:'A traqueia se divide, em sua extremidade final, em dois brônquios principais.'},
+      {stem:'Dentro dos pulmões, os brônquios continuam se dividindo em ramificações cada vez menores, até chegar às estruturas que conduzem o ar diretamente aos alvéolos. Essas estruturas são:',
+       options:['Os bronquíolos','Os brônquios secundários','A traqueia','A pleura'], correct:0,
+       explain:'Os bronquíolos são pequenas ramificações dos brônquios que conduzem o ar até os alvéolos pulmonares.'},
+      {stem:'Sobre a relação entre traqueia e brônquios, é correto afirmar que:',
+       options:['a traqueia é única e se divide nos brônquios, que levam o ar a cada pulmão',
+                'os brônquios se unem para formar a traqueia','traqueia e brônquios têm a função de realizar as trocas gasosas',
+                'os brônquios existem apenas no pulmão esquerdo'], correct:0,
+       explain:'A traqueia é um único tubo que, ao final, se divide em dois brônquios principais, um para cada pulmão.'},
+      {stem:'Assinale a sequência que representa corretamente a passagem do ar pelas vias respiratórias inferiores, até chegar às trocas gasosas:',
+       options:['Brônquios → Traqueia → Bronquíolos → Alvéolos','Traqueia → Brônquios → Bronquíolos → Alvéolos',
+                'Traqueia → Bronquíolos → Brônquios → Alvéolos','Bronquíolos → Brônquios → Traqueia → Alvéolos'], correct:1,
+       explain:'O ar segue de traqueia para brônquios, depois bronquíolos, até chegar aos alvéolos pulmonares.'}
+    ]
+  },
+  {
+    id:3, title:'Trocas Gasosas', sub:'Alvéolos, hematose e pulmões', icon:'🔄',
+    questions:[
+      {stem:'As trocas gasosas entre o ar e o sangue ocorrem em pequenas bolsas de paredes muito finas, localizadas na extremidade dos bronquíolos. Essas estruturas são:',
+       options:['Os brônquios','Os alvéolos pulmonares','A pleura','A laringe'], correct:1,
+       explain:'Os alvéolos pulmonares são pequenas bolsas de paredes finas onde ocorrem as trocas gasosas.'},
+      {stem:'O processo pelo qual o oxigênio passa dos alvéolos para o sangue, e o gás carbônico passa do sangue para os alvéolos, é chamado de:',
+       options:['Respiração celular','Hematose','Ventilação pulmonar','Digestão'], correct:1,
+       explain:'A hematose é a troca gasosa que ocorre nos alvéolos pulmonares.'},
+      {stem:'Durante a expiração, o ar eliminado para o ambiente é rico em gás carbônico. Isso acontece porque, na hematose, esse gás:',
+       options:['passa dos alvéolos para o sangue','passa do sangue para os alvéolos','é produzido dentro dos próprios alvéolos','não participa das trocas gasosas'], correct:1,
+       explain:'Na hematose, o gás carbônico passa do sangue para os alvéolos, sendo depois eliminado na expiração.'},
+      {stem:'Os pulmões têm consistência esponjosa e formato semelhante a um cone porque grande parte de sua estrutura é formada por:',
+       options:['Anéis de cartilagem','Alvéolos pulmonares','Pregas vocais','Bronquíolos apenas'], correct:1,
+       explain:'Existem cerca de 300 milhões de alvéolos nos dois pulmões, formando grande parte de sua estrutura esponjosa.'},
+      {stem:'Aproximadamente quantos alvéolos existem, ao todo, nos dois pulmões humanos?',
+       options:['300 mil','3 milhões','300 milhões','3 bilhões'], correct:2,
+       explain:'Existem cerca de 300 milhões de alvéolos distribuídos nos dois pulmões.'},
+      {stem:'Cada pulmão é revestido por uma membrana que o protege e facilita seus movimentos durante a respiração. Essa membrana é chamada de:',
+       options:['Epiglote','Pleura','Nasofaringe','Cartilagem traqueal'], correct:1,
+       explain:'A pleura é a membrana que reveste cada pulmão.'}
+    ]
+  },
+  {
+    id:4, title:'Movimentos Respiratórios', sub:'Inspiração e expiração', icon:'💨',
+    questions:[
+      {stem:'Durante a inspiração, um músculo em formato de cúpula, localizado abaixo dos pulmões, se contrai para ajudar a aumentar o volume da caixa torácica. Esse músculo é:',
+       options:['O músculo intercostal apenas','O diafragma','A epiglote','A pleura'], correct:1,
+       explain:'O diafragma se contrai durante a inspiração, ajudando a aumentar a caixa torácica.'},
+      {stem:'Durante a inspiração, o que acontece com o diafragma, os músculos intercostais e a caixa torácica?',
+       options:['Relaxam, e a caixa torácica diminui','Se contraem, e a caixa torácica aumenta',
+                'Se contraem, e a caixa torácica diminui','Permanecem parados'], correct:1,
+       explain:'Na inspiração, diafragma e intercostais se contraem, a caixa torácica aumenta e os pulmões se expandem.'},
+      {stem:'Ao final da expiração, o que ocorre com a caixa torácica e com o diafragma?',
+       options:['A caixa torácica aumenta e o diafragma se contrai','A caixa torácica diminui e o diafragma relaxa',
+                'Ambos permanecem parados','A caixa torácica diminui e o diafragma se contrai'], correct:1,
+       explain:'Na expiração, o diafragma relaxa, os músculos intercostais relaxam e a caixa torácica diminui de tamanho.'},
+      {stem:'Um estudante percebe que, ao inspirar profundamente, seu abdômen se expande levemente para fora. Isso ocorre porque, nesse momento, o diafragma:',
+       options:['relaxa e sobe, comprimindo os órgãos abdominais','se contrai e desce, empurrando os órgãos abdominais',
+                'permanece imóvel durante toda a inspiração','produz gás carbônico para os pulmões'], correct:1,
+       explain:'Na inspiração, o diafragma se contrai e desce, o que pode empurrar levemente os órgãos abdominais para fora.'},
+      {stem:'O ar rico em gás carbônico é eliminado do organismo para o ambiente durante qual movimento respiratório?',
+       options:['Inspiração','Expiração','Hematose','Deglutição'], correct:1,
+       explain:'É durante a expiração que o ar rico em gás carbônico é eliminado para o ambiente.'}
+    ]
+  }
+];
+
+/* ================= STATE ================= */
+const STORAGE_KEY = 'respiraQuestState_v1';
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {xp:0, streakDays:0, completed:[]};
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+let state = loadState();
+
+let lesson = null; // active lesson runtime state
+
+/* ================= SCREEN HELPERS ================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ================= MAP RENDER ================= */
+function renderMap(){
+  document.getElementById('xp-count').textContent = state.xp;
+  document.getElementById('streak-count').textContent = state.streakDays;
+  const map = document.getElementById('map');
+  map.innerHTML = '';
+  const title = document.createElement('p');
+  title.className='map-title';
+  title.textContent = 'Trilha do Sistema Respiratório';
+  map.appendChild(title);
+
+  LEVELS.forEach((lv, i)=>{
+    const done = state.completed.includes(lv.id);
+    const unlocked = i===0 || state.completed.includes(LEVELS[i-1].id);
+    const row = document.createElement('div');
+    row.className = 'node-row off'+(i%3);
+    const wrap = document.createElement('div');
+    wrap.className = 'node-wrap';
+
+    if(unlocked && !done && (i===0 || state.completed.includes(LEVELS[i-1].id)) && !state.completed.includes(lv.id) && isCurrent(i)){
+      const bubble = document.createElement('div');
+      bubble.className='bubble';
+      bubble.textContent = 'COMEÇAR';
+      wrap.appendChild(bubble);
+    }
+
+    const node = document.createElement('button');
+    node.className = 'node ' + (done ? 'done' : (unlocked ? 'unlocked' : 'locked'));
+    node.textContent = done ? '★' : (unlocked ? lv.icon : '🔒');
+    if(done){
+      const star = document.createElement('span');
+      star.className='star'; star.textContent='⭐';
+      node.appendChild(star);
+    }
+    node.disabled = !unlocked;
+    node.addEventListener('click', ()=> startLesson(lv.id));
+    wrap.appendChild(node);
+
+    const label = document.createElement('div');
+    label.className='node-label';
+    label.textContent = lv.title;
+    wrap.appendChild(label);
+
+    const sub = document.createElement('div');
+    sub.className='node-sub';
+    sub.textContent = lv.sub;
+    wrap.appendChild(sub);
+
+    row.appendChild(wrap);
+    map.appendChild(row);
+  });
+
+  if(state.completed.length === LEVELS.length){
+    // all done — nothing extra needed, champion screen reachable after last lesson
+  }
+}
+function isCurrent(i){
+  // first unlocked-but-not-done level
+  for(let k=0;k<LEVELS.length;k++){
+    const d = state.completed.includes(LEVELS[k].id);
+    if(!d) return k===i;
+  }
+  return false;
+}
+
+/* ================= LESSON FLOW ================= */
+function startLesson(levelId){
+  const level = LEVELS.find(l=>l.id===levelId);
+  lesson = {
+    level,
+    qIndex:0,
+    hearts:5,
+    correct:0,
+    wrong:0,
+    bestStreak:0,
+    curStreak:0,
+    xpEarned:0,
+    answered:false
+  };
+  showScreen('screen-lesson');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const {level, qIndex, hearts} = lesson;
+  const total = level.questions.length;
+  const q = level.questions[qIndex];
+  lesson.answered = false;
+  lesson.selectedIndex = null;
+
+  document.getElementById('lesson-bar').style.width = ((qIndex)/total*100) + '%';
+  document.getElementById('hearts-count').textContent = hearts;
+  document.getElementById('q-eyebrow').textContent = `Questão ${qIndex+1} de ${total}`;
+  document.getElementById('q-stem').textContent = q.stem;
+
+  const optWrap = document.getElementById('q-options');
+  optWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="badge">${letters[idx]}</span>${opt}`;
+    btn.addEventListener('click', ()=> selectOption(idx));
+    optWrap.appendChild(btn);
+  });
+
+  const bar = document.getElementById('bottom-bar');
+  bar.classList.remove('feedback-correct','feedback-wrong');
+  bar.innerHTML = '<button class="btn" id="btn-check" disabled>Verificar</button>';
+  document.getElementById('btn-check').addEventListener('click', checkAnswer);
+}
+
+function selectOption(idx){
+  if(lesson.answered) return;
+  lesson.selectedIndex = idx;
+  document.querySelectorAll('.option').forEach((el,i)=>{
+    el.classList.toggle('selected', i===idx);
+  });
+  document.getElementById('btn-check').disabled = false;
+}
+
+function checkAnswer(){
+  if(lesson.selectedIndex === null || lesson.answered) return;
+  lesson.answered = true;
+  const q = lesson.level.questions[lesson.qIndex];
+  const isCorrect = lesson.selectedIndex === q.correct;
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((el,i)=>{
+    el.disabled = true;
+    if(i===q.correct) el.classList.add('correct');
+    else if(i===lesson.selectedIndex && !isCorrect) el.classList.add('wrong');
+  });
+
+  const bar = document.getElementById('bottom-bar');
+  if(isCorrect){
+    lesson.correct++; lesson.curStreak++; lesson.xpEarned += 10;
+    lesson.bestStreak = Math.max(lesson.bestStreak, lesson.curStreak);
+    bar.classList.add('feedback-correct');
+    bar.innerHTML = `
+      <div class="feedback-row"><span class="feedback-icon">✅</span>
+        <div class="feedback-text"><p class="feedback-title ok">Boa resposta!</p><p class="feedback-explain">${q.explain}</p></div>
+      </div>
+      <button class="btn" id="btn-continue">Continuar</button>`;
+  }else{
+    lesson.wrong++; lesson.curStreak = 0; lesson.hearts--;
+    document.getElementById('hearts-count').textContent = lesson.hearts;
+    bar.classList.add('feedback-wrong');
+    bar.innerHTML = `
+      <div class="feedback-row"><span class="feedback-icon">❌</span>
+        <div class="feedback-text"><p class="feedback-title bad">Não foi dessa vez</p><p class="feedback-explain">${q.explain}</p></div>
+      </div>
+      <button class="btn red" id="btn-continue">Continuar</button>`;
+  }
+  document.getElementById('btn-continue').addEventListener('click', nextStep);
+}
+
+function nextStep(){
+  if(lesson.hearts <= 0){
+    showScreen('screen-outofhearts');
+    return;
+  }
+  lesson.qIndex++;
+  if(lesson.qIndex >= lesson.level.questions.length){
+    finishLesson();
+  }else{
+    renderQuestion();
+  }
+}
+
+function finishLesson(){
+  document.getElementById('lesson-bar').style.width='100%';
+  const total = lesson.level.questions.length;
+  const acc = Math.round((lesson.correct/total)*100);
+
+  if(!state.completed.includes(lesson.level.id)){
+    state.completed.push(lesson.level.id);
+  }
+  state.xp += lesson.xpEarned;
+  state.streakDays += 1;
+  saveState();
+
+  document.getElementById('result-emoji').textContent = acc===100 ? '🏅' : (acc>=60 ? '🎉' : '💪');
+  document.getElementById('result-title').textContent = acc===100 ? 'Perfeito!' : 'Lição concluída!';
+  document.getElementById('result-sub').textContent = lesson.level.title + ' — ' + lesson.level.sub;
+  document.getElementById('result-xp').textContent = '+' + lesson.xpEarned;
+  document.getElementById('result-acc').textContent = acc + '%';
+  document.getElementById('result-best-streak').textContent = lesson.bestStreak;
+
+  showScreen('screen-result');
+  launchConfetti();
+}
+
+function launchConfetti(){
+  const wrap = document.createElement('div');
+  wrap.className='confetti';
+  document.body.appendChild(wrap);
+  const emojis = ['🎉','⭐','🫁','💚','✨'];
+  for(let i=0;i<26;i++){
+    const s = document.createElement('i');
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDuration = (2.2 + Math.random()*1.6)+'s';
+    s.style.animationDelay = (Math.random()*0.4)+'s';
+    wrap.appendChild(s);
+  }
+  setTimeout(()=>wrap.remove(), 4200);
+}
+
+/* ================= NAV BUTTONS ================= */
+document.getElementById('btn-exit').addEventListener('click', ()=>{
+  if(confirm('Sair da lição? Seu progresso nesta lição será perdido.')){
+    renderMap();
+    showScreen('screen-home');
+  }
+});
+document.getElementById('btn-continue-map').addEventListener('click', ()=>{
+  if(state.completed.length === LEVELS.length){
+    showScreen('screen-champion');
+  }else{
+    renderMap();
+    showScreen('screen-home');
+  }
+});
+document.getElementById('btn-retry').addEventListener('click', ()=>{
+  startLesson(lesson.level.id);
+});
+document.getElementById('btn-champion-map').addEventListener('click', ()=>{
+  renderMap();
+  showScreen('screen-home');
+});
+
+/* ================= INIT ================= */
+renderMap();
+</script>
+</body>
+</html>
