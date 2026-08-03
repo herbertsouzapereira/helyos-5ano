@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102c4e">
+  <title>Rota do Sangue | Jogo de Ciências</title>
+  <style>
+    :root { --ink:#15314f; --blue:#2176bd; --blue-soft:#e5f4ff; --red:#dc4d58; --red-soft:#ffeaed; --yellow:#ffd45c; --paper:#fffdf7; --muted:#5f7082; --green:#247c61; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:linear-gradient(135deg,#e7f5ff 0%,#fff7df 55%,#ffedf0 100%); min-height:100vh; }
+    button { font:inherit; cursor:pointer; }
+    .wrap { max-width:1030px; padding:26px 18px 46px; margin:auto; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:20px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .heart { width:48px; height:48px; border-radius:16px; display:grid; place-items:center; background:var(--red); color:#fff; font-size:26px; box-shadow:0 8px 16px #dc4d5840; }
+    h1 { margin:0; font-size:clamp(1.45rem,4vw,2.15rem); letter-spacing:-.03em; }
+    .subtitle { margin:4px 0 0; color:var(--muted); font-size:.95rem; }
+    .score { background:#fff; border:2px solid #d8e7f2; padding:9px 14px; border-radius:99px; font-weight:bold; white-space:nowrap; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+    .tab { border:2px solid #c8dcea; background:#ffffffb8; color:var(--ink); border-radius:99px; padding:9px 13px; font-weight:bold; }
+    .tab.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .panel { display:none; background:var(--paper); border:2px solid #e2e6e5; border-radius:24px; padding:clamp(18px,4vw,32px); box-shadow:0 14px 30px #23415b18; }
+    .panel.active { display:block; }
+    .eyebrow { color:var(--green); font-size:.78rem; letter-spacing:.09em; font-weight:bold; text-transform:uppercase; margin:0 0 8px; }
+    h2 { margin:0 0 8px; font-size:clamp(1.35rem,3vw,1.8rem); }
+    .intro { margin:0 0 22px; color:var(--muted); line-height:1.5; }
+    .quiz-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; color:var(--muted); font-weight:bold; }
+    .progress { height:10px; background:#e7edf1; border-radius:99px; overflow:hidden; margin-bottom:25px; }
+    .progress div { width:0; height:100%; background:linear-gradient(90deg,var(--blue),#5eafd8); transition:width .3s; }
+    .question { font-size:clamp(1.2rem,3vw,1.55rem); line-height:1.3; margin:0 0 20px; }
+    .answers { display:grid; gap:11px; }
+    .answer { text-align:left; background:#fff; border:2px solid #d5e1e8; border-radius:15px; padding:14px 15px; color:var(--ink); font-weight:bold; transition:.18s; }
+    .answer:hover:not(:disabled) { border-color:var(--blue); transform:translateY(-1px); }
+    .answer.correct { background:#e7f7ef; border-color:#50ad82; color:#14563e; }
+    .answer.wrong { background:#fff0f1; border-color:#e77e85; color:#8d2930; }
+    .answer:disabled { cursor:default; }
+    .feedback { display:none; margin:18px 0 0; padding:13px 15px; border-radius:13px; line-height:1.45; background:var(--blue-soft); }
+    .feedback.show { display:block; }
+    .next { display:none; margin:16px 0 0 auto; background:var(--ink); border:0; color:#fff; padding:11px 17px; border-radius:12px; font-weight:bold; }
+    .next.show { display:block; }
+    .route-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:26px; align-items:center; }
+    .diagram { min-height:390px; position:relative; background:linear-gradient(145deg,#f3fbff,#fff8ef); border-radius:20px; overflow:hidden; padding:22px; }
+    .route-line { position:absolute; left:50%; transform:translateX(-50%); width:12px; height:266px; top:60px; border-radius:99px; background:linear-gradient(to bottom,var(--blue) 0 35%,var(--red) 55% 100%); opacity:.85; }
+    .node { position:absolute; left:50%; transform:translateX(-50%); width:142px; padding:11px 7px; text-align:center; border-radius:16px; font-weight:bold; background:white; border:3px solid #cbd7df; box-shadow:0 6px 12px #27435b18; transition:.25s; z-index:2; }
+    .node small { display:block; font-size:.74rem; font-weight:normal; color:var(--muted); margin-top:3px; }
+    .node.lungs { top:25px; border-color:var(--blue); } .node.heart { top:150px; border-color:#ad6167; } .node.body { top:285px; border-color:var(--red); }
+    .node.highlight.blue { background:var(--blue-soft); border-color:var(--blue); } .node.highlight.red { background:var(--red-soft); border-color:var(--red); }
+    .drop { position:absolute; left:calc(50% - 12px); top:285px; width:24px; height:29px; border-radius:60% 60% 65% 65%; background:var(--blue); z-index:4; box-shadow:0 2px 6px #163b6550; }
+    .drop::after { content:""; position:absolute; width:12px; height:12px; background:inherit; transform:rotate(45deg); top:-5px; left:6px; border-radius:3px; }
+    .route-label { position:absolute; font-size:.78rem; font-weight:bold; color:var(--muted); max-width:100px; line-height:1.2; }
+    .l1 { left:13%; top:95px; } .l2 { right:10%; top:222px; } .l3 { left:11%; bottom:30px; }
+    .step-count { color:var(--muted); font-weight:bold; margin-bottom:9px; }
+    .step-title { font-size:1.45rem; margin:0 0 10px; } .step-text { line-height:1.55; color:var(--muted); margin:0 0 18px; }
+    .tag { display:inline-block; border-radius:99px; padding:6px 10px; font-weight:bold; font-size:.84rem; margin-bottom:14px; }
+    .tag.blue { background:var(--blue-soft); color:#155b93; } .tag.red { background:var(--red-soft); color:#a12b37; }
+    .route-buttons { display:flex; gap:10px; flex-wrap:wrap; } .route-buttons button { padding:10px 13px; border-radius:11px; font-weight:bold; }
+    .primary { border:0; background:var(--ink); color:#fff; } .secondary { background:#fff; border:2px solid #cddae2; color:var(--ink); }
+    .beat-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:center; }
+    .control-card { background:#f0f8fc; border-radius:20px; padding:22px; }
+    label { display:block; font-weight:bold; margin-bottom:8px; } input[type=range] { width:100%; accent-color:var(--red); }
+    .range-value { font-size:2.15rem; font-weight:bold; color:var(--red); margin:4px 0 16px; }
+    .stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; } .stat { border:2px solid #dfe8eb; border-radius:16px; padding:15px; background:white; } .stat b { display:block; font-size:1.55rem; margin-top:5px; } .stat span { font-size:.83rem; color:var(--muted); }
+    .pulse-zone { text-align:center; padding:20px; } .pulse-heart { font-size:98px; display:inline-block; filter:drop-shadow(0 8px 7px #dc4d5850); animation:pulse 1s infinite; transform-origin:center; } .pulse-caption { color:var(--muted); line-height:1.5; margin:12px auto 0; max-width:320px; }
+    @keyframes pulse { 0%,100% { transform:scale(1); } 25% { transform:scale(1.13); } 45% { transform:scale(1); } }
+    .fact { margin-top:22px; padding:13px 15px; background:#fff6cf; border-radius:13px; line-height:1.45; }
+    .finish { text-align:center; padding:22px 0 4px; } .finish h3 { font-size:1.6rem; margin:0 0 8px; } .finish p { color:var(--muted); }
+    @media (max-width:720px) { header { align-items:flex-start; flex-direction:column; } .route-grid,.beat-grid { grid-template-columns:1fr; } .diagram { min-height:365px; } .pulse-zone { padding-top:0; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand"><div class="heart" aria-hidden="true">♥</div><div><h1>Rota do Sangue</h1><p class="subtitle">Jogo de Ciências: coração, batimentos e circulação</p></div></div>
+      <div class="score" aria-live="polite">⭐ Pontos: <span id="score">0</span></div>
+    </header>
+    <nav class="tabs" aria-label="Áreas do jogo">
+      <button class="tab active" data-panel="quiz">Desafio relâmpago</button>
+      <button class="tab" data-panel="route">Missão circulação</button>
+      <button class="tab" data-panel="beat">Laboratório do coração</button>
+    </nav>
+
+    <section class="panel active" id="quiz">
+      <p class="eyebrow">Quiz</p><h2>Teste seus conhecimentos</h2><p class="intro">Cada resposta certa vale 10 pontos. Leia com cuidado — as partes mais importantes da página estão aqui.</p>
+      <div class="quiz-top"><span id="counter">Questão 1 de 8</span><span id="streak">Sequência: 0</span></div><div class="progress"><div id="progress"></div></div>
+      <h3 class="question" id="question"></h3><div class="answers" id="answers"></div><div class="feedback" id="feedback" aria-live="polite"></div><button class="next" id="next">Próxima questão →</button>
+    </section>
+
+    <section class="panel" id="route">
+      <p class="eyebrow">Explorador</p><h2>Acompanhe uma gota de sangue</h2><p class="intro">Use os botões para ver, passo a passo, por que existem dois caminhos de circulação.</p>
+      <div class="route-grid"><div class="diagram" aria-label="Esquema do trajeto entre coração, pulmões e tecidos corporais"><div class="route-line"></div><div class="node lungs" id="lungs">Pulmões<small>entra O₂ • sai CO₂</small></div><div class="node heart" id="heartNode">Coração<small>bombeia o sangue</small></div><div class="node body" id="bodyNode">Tecidos do corpo<small>recebem O₂</small></div><div class="drop" id="drop" aria-hidden="true"></div><span class="route-label l1">pequena circulação</span><span class="route-label l2">grande circulação</span><span class="route-label l3">o sangue volta com CO₂</span></div>
+      <div><div class="step-count" id="stepCount">PASSO 1 DE 4</div><span class="tag blue" id="stepTag">SANGUE COM POUCO OXIGÊNIO</span><h3 class="step-title" id="stepTitle"></h3><p class="step-text" id="stepText"></p><div class="route-buttons"><button class="secondary" id="backStep">← Voltar</button><button class="primary" id="forwardStep">Avançar →</button></div></div></div>
+    </section>
+
+    <section class="panel" id="beat">
+      <p class="eyebrow">Simulador</p><h2>Quando o coração acelera?</h2><p class="intro">Em repouso, o coração de um adulto bate em média 70 vezes por minuto e bombeia cerca de 70 mL em cada contração.</p>
+      <div class="beat-grid"><div class="control-card"><label for="bpm">Batimentos por minuto</label><div class="range-value"><span id="bpmText">70</span> bpm</div><input id="bpm" type="range" min="50" max="140" value="70"><div class="stats"><div class="stat"><span>Por contração</span><b>70 mL</b></div><div class="stat"><span>Em 1 minuto</span><b id="liters">4,9 L</b></div><div class="stat"><span>Em 5 minutos</span><b id="fiveMinutes">24,5 L</b></div><div class="stat"><span>Situação</span><b id="situation">Repouso</b></div></div></div><div class="pulse-zone"><div class="pulse-heart" id="pulseHeart" aria-hidden="true">♥</div><p class="pulse-caption" id="pulseCaption">Em repouso, os batimentos são mais lentos. O coração continua trabalhando sem depender da nossa vontade.</p></div></div>
+      <div class="fact"><b>Você sabia?</b> O coração tem aproximadamente o tamanho da sua mão fechada. Durante atividade física, ele bate mais rápido e mais forte para levar mais oxigênio e energia aos músculos.</div>
+    </section>
+  </main>
+  <script>
+    const questions=[
+      {q:'O coração é um órgão muscular que funciona principalmente porque…',a:['contrai e relaxa sem depender da nossa vontade.','só se move quando fazemos exercícios.','recebe ar diretamente dos pulmões.'],c:0,e:'Isso mesmo! A cada contração, o coração impulsiona sangue para os vasos sanguíneos.'},
+      {q:'Em repouso, o coração de um adulto bate, em média…',a:['cerca de 70 vezes por minuto.','cerca de 7 vezes por minuto.','cerca de 700 vezes por minuto.'],c:0,e:'Correto! Em momentos de atividade física, esse número pode até dobrar.'},
+      {q:'Em cada contração, aproximadamente quanto sangue é bombeado?',a:['70 mililitros','5 litros','300 gramas'],c:0,e:'Muito bem! 70 mL por batimento, multiplicados por cerca de 70 batimentos, dão por volta de 5 L por minuto.'},
+      {q:'O fluxo coração → pulmões → coração recebe o nome de…',a:['pequena circulação.','grande circulação.','digestão.'],c:0,e:'Acertou! Nos pulmões, o sangue recebe gás oxigênio e elimina gás carbônico.'},
+      {q:'O fluxo coração → tecidos corporais → coração é chamado de…',a:['grande circulação.','pequena circulação.','respiração pulmonar.'],c:0,e:'Isso! É esse caminho que leva oxigênio aos demais órgãos do corpo.'},
+      {q:'O sangue que chega dos órgãos ao coração, mostrado em azul no esquema, deve seguir para…',a:['os pulmões.','as mãos apenas.','o estômago.'],c:0,e:'Exatamente. Ele vai aos pulmões, onde troca gases: sai CO₂ e entra O₂.'},
+      {q:'Durante o esforço físico, os músculos precisam de mais oxigênio porque…',a:['precisam produzir mais energia.','o coração para de funcionar.','o sangue desaparece dos vasos.'],c:0,e:'Certo! Por isso o coração aumenta o ritmo e a força das batidas.'},
+      {q:'Qual comparação ajuda a imaginar o tamanho aproximado do seu coração?',a:['Uma mão fechada.','Uma bola de futebol.','Uma ervilha.'],c:0,e:'Perfeito! O tamanho varia de pessoa para pessoa, mas costuma ser próximo ao da própria mão fechada.'}
+    ];
+    let current=0, points=0, streak=0, locked=false;
+    const $=id=>document.getElementById(id);
+    function renderQuiz(){const item=questions[current]; locked=false; $('counter').textContent=`Questão ${current+1} de ${questions.length}`; $('streak').textContent=`Sequência: ${streak}`; $('progress').style.width=`${current/questions.length*100}%`; $('question').textContent=item.q; $('answers').innerHTML=''; $('feedback').className='feedback'; $('next').className='next'; item.a.forEach((answer,i)=>{const b=document.createElement('button');b.className='answer';b.textContent=answer;b.onclick=()=>answerQuestion(i);$('answers').appendChild(b);});}
+    function answerQuestion(i){if(locked)return;locked=true;const item=questions[current],buttons=[...document.querySelectorAll('.answer')],right=i===item.c;buttons.forEach((b,n)=>{b.disabled=true;if(n===item.c)b.classList.add('correct');else if(n===i)b.classList.add('wrong');});if(right){points+=10;streak++;$('feedback').innerHTML='<b>✓ Boa!</b> '+item.e;}else{streak=0;$('feedback').innerHTML='<b>Quase!</b> '+item.e;}$('score').textContent=points;$('streak').textContent=`Sequência: ${streak}`;$('feedback').classList.add('show');$('next').textContent=current===questions.length-1?'Ver resultado':'Próxima questão →';$('next').classList.add('show');}
+    $('next').onclick=()=>{if(current===questions.length-1){$('quiz').innerHTML=`<div class="finish"><div class="heart" style="margin:auto">♥</div><h3>Missão concluída!</h3><p>Você fez <b>${points} pontos</b> de 80. Agora explore a Missão circulação para visualizar o trajeto do sangue.</p><button class="primary" onclick="location.reload()" style="padding:11px 16px;border-radius:12px">Jogar outra vez</button></div>`;}else{current++;renderQuiz();}};
+    document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab,.panel').forEach(e=>e.classList.remove('active'));tab.classList.add('active');$(tab.dataset.panel).classList.add('active');});
+    const steps=[
+      {tag:'SANGUE COM POUCO OXIGÊNIO',color:'blue',title:'Dos tecidos para o coração',text:'Depois de entregar oxigênio às células do corpo, o sangue fica com mais gás carbônico (CO₂) e retorna ao coração.',drop:'285px',nodes:['bodyNode']},
+      {tag:'PEQUENA CIRCULAÇÃO',color:'blue',title:'Do coração para os pulmões',text:'O coração bombeia esse sangue até os pulmões. O percurso coração–pulmões–coração chama-se pequena circulação.',drop:'150px',nodes:['heartNode']},
+      {tag:'TROCA DE GASES',color:'red',title:'Nos pulmões, entra oxigênio',text:'Nos pulmões, o sangue elimina gás carbônico e recebe gás oxigênio (O₂). Por isso ele é representado em vermelho no esquema.',drop:'25px',nodes:['lungs']},
+      {tag:'GRANDE CIRCULAÇÃO',color:'red',title:'Do coração para todo o corpo',text:'O sangue rico em oxigênio volta ao coração e é bombeado para os tecidos corporais. Esse percurso é a grande circulação.',drop:'150px',nodes:['heartNode','bodyNode']}
+    ]; let step=0;
+    function renderStep(){const s=steps[step];$('stepCount').textContent=`PASSO ${step+1} DE ${steps.length}`;$('stepTag').className='tag '+s.color;$('stepTag').textContent=s.tag;$('stepTitle').textContent=s.title;$('stepText').textContent=s.text;$('drop').style.top=s.drop;document.querySelectorAll('.node').forEach(n=>n.className=n.className.replace(/ highlight (blue|red)/,''));s.nodes.forEach(n=>$(n).classList.add('highlight',s.color));$('backStep').disabled=step===0;$('backStep').style.opacity=step===0?.45:1;$('forwardStep').textContent=step===3?'Recomeçar ↻':'Avançar →';}
+    $('forwardStep').onclick=()=>{step=step===3?0:step+1;renderStep()};$('backStep').onclick=()=>{if(step){step--;renderStep()}};
+    $('bpm').oninput=e=>{const bpm=+e.target.value,liters=bpm*70/1000,active=bpm>85;$('bpmText').textContent=bpm;$('liters').textContent=liters.toLocaleString('pt-BR',{maximumFractionDigits:1})+' L';$('fiveMinutes').textContent=(liters*5).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L';$('situation').textContent=active?'Esforço':'Repouso';$('pulseHeart').style.animationDuration=(60/bpm)+'s';$('pulseCaption').textContent=active?'Em atividade física, os músculos precisam de mais oxigênio e energia. Por isso o coração bate mais rápido e mais forte.':'Em repouso, os batimentos são mais lentos. O coração continua trabalhando sem depender da nossa vontade.';};
+    renderQuiz();renderStep();
+  </script>
+</body>
+</html>
