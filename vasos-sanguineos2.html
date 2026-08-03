@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#eaf9f4">
+  <title>Missão Circulação</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Quicksand:wght@600;700&display=swap');
+:root{--ink:#173f4c;--green:#137d68;--mint:#eaf9f4;--red:#ee5e62;--blue:#348bd5;--yellow:#ffc951;--purple:#9a74d5}*{box-sizing:border-box}body{margin:0;background:linear-gradient(155deg,#dff8f1,#f9fff9);font-family:Nunito,Arial,sans-serif;color:var(--ink);min-height:100svh}.app{max-width:630px;margin:auto;padding:18px 18px calc(28px + env(safe-area-inset-bottom));min-height:100svh}header{height:57px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px}.brand h1{font-size:19px;margin:0;letter-spacing:-.5px}.brand small,.eyebrow{font-size:10px;font-weight:900;letter-spacing:1.3px;color:#358a7b}.drop{width:34px;height:34px;border-radius:50% 50% 50% 8px;background:var(--red);display:grid;place-items:center;color:#fff;transform:rotate(-45deg);font-size:17px}.icon-btn{border:0;background:#fff;color:var(--green);font-size:23px;border-radius:14px;width:43px;height:43px;box-shadow:0 3px 12px #27745b17}.screen{display:none;animation:in .35s ease}.screen.active{display:block}@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.hero{text-align:center;padding-top:15px}.hero-art{height:192px;position:relative;margin:6px auto 10px;background:radial-gradient(ellipse at center bottom,#c7f2e5 0 25%,transparent 26%)}.lung{position:absolute;top:21px;color:#82bee7;font-size:138px;line-height:1;text-shadow:inset 0 0 3px #fff}.lung.left{left:calc(50% - 95px)}.lung.right{right:calc(50% - 95px)}.heart{position:absolute;color:var(--red);font-size:68px;left:calc(50% - 34px);top:68px;animation:beat 1.2s infinite}@keyframes beat{50%{transform:scale(1.12)}}.dot{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--yellow)}.d1{top:34px;left:22%}.d2{top:114px;right:15%;background:var(--purple)}.d3{top:150px;left:26%;background:var(--blue)}h2{font-size:28px;line-height:1.12;letter-spacing:-1px;margin:7px 0 12px;font-weight:900}.lead{font-family:Quicksand,sans-serif;font-size:16px;line-height:1.48;margin:0 0 21px}.compact{margin-bottom:15px}.chips{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:15px 0 25px}.chips span{font-size:13px;font-weight:800;background:#fff;padding:8px 11px;border-radius:99px;box-shadow:0 3px 8px #2a76511a}.primary{width:100%;border:0;border-radius:17px;padding:16px 18px;color:#fff;background:var(--green);font:900 16px Nunito;box-shadow:0 7px 0 #075846,0 11px 20px #1b796737;cursor:pointer;transition:.15s}.primary:active{transform:translateY(5px);box-shadow:0 2px 0 #075846}.primary b{font-size:21px;float:right;line-height:15px}.touch{font-size:12px;color:#65928a;margin-top:20px}.progress{display:flex;gap:6px;margin:14px 0 26px}.progress span{height:7px;flex:1;border-radius:10px;background:#c9e7dd}.progress .on{background:var(--green)}.cards{display:grid;gap:10px;margin:12px 0 24px}.info-card{border-radius:19px;padding:14px 15px 14px 64px;min-height:89px;position:relative;background:#fff;box-shadow:0 5px 15px #24684f12;border:1px solid #e8f3ef}.info-card .emoji{position:absolute;left:15px;top:18px;width:38px;height:38px;border-radius:13px;background:#def2ff;display:grid;place-items:center;font-size:22px}.info-card.yellow .emoji{background:#fff0c4}.info-card.purple .emoji{background:#eee5ff}.info-card h3{font-size:17px;margin:0 0 1px}.info-card p{font-family:Quicksand,sans-serif;margin:0;font-size:13px;line-height:1.3}.vessel-map{height:253px;background:#fff;border-radius:28px;position:relative;overflow:hidden;border:1px solid #e8f2ef;margin:12px 0}.map-heart{position:absolute;left:calc(50% - 28px);top:85px;font-size:58px;color:var(--red);z-index:2;filter:drop-shadow(0 3px 1px #ce3b46)}.vessel{position:absolute;border:0;color:white;border-radius:16px;padding:10px 12px;text-align:left;font-family:Nunito;box-shadow:0 5px 9px #113d3d29;z-index:3}.vessel b{font-size:13px;display:block}.vessel small{font-size:11px}.artery{background:var(--red);left:19px;top:28px}.vein{background:var(--blue);right:19px;bottom:31px}.capillary{background:var(--purple);left:calc(50% - 52px);bottom:18px}.vessel-map:before,.vessel-map:after{content:"";position:absolute;border-radius:50%;border:13px solid transparent;width:250px;height:135px}.vessel-map:before{border-top-color:#f7a6a9;left:52px;top:19px;transform:rotate(20deg)}.vessel-map:after{border-bottom-color:#9dc9ef;right:45px;bottom:13px;transform:rotate(20deg)}.tip{min-height:59px;border-radius:15px;background:#fff6d9;padding:13px 15px;color:#79550d;font-size:14px;line-height:1.25;margin-bottom:18px}.quiz-head{display:flex;align-items:start;justify-content:space-between;gap:12px}.quiz-head h2{max-width:440px}.quiz-head span{white-space:nowrap;background:#e0f4ec;color:var(--green);padding:6px 9px;border-radius:8px;font-weight:900;font-size:12px;margin-top:9px}.question-visual{height:105px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 16px;overflow:hidden}.qicon{width:44px;height:44px;flex:none}.qicon.ic-red{color:var(--red)}.qicon.ic-blue{color:var(--blue)}.qicon.ic-ink{color:var(--ink)}.qdot{display:inline-block;width:26px;height:26px;border-radius:50%;flex:none;box-shadow:inset 0 -3px 0 #00000022}.qarrow{font-size:28px;color:#b8d2cb;font-weight:900}.qmark{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:#eef3f2;border:2px dashed #b7cdc6;color:#7c9992;font-weight:900;font-size:22px;flex:none}.qsym{font-size:32px;font-weight:800}.chip-icon{width:15px;height:15px;vertical-align:-3px;margin-right:1px;color:var(--green)}.info-card .emoji svg{width:22px;height:22px;color:var(--green)}.answers{display:grid;gap:10px}.answer{background:#fff;border:2px solid transparent;border-radius:16px;padding:14px 15px;text-align:left;color:var(--ink);font:800 15px Nunito;min-height:56px;cursor:pointer;box-shadow:0 4px 10px #245c4b11}.answer:active{transform:scale(.98)}.answer.correct{border-color:#42ac6f;background:#e5faec;color:#176e41}.answer.wrong{border-color:#ef7777;background:#fff0f0;color:#a53e3e}.answer:disabled{cursor:default}.feedback{min-height:25px;font-weight:800;font-size:14px;margin:13px 3px;color:var(--ink)}.feedback.feedback-right{color:#176e41}.feedback.feedback-wrong{color:#a53e3e}.hidden{display:none}.result{text-align:center;padding-top:11px}.medal{height:101px;width:101px;border-radius:50%;display:grid;place-items:center;margin:12px auto 18px;background:var(--yellow);border:8px solid #ffe7a5;color:#fff;font-size:49px;box-shadow:0 5px 0 #e2a72c}.review{text-align:left;border-radius:18px;background:#fff;padding:14px 16px;margin:20px 0 25px;font-size:13px;line-height:1.38}.review h3{margin:0 0 7px;font-size:15px}.review p{margin:7px 0}@media(min-width:550px){.transport-cards{grid-template-columns:repeat(3,1fr)}.info-card{padding:12px;min-height:178px}.info-card .emoji{position:static;margin-bottom:9px}.info-card p{font-size:12px}}
+  </style>
+</head>
+<body>
+  <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.325 12 13.997 8.94-4.672 12-9.929 12-13.997 0-8.198-10.011-8.967-12-3.568z" fill="currentColor"/></symbol>
+    <symbol id="i-lungs" viewBox="0 0 24 24">
+      <path d="M12 2v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <path d="M12 9c-.9 0-1.5.6-1.7 1.4l-1.2 4.6c-.5 2-2.1 3.2-3.9 3.2C3.4 18.2 2.4 17 2.4 15c0-1 .3-2.2.8-3.7l1.3-4C5.1 5.6 6.5 4.6 8 5c1 .3 1.8 1.1 2.1 2.1z" fill="currentColor"/>
+      <path d="M12 9c.9 0 1.5.6 1.7 1.4l1.2 4.6c.5 2 2.1 3.2 3.9 3.2 1.7 0 2.7-1.2 2.7-3.2 0-1-.3-2.2-.8-3.7l-1.3-4C18.9 5.6 17.5 4.6 16 5c-1 .3-1.8 1.1-2.1 2.1z" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-blood" viewBox="0 0 24 24"><path d="M12 2c4 5.5 7 9.6 7 13.2A7 7 0 1 1 5 15.2C5 11.6 8 7.5 12 2z" fill="currentColor"/></symbol>
+    <symbol id="i-oximeter" viewBox="0 0 24 24">
+      <rect x="2.5" y="7" width="9" height="10" rx="4.5" fill="currentColor"/>
+      <path d="M11.5 12h2.7l1.4-3.4 1.8 6.8 1.4-3.4h2.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-cell" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/>
+      <circle cx="12" cy="12" r="3.4" fill="currentColor"/>
+    </symbol>
+  </svg>
+  <main class="app">
+    <header>
+      <div class="brand"><span class="drop">♥</span><div><small>CIÊNCIAS EM AÇÃO</small><h1>Missão Circulação</h1></div></div>
+      <button id="sound" class="icon-btn" aria-label="Ativar ou desativar sons">♪</button>
+    </header>
+
+    <section id="welcome" class="screen active hero">
+      <div class="hero-art" aria-hidden="true"><span class="lung left">◖</span><span class="lung right">◗</span><span class="heart">♥</span><i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i></div>
+      <p class="eyebrow">JOGO INTERATIVO</p>
+      <h2>Leve vida para todo o corpo!</h2>
+      <p class="lead">Ajude o sangue a buscar oxigênio, nutrientes e a fazer o caminho certo pelos vasos.</p>
+      <div class="chips"><span><svg class="chip-icon"><use href="#i-lungs"/></svg> Alvéolos</span><span><svg class="chip-icon"><use href="#i-heart"/></svg> Vasos</span><span>🔎 Oxímetro</span></div>
+      <button class="primary" data-go="learn">Começar missão <b>→</b></button>
+      <p class="touch">Toque nas respostas e explore.</p>
+    </section>
+
+    <section id="learn" class="screen">
+      <div class="progress"><span class="on"></span><span></span><span></span><span></span></div>
+      <p class="eyebrow">ESTAÇÃO 1 · APRENDA</p>
+      <h2>O que o sangue transporta?</h2>
+      <p class="lead compact">O sangue é como uma rede de entregas. Ele leva o que o corpo precisa e recolhe o que precisa sair.</p>
+      <div class="cards transport-cards">
+        <article class="info-card blue"><div class="emoji"><svg><use href="#i-lungs"/></svg></div><h3>Oxigênio</h3><p>Entra no sangue nos <strong>alvéolos</strong>, pequenas bolsas dentro dos pulmões.</p></article>
+        <article class="info-card yellow"><div class="emoji">🍎</div><h3>Nutrientes</h3><p>Entram no sangue depois de serem absorvidos no <strong>intestino</strong>.</p></article>
+        <article class="info-card purple"><div class="emoji">💨</div><h3>Gás carbônico</h3><p>É recolhido pelo sangue e levado aos pulmões para sair do corpo.</p></article>
+      </div>
+      <button class="primary" data-go="vessels">Entendi! Ver os vasos <b>→</b></button>
+    </section>
+
+    <section id="vessels" class="screen">
+      <div class="progress"><span class="on"></span><span class="on"></span><span></span><span></span></div>
+      <p class="eyebrow">ESTAÇÃO 2 · EXPLORE</p>
+      <h2>Conheça os vasos sanguíneos</h2>
+      <p class="lead compact">Toque em cada caminho para descobrir sua função.</p>
+      <div class="vessel-map">
+        <div class="map-heart">♥</div>
+        <button class="vessel artery" data-vessel="artery"><b>ARTÉRIAS</b><small>saem do coração</small></button>
+        <button class="vessel vein" data-vessel="vein"><b>VEIAS</b><small>voltam ao coração</small></button>
+        <button class="vessel capillary" data-vessel="capillary"><b>CAPILARES</b><small>bem fininhos</small></button>
+      </div>
+      <aside id="vessel-tip" class="tip" aria-live="polite">Toque em um vaso acima.</aside>
+      <button class="primary" data-go="quiz">Testar meus conhecimentos <b>→</b></button>
+    </section>
+
+    <section id="quiz" class="screen">
+      <div class="progress"><span class="on"></span><span class="on"></span><span class="on"></span><span></span></div>
+      <p class="eyebrow">ESTAÇÃO 3 · DESAFIO</p>
+      <div class="quiz-head"><h2 id="question-title">Carregando desafio…</h2><span id="counter">1 / 5</span></div>
+      <div id="question-visual" class="question-visual"></div>
+      <div id="answers" class="answers"></div>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+      <button id="next" class="primary hidden">Próxima pergunta <b>→</b></button>
+    </section>
+
+    <section id="result" class="screen result">
+      <div class="progress"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span></div>
+      <div class="medal">★</div>
+      <p class="eyebrow">MISSÃO CONCLUÍDA</p>
+      <h2>Você cuidou muito bem da circulação!</h2>
+      <p id="score-text" class="lead"></p>
+      <div class="review">
+        <h3>Guarde estas ideias:</h3>
+        <p><b>Artérias</b> saem do coração · <b>Veias</b> voltam ao coração · <b>Capilares</b> fazem as trocas.</p>
+        <p>O oxigênio entra nos <b>alvéolos</b> e uma saturação saudável costuma ser <b>95% a 99%</b>.</p>
+      </div>
+      <button id="restart" class="primary">Jogar novamente ↻</button>
+    </section>
+  </main>
+  <script>
+const screens = [...document.querySelectorAll('.screen')];
+const go = id => { screens.forEach(s=>s.classList.toggle('active',s.id===id)); window.scrollTo(0,0); };
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+const vesselData={artery:'<span class="qdot" style="width:15px;height:15px;background:var(--red)"></span> <b>Artérias</b> levam o sangue <b>do coração para outras partes do corpo</b>. Nos desenhos, costumam aparecer em vermelho.',vein:'<span class="qdot" style="width:15px;height:15px;background:var(--blue)"></span> <b>Veias</b> trazem o sangue <b>do corpo de volta ao coração</b>. Nos desenhos, costumam aparecer em azul.',capillary:'<span class="qdot" style="width:15px;height:15px;background:var(--purple)"></span> <b>Capilares</b> são vasos muito finos — mais finos que um fio de cabelo. Neles acontecem trocas importantes.'};
+document.querySelectorAll('[data-vessel]').forEach(b=>b.onclick=()=>document.querySelector('#vessel-tip').innerHTML=vesselData[b.dataset.vessel]);
+const ic=(name,cls='')=>`<svg class="qicon ${cls}"><use href="#i-${name}"/></svg>`;
+const dot=color=>`<span class="qdot" style="background:${color}"></span>`;
+const mark=()=>'<span class="qmark">?</span>';
+const sym=ch=>`<span class="qsym">${ch}</span>`;
+const arrow='<span class="qarrow">→</span>';
+const questions=[
+{q:'Onde o corpo absorve o gás oxigênio?',v:ic('lungs')+arrow+ic('blood','ic-red'),a:['Nos alvéolos dos pulmões','No estômago','Nos músculos'],ok:0,why:'Os alvéolos são pequenas bolsas nos pulmões onde o oxigênio passa para o sangue.'},
+{q:'Qual vaso leva sangue que sai do coração?',v:ic('heart','ic-red')+arrow+dot('var(--red)'),a:['Veia','Artéria','Capilar'],ok:1,why:'As artérias saem do coração e levam o sangue para o corpo.'},
+{q:'Qual vaso traz o sangue do corpo de volta ao coração?',v:dot('var(--blue)')+arrow+ic('heart','ic-red'),a:['Artéria','Veia','Alvéolo'],ok:1,why:'As veias fazem o caminho de volta ao coração.'},
+{q:'Que vasos são mais finos que um fio de cabelo?',v:ic('blood','ic-red')+sym('┄┄┄')+ic('blood','ic-red'),a:['Capilares','Artérias','Veias'],ok:0,why:'Os capilares são minúsculos e permitem as trocas entre sangue e corpo.'},
+{q:'Uma leitura de oxímetro saudável costuma ficar entre…',v:ic('oximeter')+sym('98%'),a:['20% e 40%','70% e 80%','95% e 99%'],ok:2,why:'Em geral, uma pessoa saudável tem de 95% a 99% de oxigênio dissolvido no sangue.'},
+{q:'Depois da digestão, onde os nutrientes entram no sangue?',v:sym('🍎')+arrow+ic('blood','ic-red'),a:['No intestino','No coração','Na pele'],ok:0,why:'Os nutrientes absorvidos no intestino se misturam ao sangue.'},
+{q:'O que o sangue faz com o gás carbônico produzido pelo corpo?',v:ic('blood','ic-red')+arrow+sym('💨')+arrow+ic('lungs'),a:['Leva-o aos pulmões para sair','Transforma-o em oxigênio','Guarda-o nos ossos'],ok:0,why:'O sangue transporta o gás carbônico até os pulmões, onde ele é eliminado.'},
+{q:'Nos capilares acontece principalmente…',v:dot('var(--purple)')+sym('⇄')+ic('cell','ic-ink'),a:['A troca de substâncias','A produção dos ossos','A digestão dos alimentos'],ok:0,why:'Por serem muito finos, os capilares facilitam trocas entre o sangue e as células.'},
+{q:'Complete: artérias são geralmente representadas em…',v:ic('heart','ic-red')+arrow+mark(),a:['Vermelho','Azul','Roxo'],ok:0,why:'Em esquemas, artérias aparecem em vermelho e veias em azul.'},
+{q:'Complete: veias são geralmente representadas em…',v:mark()+arrow+ic('heart','ic-red'),a:['Amarelo','Azul','Verde'],ok:1,why:'As veias, que voltam ao coração, costumam ser mostradas em azul.'},
+{q:'O oxímetro mede a quantidade de quê no sangue?',v:ic('oximeter')+sym('SpO₂'),a:['Oxigênio','Água','Nutrientes'],ok:0,why:'O aparelho ajuda a detectar a quantidade de oxigênio no sangue.'},
+{q:'Qual é o caminho correto do oxigênio?',v:sym('💨')+arrow+ic('lungs')+arrow+ic('blood','ic-red'),a:['Ar → alvéolos → sangue','Sangue → alvéolos → ar','Intestino → sangue → alvéolos'],ok:0,why:'O oxigênio do ar chega aos alvéolos e, dali, passa para o sangue.'}
+];
+let index=0,score=0,answered=false;const title=document.querySelector('#question-title'),visual=document.querySelector('#question-visual'),answers=document.querySelector('#answers'),feedback=document.querySelector('#feedback'),next=document.querySelector('#next');
+function drawQuestion(){const x=questions[index];answered=false;title.textContent=x.q;visual.innerHTML=x.v;document.querySelector('#counter').textContent=`${index+1} / ${questions.length}`;feedback.textContent='';feedback.classList.remove('feedback-right','feedback-wrong');next.classList.add('hidden');answers.innerHTML='';x.a.forEach((answer,i)=>{let b=document.createElement('button');b.className='answer';b.textContent=answer;b.onclick=()=>answerQuestion(i);answers.append(b)})}function answerQuestion(chosen){if(answered)return;answered=true;const q=questions[index],buttons=[...answers.children],right=chosen===q.ok;if(right)score++;buttons.forEach((b,i)=>{b.disabled=true;if(i===q.ok)b.classList.add('correct');else if(i===chosen)b.classList.add('wrong')});feedback.innerHTML=right?('✓ Isso mesmo! '+q.why):('✦ Não foi dessa vez. A resposta certa é <b>'+q.a[q.ok]+'</b>. '+q.why);feedback.classList.toggle('feedback-right',right);feedback.classList.toggle('feedback-wrong',!right);next.textContent=index===questions.length-1?'Ver meu resultado →':'Próxima pergunta →';next.classList.remove('hidden')}next.onclick=()=>{index++;if(index<questions.length)drawQuestion();else{document.querySelector('#score-text').innerHTML=`Você acertou <strong>${score} de ${questions.length}</strong> desafios.`;go('result')}};document.querySelector('#restart').onclick=()=>{index=0;score=0;drawQuestion();go('welcome')};document.querySelector('[data-go="quiz"]').addEventListener('click',drawQuestion);let soundOn=false;document.querySelector('#sound').onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'♫':'♪'};
+  </script>
+</body>
+</html>
